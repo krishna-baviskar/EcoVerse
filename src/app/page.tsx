@@ -131,6 +131,25 @@ export default function DashboardPage() {
           </DropdownMenu>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
+             <Card>
+              <CardHeader>
+                <CardTitle className="font-headline">Update Location</CardTitle>
+                <CardDescription>Enter your city to update your location.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLocationChange} className="flex space-x-2">
+                  <Input
+                    placeholder="Enter your city"
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                  />
+                  <Button type="submit">Update</Button>
+                </form>
+              </CardContent>
+            </Card>
+            <EcoscoreTrendChart />
+          </div>
           <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
             <OverviewCard
               title="EcoScore"
@@ -157,25 +176,7 @@ export default function DashboardPage() {
               description="Your current location"
             />
           </div>
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
-            <EcoscoreTrendChart />
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline">Update Location</CardTitle>
-                <CardDescription>Enter your city to update your location.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleLocationChange} className="flex space-x-2">
-                  <Input
-                    placeholder="Enter your city"
-                    value={locationInput}
-                    onChange={(e) => setLocationInput(e.target.value)}
-                  />
-                  <Button type="submit">Update</Button>
-                </form>
-              </CardContent>
-            </Card>
-          </div>
+          
           <div className="mt-4">
             <Leaderboard />
           </div>
