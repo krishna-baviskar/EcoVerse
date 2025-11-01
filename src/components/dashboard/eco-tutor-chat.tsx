@@ -1,6 +1,10 @@
 'use client';
 
-import { ecoGptTutorInitialExplanation, suggestEcoActions } from '@/ai/flows';
+import {
+  ecoGptTutorInitialExplanation,
+  suggestEcoActions,
+  generateQuiz,
+} from '@/ai/flows';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,13 +17,19 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Bot, Send, User } from 'lucide-react';
+import { Bot, Send, User, BrainCircuit, Zap } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface Message {
   id: number;
   text: string;
   sender: 'user' | 'tutor';
+  actions?: TutorAction[];
+}
+
+interface TutorAction {
+  label: string;
+  action: () => Promise<void>;
 }
 
 export function EcoTutorChat() {
@@ -27,6 +37,91 @@ export function EcoTutorChat() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const handleActionClick = async (action: () => Promise<void>) => {
+    await action();
+  };
+
+  const getQuiz = async () => {
+    setIsLoading(true);
+    setMessages(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        text: 'Give me a quiz about sustainability.',
+        sender: 'user',
+      },
+    ]);
+    try {
+      const res = await generateQuiz({
+        topic: 'sustainability',
+        questionCount: 3,
+      });
+      const quizText =
+        "Here's a quick quiz for you:\n\n" +
+        res.questions
+          .map(
+            (q, i) =>
+              `${i + 1}. ${q.question}\n` +
+              q.options.map(o => `   - ${o}`).join('\n') +
+              `\nAnswer: ${q.answer}`
+          )
+          .join('\n\n');
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now() + 1, text: quizText, sender: 'tutor' },
+      ]);
+    } catch (error) {
+      console.error('Failed to get quiz:', error);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text: 'I apologize, but I am unable to generate a quiz right now. Please try again later.',
+          sender: 'tutor',
+        },
+      ]);
+    }
+    setIsLoading(false);
+  };
+
+  const getChallenges = async () => {
+    setIsLoading(true);
+    setMessages(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        text: 'Suggest some eco-challenges for me.',
+        sender: 'user',
+      },
+    ]);
+    try {
+      const res = await suggestEcoActions({
+        userProfile:
+          'A person interested in sustainability, living in an urban area, looking for challenges.',
+        ecoScore: 850,
+        location: 'New York City',
+      });
+      const suggestionsText =
+        'Here are some challenges for you:\n- ' +
+        res.suggestions.join('\n- ');
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now() + 1, text: suggestionsText, sender: 'tutor' },
+      ]);
+    } catch (error) {
+      console.error('Failed to get challenges:', error);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text: 'I apologize, but I am unable to provide challenges at this moment. Please try again later.',
+          sender: 'tutor',
+        },
+      ]);
+    }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     const getInitialMessage = async () => {
@@ -38,7 +133,21 @@ export function EcoTutorChat() {
           averageScore: 720,
         });
         setMessages([
-          { id: 1, text: res.explanation, sender: 'tutor' },
+          {
+            id: 1,
+            text: res.explanation,
+            sender: 'tutor',
+            actions: [
+              {
+                label: 'Give me a quiz',
+                action: getQuiz,
+              },
+              {
+                label: 'Suggest a challenge',
+                action: getChallenges,
+              },
+            ],
+          },
         ]);
       } catch (error) {
         console.error('Failed to get initial explanation:', error);
@@ -58,12 +167,15 @@ export function EcoTutorChat() {
 
   useEffect(() => {
     if (scrollAreaRef.current) {
-        // A simple way to scroll to the bottom.
-        setTimeout(() => {
-            if(scrollAreaRef.current) {
-                scrollAreaRef.current.scrollTo(0, scrollAreaRef.current.scrollHeight);
-            }
-        }, 100);
+      // A simple way to scroll to the bottom.
+      setTimeout(() => {
+        if (scrollAreaRef.current) {
+          scrollAreaRef.current.scrollTo(
+            0,
+            scrollAreaRef.current.scrollHeight
+          );
+        }
+      }, 100);
     }
   }, [messages]);
 
@@ -81,21 +193,23 @@ export function EcoTutorChat() {
     setIsLoading(true);
 
     try {
-        const res = await suggestEcoActions({
-            userProfile: 'A person interested in sustainability, living in an urban area.',
-            ecoScore: 850,
-            location: 'New York City'
-        });
+      const res = await suggestEcoActions({
+        userProfile:
+          'A person interested in sustainability, living in an urban area.',
+        ecoScore: 850,
+        location: 'New York City',
+      });
 
-        const suggestionsText = "Here are some suggestions for you:\n- " + res.suggestions.join('\n- ');
+      const suggestionsText =
+        'Here are some suggestions for you:\n- ' +
+        res.suggestions.join('\n- ');
 
-        const tutorResponse: Message = {
-            id: Date.now() + 1,
-            text: suggestionsText,
-            sender: 'tutor',
-        };
-        setMessages(prev => [...prev, tutorResponse]);
-
+      const tutorResponse: Message = {
+        id: Date.now() + 1,
+        text: suggestionsText,
+        sender: 'tutor',
+      };
+      setMessages(prev => [...prev, tutorResponse]);
     } catch (error) {
       console.error('Failed to get suggestions:', error);
       const errorResponse: Message = {
@@ -133,17 +247,41 @@ export function EcoTutorChat() {
                     </AvatarFallback>
                   </Avatar>
                 )}
-                <div
-                  className={cn(
-                    'max-w-xs rounded-lg p-3 text-sm whitespace-pre-wrap',
-                    message.sender === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
+                <div className="flex flex-col gap-2">
+                  <div
+                    className={cn(
+                      'max-w-xs rounded-lg p-3 text-sm whitespace-pre-wrap',
+                      message.sender === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-muted'
+                    )}
+                  >
+                    {message.text}
+                  </div>
+                  {message.sender === 'tutor' && message.actions && (
+                    <div className="flex gap-2">
+                      {message.actions.map((action, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleActionClick(action.action)}
+                          disabled={isLoading}
+                          className="bg-card"
+                        >
+                          {action.label === 'Give me a quiz' ? (
+                            <BrainCircuit className="mr-2 h-4 w-4" />
+                          ) : (
+                            <Zap className="mr-2 h-4 w-4" />
+                          )}
+                          {action.label}
+                        </Button>
+                      ))}
+                    </div>
                   )}
-                >
-                  {message.text}
                 </div>
-                 {message.sender === 'user' && (
+
+                {message.sender === 'user' && (
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="bg-accent text-accent-foreground">
                       <User size={20} />
@@ -153,18 +291,18 @@ export function EcoTutorChat() {
               </div>
             ))}
             {isLoading && messages.length > 0 && (
-                 <div className="flex items-start gap-3 justify-start">
-                    <Avatar className="h-8 w-8">
-                        <AvatarFallback className="bg-primary text-primary-foreground">
-                            <Bot size={20} />
-                        </AvatarFallback>
-                    </Avatar>
-                    <div className="max-w-xs rounded-lg p-3 text-sm bg-muted flex items-center space-x-1">
-                        <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse delay-0"></span>
-                        <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse delay-150"></span>
-                        <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse delay-300"></span>
-                    </div>
-                 </div>
+              <div className="flex items-start gap-3 justify-start">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    <Bot size={20} />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="max-w-xs rounded-lg p-3 text-sm bg-muted flex items-center space-x-1">
+                  <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse delay-0"></span>
+                  <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse delay-150"></span>
+                  <span className="w-2 h-2 bg-foreground/50 rounded-full animate-pulse delay-300"></span>
+                </div>
+              </div>
             )}
           </div>
         </ScrollArea>
