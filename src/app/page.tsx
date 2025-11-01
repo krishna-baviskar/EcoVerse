@@ -34,6 +34,7 @@ import { Input } from '@/components/ui/input';
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarInset,
   SidebarMenu,
@@ -95,6 +96,12 @@ export default function DashboardPage() {
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter>
+          <div className="flex items-center gap-2 p-2 text-sm text-sidebar-foreground/70">
+            <MapPin className="h-4 w-4" />
+            <span className="truncate">{location}</span>
+          </div>
+        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-card/50 px-4 lg:h-[60px] lg:px-6">
