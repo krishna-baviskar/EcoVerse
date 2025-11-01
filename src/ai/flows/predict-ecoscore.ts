@@ -42,17 +42,25 @@ const PredictEcoScoreOutputSchema = z.object({
 });
 export type PredictEcoScoreOutput = z.infer<typeof PredictEcoScoreOutputSchema>;
 
-// Fetches real environmental data from OpenWeatherMap API
+// Fetches real environmental data from APIs
 const getEnvironmentalData = async (location: string) => {
-  const apiKey = process.env.OPENWEATHERMAP_API_KEY;
-  if (!apiKey || apiKey === 'your_api_key_here') {
+  const openWeatherApiKey = process.env.OPENWEATHERMAP_API_KEY;
+  if (!openWeatherApiKey || openWeatherApiKey === 'your_api_key_here') {
     throw new Error(
       'OpenWeatherMap API key is not configured. Please add it to your .env file.'
     );
   }
 
-  // 1. Geocode location to get lat/lon
-  const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=1&appid=${apiKey}`;
+  const waqiApiKey = process.env.WAQI_API_KEY;
+  if (!waqiApiKey || waqiApiKey === 'your_waqi_api_key_here') {
+    throw new Error(
+      'World Air Quality Index API key is not configured. Please add it to your .env file.'
+    );
+  }
+
+
+  // 1. Geocode location to get lat/lon using OpenWeatherMap
+  const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=1&appid=${openWeatherApiKey}`;
   const geoResponse = await fetch(geoUrl);
   if (!geoResponse.ok) {
     throw new Error('Failed to fetch location data from OpenWeatherMap.');
@@ -63,8 +71,8 @@ const getEnvironmentalData = async (location: string) => {
   }
   const { lat, lon } = geoData[0];
 
-  // 2. Get current weather data (temp, humidity)
-  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  // 2. Get current weather data (temp, humidity) using OpenWeatherMap
+  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${openWeatherApiKey}&units=metric`;
   const weatherResponse = await fetch(weatherUrl);
   if (!weatherResponse.ok) {
     throw new Error('Failed to fetch weather data.');
@@ -73,18 +81,17 @@ const getEnvironmentalData = async (location: string) => {
   const temperature = weatherData.main.temp;
   const humidity = weatherData.main.humidity;
 
-  // 3. Get Air Quality Index (AQI)
-  const airUrl = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+  // 3. Get Air Quality Index (AQI) from World Air Quality Index API
+  const airUrl = `https://api.waqi.info/feed/geo:${lat};${lon}/?token=${waqiApiKey}`;
   const airResponse = await fetch(airUrl);
    if (!airResponse.ok) {
-    throw new Error('Failed to fetch air quality data.');
+    throw new Error('Failed to fetch air quality data from WAQI.');
   }
   const airData = await airResponse.json();
-  // OpenWeatherMap returns a value from 1 (Good) to 5 (Very Poor).
-  // We need to convert it to a standard AQI scale (approx. 0-500).
-  const aqiValue = airData.list[0].main.aqi;
-  const aqiConversion = {1: 40, 2: 75, 3: 125, 4: 200, 5: 350};
-  const aqi = aqiConversion[aqiValue as keyof typeof aqiConversion] || 0;
+  if (airData.status !== 'ok') {
+    throw new Error(`Failed to get AQI data: ${airData.data}`);
+  }
+  const aqi = airData.data.aqi;
 
 
   return { aqi, temperature, humidity };
