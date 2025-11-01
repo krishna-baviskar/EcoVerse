@@ -33,7 +33,7 @@ const chartConfig = {
 
 export function EcoscoreTrendChart() {
   return (
-    <Card className="h-[500px] flex flex-col">
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <TrendingUp /> EcoScore Trend

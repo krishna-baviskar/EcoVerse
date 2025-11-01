@@ -4,15 +4,24 @@ import {
   Bot,
   Coins,
   LayoutDashboard,
+  MapPin,
   PlusCircle,
   TrendingUp,
   Trophy,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,6 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
 import {
   Sidebar,
   SidebarContent,
@@ -40,6 +50,17 @@ import { OverviewCard } from '@/components/dashboard/overview-card';
 import { Logo } from '@/components/logo';
 
 export default function DashboardPage() {
+  const [location, setLocation] = useState('Greenville');
+  const [locationInput, setLocationInput] = useState('');
+
+  const handleLocationChange = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (locationInput.trim()) {
+      setLocation(locationInput.trim());
+      setLocationInput('');
+    }
+  };
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -130,16 +151,30 @@ export default function DashboardPage() {
               description="Top 5% in your city"
             />
             <OverviewCard
-              title="Actions Logged"
-              value="52"
-              icon={PlusCircle}
-              description="+5 this week"
+              title="Location"
+              value={location}
+              icon={MapPin}
+              description="Your current location"
             />
           </div>
-          <div className="grid grid-cols-1 gap-4 lg:gap-8">
-            <div className="lg:col-span-4">
-              <EcoscoreTrendChart />
-            </div>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
+            <EcoscoreTrendChart />
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-headline">Update Location</CardTitle>
+                <CardDescription>Enter your city to update your location.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleLocationChange} className="flex space-x-2">
+                  <Input
+                    placeholder="Enter your city"
+                    value={locationInput}
+                    onChange={(e) => setLocationInput(e.target.value)}
+                  />
+                  <Button type="submit">Update</Button>
+                </form>
+              </CardContent>
+            </Card>
           </div>
           <div className="mt-4">
             <Leaderboard />
