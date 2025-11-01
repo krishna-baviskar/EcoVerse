@@ -9,7 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 
 const PredictEcoScoreInputSchema = z.object({
   location: z.string().describe('The city for which to predict the EcoScore.'),
@@ -32,22 +32,63 @@ const PredictEcoScoreOutputSchema = z.object({
   aqi: z.number().describe('Simulated Air Quality Index.'),
   humidity: z.number().describe('Simulated humidity in percentage.'),
   temperature: z.number().describe('Simulated temperature in Celsius.'),
-  breakdown: z.array(ScoreBreakdownSchema).describe('A breakdown of the score calculation.'),
-  condition: z.string().describe('The environmental condition (e.g., Good, Moderate).'),
+  breakdown: z
+    .array(ScoreBreakdownSchema)
+    .describe('A breakdown of the score calculation.'),
+  condition: z
+    .string()
+    .describe('The environmental condition (e.g., Good, Moderate).'),
   suggestion: z.string().describe('A suggested action based on the score.'),
 });
 export type PredictEcoScoreOutput = z.infer<typeof PredictEcoScoreOutputSchema>;
 
-// Dummy function to simulate fetching environmental data
-const getEnvironmentalData = (location: string) => {
-    // In a real app, this would call external APIs.
-    // We'll use pseudorandom data based on location name length.
-    const seed = location.length;
-    const aqi = (seed * 17) % 450 + 10; // AQI from 10 to 460
-    const temperature = (seed * 5) % 40; // Temp up to 40 C
-    const humidity = (seed * 7) % 80 + 20; // Humidity from 20 to 100
-    return { aqi, temperature, humidity };
-}
+// Fetches real environmental data from OpenWeatherMap API
+const getEnvironmentalData = async (location: string) => {
+  const apiKey = process.env.OPENWEATHERMAP_API_KEY;
+  if (!apiKey || apiKey === 'your_api_key_here') {
+    throw new Error(
+      'OpenWeatherMap API key is not configured. Please add it to your .env file.'
+    );
+  }
+
+  // 1. Geocode location to get lat/lon
+  const geoUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=1&appid=${apiKey}`;
+  const geoResponse = await fetch(geoUrl);
+  if (!geoResponse.ok) {
+    throw new Error('Failed to fetch location data from OpenWeatherMap.');
+  }
+  const geoData = await geoResponse.json();
+  if (!geoData || geoData.length === 0) {
+    throw new Error(`Could not find location: ${location}`);
+  }
+  const { lat, lon } = geoData[0];
+
+  // 2. Get current weather data (temp, humidity)
+  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`;
+  const weatherResponse = await fetch(weatherUrl);
+  if (!weatherResponse.ok) {
+    throw new Error('Failed to fetch weather data.');
+  }
+  const weatherData = await weatherResponse.json();
+  const temperature = weatherData.main.temp;
+  const humidity = weatherData.main.humidity;
+
+  // 3. Get Air Quality Index (AQI)
+  const airUrl = `http://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lon}&appid=${apiKey}`;
+  const airResponse = await fetch(airUrl);
+   if (!airResponse.ok) {
+    throw new Error('Failed to fetch air quality data.');
+  }
+  const airData = await airResponse.json();
+  // OpenWeatherMap returns a value from 1 (Good) to 5 (Very Poor).
+  // We need to convert it to a standard AQI scale (approx. 0-500).
+  const aqiValue = airData.list[0].main.aqi;
+  const aqiConversion = {1: 40, 2: 75, 3: 125, 4: 200, 5: 350};
+  const aqi = aqiConversion[aqiValue as keyof typeof aqiConversion] || 0;
+
+
+  return { aqi, temperature, humidity };
+};
 
 export async function predictEcoScore(
   input: PredictEcoScoreInput
@@ -57,19 +98,23 @@ export async function predictEcoScore(
 
 const prompt = ai.definePrompt({
   name: 'predictEcoScorePrompt',
-  input: { schema: z.object({
-    location: z.string(),
-    aqi: z.number(),
-    temperature: z.number(),
-    humidity: z.number(),
-  }) },
-  output: { schema: z.object({
+  input: {
+    schema: z.object({
+      location: z.string(),
+      aqi: z.number(),
+      temperature: z.number(),
+      humidity: z.number(),
+    }),
+  },
+  output: {
+    schema: z.object({
       ecoScore: z.number(),
       explanation: z.string(),
       breakdown: z.array(ScoreBreakdownSchema),
       condition: z.string(),
       suggestion: z.string(),
-  })},
+    }),
+  },
   prompt: `Given the following environmental data for the city of {{{location}}}: {AQI: {{{aqi}}}, Temperature: {{{temperature}}}°C, Humidity: {{{humidity}}}%}, calculate the EcoScore.
 
   Use the following formula:
@@ -102,17 +147,17 @@ const predictEcoScoreFlow = ai.defineFlow(
     inputSchema: PredictEcoScoreInputSchema,
     outputSchema: PredictEcoScoreOutputSchema,
   },
-  async (input) => {
-    const environmentalData = getEnvironmentalData(input.location);
+  async input => {
+    const environmentalData = await getEnvironmentalData(input.location);
 
     const { output } = await prompt({
-        ...input,
-        ...environmentalData,
+      ...input,
+      ...environmentalData,
     });
-    
+
     return {
-        ...output!,
-        ...environmentalData
+      ...output!,
+      ...environmentalData,
     };
   }
 );
