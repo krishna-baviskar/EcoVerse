@@ -33,13 +33,11 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 
-import { EcoscoreTrendChart } from '@/components/dashboard/ecoscore-trend-chart';
-import { Leaderboard } from '@/components/dashboard/leaderboard';
+import { EcoTutorChat } from '@/components/dashboard/eco-tutor-chat';
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
-import { OverviewCard } from '@/components/dashboard/overview-card';
 import { Logo } from '@/components/logo';
 
-export default function DashboardPage() {
+export default function EcoGptTutorPage() {
   return (
     <SidebarProvider>
       <Sidebar>
@@ -49,13 +47,13 @@ export default function DashboardPage() {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/" isActive>
+              <SidebarMenuButton href="/">
                 <LayoutDashboard />
                 <span className="truncate">Dashboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/eco-gpt-tutor">
+              <SidebarMenuButton href="/eco-gpt-tutor" isActive>
                 <Bot />
                 <span className="truncate">EcoGPT Tutor</span>
               </SidebarMenuButton>
@@ -80,7 +78,7 @@ export default function DashboardPage() {
           <SidebarTrigger className="shrink-0 md:hidden" />
           <div className="w-full flex-1">
             <h1 className="text-lg font-semibold md:text-2xl font-headline">
-              Dashboard
+              EcoGPT Tutor
             </h1>
           </div>
           <LogActionDialog>
@@ -110,40 +108,7 @@ export default function DashboardPage() {
           </DropdownMenu>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-            <OverviewCard
-              title="EcoScore"
-              value="850"
-              icon={TrendingUp}
-              description="+20.1% from last month"
-            />
-            <OverviewCard
-              title="Eco-Points"
-              value="12,530"
-              icon={Coins}
-              description="+180.1 from last week"
-            />
-            <OverviewCard
-              title="Community Rank"
-              value="#12"
-              icon={Award}
-              description="Top 5% in your city"
-            />
-            <OverviewCard
-              title="Actions Logged"
-              value="52"
-              icon={PlusCircle}
-              description="+5 this week"
-            />
-          </div>
-          <div className="grid grid-cols-1 gap-4 lg:gap-8">
-            <div className="lg:col-span-4">
-              <EcoscoreTrendChart />
-            </div>
-          </div>
-          <div className="mt-4">
-            <Leaderboard />
-          </div>
+          <EcoTutorChat />
         </main>
       </SidebarInset>
     </SidebarProvider>
