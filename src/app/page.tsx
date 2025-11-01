@@ -3,11 +3,11 @@ import {
   Award,
   Bot,
   Coins,
+  Droplets,
   LayoutDashboard,
   MapPin,
   PlusCircle,
   Thermometer,
-  TrafficCone,
   TrendingUp,
   Trophy,
   Users,
@@ -188,7 +188,7 @@ export default function DashboardPage() {
                   <CardTitle className="font-headline flex items-center gap-2">
                     <Info /> EcoScore Insights
                   </CardTitle>
-                  <CardDescription>AI-generated explanation for your score.</CardDescription>
+                  <CardDescription>{ecoScoreData.condition}: {ecoScoreData.suggestion}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm">{ecoScoreData.explanation}</p>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
           <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
             <OverviewCard
               title="EcoScore"
-              value={isLoading ? "..." : ecoScoreData?.ecoScore.toFixed(0) || 'N/A'}
+              value={isLoading ? "..." : ecoScoreData?.ecoScore.toFixed(1) || 'N/A'}
               icon={TrendingUp}
               description={isLoading ? "Calculating..." : `Based on ${location} data`}
             />
@@ -216,10 +216,10 @@ export default function DashboardPage() {
               description="Air Quality Index"
             />
             <OverviewCard
-              title="Traffic"
-              value={isLoading ? "..." : ecoScoreData?.traffic || 'N/A'}
-              icon={TrafficCone}
-              description="City traffic conditions"
+              title="Humidity"
+              value={isLoading ? "..." : `${ecoScoreData?.humidity.toFixed(0) || 'N/A'}%`}
+              icon={Droplets}
+              description="Relative Humidity"
             />
             <OverviewCard
               title="Temperature"
