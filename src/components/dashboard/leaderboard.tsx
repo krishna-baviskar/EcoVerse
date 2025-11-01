@@ -31,7 +31,7 @@ const leaderboardData: User[] = [
 
 export function Leaderboard() {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <Trophy /> Community Leaderboard

@@ -6,13 +6,18 @@ import {
   LayoutDashboard,
   MapPin,
   PlusCircle,
+  Thermometer,
+  TrafficCone,
   TrendingUp,
   Trophy,
   Users,
+  Wind,
+  Info,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
+import { predictEcoScore, type PredictEcoScoreOutput } from '@/ai/flows';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,14 +58,34 @@ import { Logo } from '@/components/logo';
 export default function DashboardPage() {
   const [location, setLocation] = useState('Greenville');
   const [locationInput, setLocationInput] = useState('');
+  const [ecoScoreData, setEcoScoreData] = useState<PredictEcoScoreOutput | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleLocationChange = (e: React.FormEvent) => {
+  const handleLocationChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (locationInput.trim()) {
-      setLocation(locationInput.trim());
+      const newLocation = locationInput.trim();
+      setLocation(newLocation);
       setLocationInput('');
+      await updateEcoScore(newLocation);
     }
   };
+
+  const updateEcoScore = async (loc: string) => {
+    setIsLoading(true);
+    try {
+      const result = await predictEcoScore({ location: loc });
+      setEcoScoreData(result);
+    } catch (error) {
+      console.error("Failed to predict ecoscore", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    updateEcoScore(location);
+  }, []);
 
   return (
     <SidebarProvider>
@@ -139,10 +164,10 @@ export default function DashboardPage() {
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
-             <Card>
+            <Card>
               <CardHeader>
                 <CardTitle className="font-headline">Update Location</CardTitle>
-                <CardDescription>Enter your city to update your location.</CardDescription>
+                <CardDescription>Enter your city to update your location and EcoScore.</CardDescription>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleLocationChange} className="flex space-x-2">
@@ -151,41 +176,66 @@ export default function DashboardPage() {
                     value={locationInput}
                     onChange={(e) => setLocationInput(e.target.value)}
                   />
-                  <Button type="submit">Update</Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Updating...' : 'Update'}
+                  </Button>
                 </form>
               </CardContent>
             </Card>
-            <EcoscoreTrendChart />
+            {ecoScoreData && !isLoading ? (
+               <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline flex items-center gap-2">
+                    <Info /> EcoScore Insights
+                  </CardTitle>
+                  <CardDescription>AI-generated explanation for your score.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm">{ecoScoreData.explanation}</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="flex items-center justify-center">
+                <CardContent className="p-6">
+                  <p>Enter a location to see your EcoScore insights.</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
           <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
             <OverviewCard
               title="EcoScore"
-              value="850"
+              value={isLoading ? "..." : ecoScoreData?.ecoScore.toFixed(0) || 'N/A'}
               icon={TrendingUp}
-              description="+20.1% from last month"
+              description={isLoading ? "Calculating..." : `Based on ${location} data`}
+            />
+             <OverviewCard
+              title="AQI"
+              value={isLoading ? "..." : ecoScoreData?.aqi.toFixed(0) || 'N/A'}
+              icon={Wind}
+              description="Air Quality Index"
             />
             <OverviewCard
-              title="Eco-Points"
-              value="12,530"
-              icon={Coins}
-              description="+180.1 from last week"
+              title="Traffic"
+              value={isLoading ? "..." : ecoScoreData?.traffic || 'N/A'}
+              icon={TrafficCone}
+              description="City traffic conditions"
             />
             <OverviewCard
-              title="Community Rank"
-              value="#12"
-              icon={Award}
-              description="Top 5% in your city"
-            />
-            <OverviewCard
-              title="Location"
-              value={location}
-              icon={MapPin}
-              description="Your current location"
+              title="Temperature"
+              value={isLoading ? "..." : `${ecoScoreData?.temperature.toFixed(0) || 'N/A'}°C`}
+              icon={Thermometer}
+              description="Current temperature"
             />
           </div>
           
-          <div className="mt-4">
-            <Leaderboard />
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <div className="lg:col-span-4">
+              <Leaderboard />
+            </div>
+            <div className="lg:col-span-3">
+              <EcoscoreTrendChart />
+            </div>
           </div>
         </main>
       </SidebarInset>
