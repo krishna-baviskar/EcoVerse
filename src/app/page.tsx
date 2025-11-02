@@ -80,7 +80,6 @@ export default function DashboardPage() {
   }, [isUserLoading, user, router]);
 
   const fetchDashboardData = useCallback(async (loc: string, forceRefresh = false) => {
-    // The location used for fetching should be just the city part.
     const fetchCity = loc.split(',')[0].trim();
     if (!fetchCity) {
       setIsLoadingEcoScore(false);
@@ -88,12 +87,15 @@ export default function DashboardPage() {
       return;
     }
 
-    if (!forceRefresh) {
-        const cachedEcoScore = sessionStorage.getItem('ecoScoreData');
-        const cachedChallenges = sessionStorage.getItem('challenges');
-        const cachedLocation = sessionStorage.getItem('userLocation');
+    // Use a composite key for caching to handle different locations
+    const ecoScoreCacheKey = `ecoScoreData-${fetchCity}`;
+    const challengesCacheKey = `challenges-${fetchCity}`;
 
-        if (cachedEcoScore && cachedChallenges && cachedLocation === loc) {
+    if (!forceRefresh) {
+        const cachedEcoScore = sessionStorage.getItem(ecoScoreCacheKey);
+        const cachedChallenges = sessionStorage.getItem(challengesCacheKey);
+
+        if (cachedEcoScore && cachedChallenges) {
             setEcoScoreData(JSON.parse(cachedEcoScore));
             setChallenges(JSON.parse(cachedChallenges));
             setLocation(loc);
@@ -108,19 +110,24 @@ export default function DashboardPage() {
 
     try {
       const ecoScorePromise = predictEcoScore({ location: fetchCity });
-      const challengesPromise = generateChallenges({ location: fetchCity, ecoScore: 80 }); // Using a placeholder score to initiate
+      // Use a placeholder score, as it's not critical for generating initial challenges.
+      const challengesPromise = generateChallenges({ location: fetchCity, ecoScore: 75 }); 
       
       const [ecoScoreResult, challengesResult] = await Promise.all([ecoScorePromise, challengesPromise]);
 
       setEcoScoreData(ecoScoreResult);
       setChallenges(challengesResult.challenges);
       
-      sessionStorage.setItem('ecoScoreData', JSON.stringify(ecoScoreResult));
-      sessionStorage.setItem('challenges', JSON.stringify(challengesResult.challenges));
+      sessionStorage.setItem(ecoScoreCacheKey, JSON.stringify(ecoScoreResult));
+      sessionStorage.setItem(challengesCacheKey, JSON.stringify(challengesResult.challenges));
+      // Also cache the full location string to maintain display consistency
       sessionStorage.setItem('userLocation', loc);
 
     } catch (error) {
       console.error("Failed to fetch dashboard data", error);
+      // Clear potentially bad cache on error
+      sessionStorage.removeItem(ecoScoreCacheKey);
+      sessionStorage.removeItem(challengesCacheKey);
       setEcoScoreData(null);
       setChallenges([]);
     } finally {
@@ -139,12 +146,19 @@ export default function DashboardPage() {
         setIsLoadingChallenges(false);
       } else {
         setLocation(userLocation);
-        fetchDashboardData(userLocation, false);
+        fetchDashboardData(userLocation, false); // Pass false, let the function decide based on cache
       }
     } else if (!isProfileLoading) {
-      // If there's no profile and we are not loading one, stop loading spinners.
-      setIsLoadingEcoScore(false);
-      setIsLoadingChallenges(false);
+      // If there's no profile and we are not loading one, check session storage for a location.
+      const cachedLocation = sessionStorage.getItem('userLocation');
+      if (cachedLocation) {
+          setLocation(cachedLocation);
+          fetchDashboardData(cachedLocation, false);
+      } else {
+        // Stop loading spinners if no profile and no cached location
+        setIsLoadingEcoScore(false);
+        setIsLoadingChallenges(false);
+      }
     }
   }, [userProfile, isProfileLoading, fetchDashboardData]);
 
@@ -159,12 +173,15 @@ export default function DashboardPage() {
   };
 
   const handleLocationUpdate = async (newLocation: string) => {
-    if (!newLocation.trim() || !userDocRef) return;
+    if (!newLocation.trim()) return;
     
     setLocation(newLocation); 
     
-    updateDocumentNonBlocking(userDocRef, { location: newLocation });
+    if (userDocRef) {
+      updateDocumentNonBlocking(userDocRef, { location: newLocation });
+    }
 
+    // Force a refresh with the new location
     await fetchDashboardData(newLocation, true);
   };
 
@@ -348,3 +365,4 @@ export default function DashboardPage() {
     
 
     
+
