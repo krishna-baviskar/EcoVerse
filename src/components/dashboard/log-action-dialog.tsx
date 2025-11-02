@@ -3,6 +3,7 @@ import { useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
 
 import {
   Dialog,
@@ -27,13 +28,28 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { validateSustainableAction } from '@/ai/flows';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle, Info, Loader2, XCircle } from 'lucide-react';
+import { CheckCircle, Info, Loader2, XCircle, Paperclip, Video } from 'lucide-react';
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ACCEPTED_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'];
+
 
 const formSchema = z.object({
   action: z.string().min(5, {
     message: 'Action must be at least 5 characters.',
   }),
   evidence: z.string().optional(),
+  media: z
+    .any()
+    .refine(
+        (files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE,
+        `Max file size is 5MB.`
+    )
+    .refine(
+        (files) => !files || files.length === 0 || ACCEPTED_MEDIA_TYPES.includes(files?.[0]?.type),
+        'Only .jpg, .png, .webp, .mp4 and .webm formats are supported.'
+    )
+    .optional(),
 });
 
 type ValidationResult = {
@@ -42,10 +58,22 @@ type ValidationResult = {
     reason?: string;
 }
 
+const fileToDataUri = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+};
+
 export function LogActionDialog({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ValidationResult | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState<string | null>(null);
+
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -59,10 +87,28 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setResult(null);
+
+    let mediaDataUri: string | undefined;
+    if (values.media && values.media.length > 0) {
+        try {
+            mediaDataUri = await fileToDataUri(values.media[0]);
+        } catch (error) {
+            console.error('Failed to convert file to data URI:', error);
+            toast({
+                variant: 'destructive',
+                title: 'File Processing Error',
+                description: 'Could not process the uploaded file.',
+            });
+            setIsLoading(false);
+            return;
+        }
+    }
+
+
     try {
       const validationResult = await validateSustainableAction({
         action: values.action,
-        supportingEvidence: values.evidence,
+        supportingEvidence: mediaDataUri || values.evidence,
       });
 
       setResult(validationResult);
@@ -92,17 +138,19 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
         form.reset();
         setResult(null);
         setIsLoading(false);
+        setPreview(null);
+        setMediaType(null);
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="font-headline">Log Sustainable Action</DialogTitle>
           <DialogDescription>
-            Tell us about a sustainable action you've taken to earn eco-points.
+            Tell us about a sustainable action you've taken to earn eco-points. Upload an image or video as evidence.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -125,7 +173,7 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
               name="evidence"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Supporting Evidence (Optional)</FormLabel>
+                  <FormLabel>Description (Optional)</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="e.g., Described the route, mentioned car model for efficiency."
@@ -136,6 +184,52 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
                 </FormItem>
               )}
             />
+             <FormField
+              control={form.control}
+              name="media"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Evidence (Image/Video)</FormLabel>
+                  <FormControl>
+                    <Input 
+                        type="file" 
+                        accept={ACCEPTED_MEDIA_TYPES.join(',')}
+                        onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            field.onChange(e.target.files);
+                            if (file) {
+                                setMediaType(file.type);
+                                setPreview(URL.createObjectURL(file));
+                            } else {
+                                setPreview(null);
+                                setMediaType(null);
+                            }
+                        }}
+                        className="file:text-primary file:font-medium"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {preview && (
+                 <div className="mt-4 rounded-md border p-2">
+                    <p className="text-sm font-medium mb-2">Preview:</p>
+                    {mediaType?.startsWith('image/') ? (
+                        <Image src={preview} alt="Preview" width={400} height={300} className="rounded-md w-full object-cover" />
+                    ) : mediaType?.startsWith('video/') ? (
+                        <video src={preview} controls className="w-full rounded-md" />
+                    ) : (
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <Paperclip className="h-4 w-4" />
+                            <span>File ready for upload.</span>
+                        </div>
+                    )}
+                </div>
+            )}
+
+
             <DialogFooter>
                 <Button type="submit" disabled={isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

@@ -17,7 +17,7 @@ const ValidateSustainableActionInputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'Optional supporting evidence for the action, such as a description or photo data URI.'
+      'Optional supporting evidence for the action, such as a description or a data URI for an image/video.'
     ),
 });
 export type ValidateSustainableActionInput = z.infer<typeof ValidateSustainableActionInputSchema>;
@@ -42,17 +42,27 @@ const validateSustainableActionPrompt = ai.definePrompt({
   input: {schema: ValidateSustainableActionInputSchema},
   output: {schema: ValidateSustainableActionOutputSchema},
   prompt: `You are an AI assistant that validates user-reported sustainable actions and assigns eco-points.
+Analyze the user's action and any supporting evidence provided (which could be text, an image, or a video data URI).
 
-  Here's the user's reported action:
-  Action: {{{action}}}
+User's reported action:
+Action: {{{action}}}
 
-  {% if supportingEvidence %}Supporting Evidence: {{{supportingEvidence}}}\n{% endif %}
+{{#if supportingEvidence}}
+Supporting Evidence: 
+  {{#if (startsWith supportingEvidence "data:image")}}
+    {{media url=supportingEvidence}}
+  {{else if (startsWith supportingEvidence "data:video")}}
+    {{media url=supportingEvidence}}
+  {{else}}
+    {{{supportingEvidence}}}
+  {{/if}}
+{{/if}}
 
-  Determine if the action is a valid sustainable action. If it is, determine how many eco-points to award.
-  The number of eco-points should be between 1 and 100, depending on the environmental impact of the action.
+Determine if the action is a valid sustainable action based on the evidence. If it is valid, award eco-points between 1 and 100 based on the environmental impact.
+If the action is not valid, explain why in the 'reason' field.
 
-  If the action is not valid, explain why in the reason field. Return a JSON format.
-  `,
+Return a JSON response in the specified format.
+`,
 });
 
 const validateSustainableActionFlow = ai.defineFlow(
