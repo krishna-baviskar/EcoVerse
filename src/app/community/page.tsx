@@ -103,14 +103,6 @@ export default function CommunityPage() {
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <Link href="/leaderboard">
-                <SidebarMenuButton>
-                  <Trophy />
-                  <span className="truncate">Leaderboard</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton href="/community" isActive>
                 <Users />
                 <span className="truncate">Community</span>

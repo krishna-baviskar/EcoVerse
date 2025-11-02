@@ -97,16 +97,15 @@ export default function DashboardPage() {
       return;
     }
     
+    if (ecoScoreData?.location === loc) {
+      return;
+    }
+
     setIsLoadingEcoScore(true);
     setIsLoadingChallenges(true);
 
     try {
-      if (ecoScoreData && ecoScoreData.location === loc) {
-        setIsLoadingEcoScore(false);
-        setIsLoadingChallenges(false);
-        return;
-      }
-
+      
       const ecoScorePromise = predictEcoScore({ location: loc });
       const ecoScoreResult = await ecoScorePromise;
       setEcoScoreData(ecoScoreResult);
@@ -162,7 +161,7 @@ export default function DashboardPage() {
     await fetchDashboardData(newLocation);
   };
 
-  if (isUserLoading || isProfileLoading || (isLoadingEcoScore && !hasFetchedInitialData)) {
+  if (isUserLoading || isProfileLoading || (!hasFetchedInitialData && isProfileLoading)) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -193,14 +192,6 @@ export default function DashboardPage() {
                 <LayoutDashboard />
                 <span className="truncate">Dashboard</span>
               </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/leaderboard">
-                <SidebarMenuButton>
-                  <Trophy />
-                  <span className="truncate">Leaderboard</span>
-                </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <Link href="/community">

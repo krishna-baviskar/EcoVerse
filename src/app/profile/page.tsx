@@ -51,6 +51,7 @@ import { Logo } from '@/components/logo';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/lib/types';
 import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
+import { Leaderboard } from '@/components/dashboard/leaderboard';
 
 
 export default function ProfilePage() {
@@ -103,14 +104,6 @@ export default function ProfilePage() {
                 <SidebarMenuButton>
                   <LayoutDashboard />
                   <span className="truncate">Dashboard</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/leaderboard">
-                <SidebarMenuButton>
-                  <Trophy />
-                  <span className="truncate">Leaderboard</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -226,6 +219,7 @@ export default function ProfilePage() {
               </Card>
             </CardContent>
           </Card>
+          <Leaderboard />
         </main>
         <FloatingEcoTutor location="Greenville" />
       </SidebarInset>
