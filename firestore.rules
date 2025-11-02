@@ -10,6 +10,36 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
+    
+    function isUpdatingProfile(requestData, resourceData) {
+      // Check if only allowed fields are being updated
+      let allowedFields = ['displayName', 'photoURL', 'location'];
+      let otherFieldsUnchanged = requestData.keys().removeAll(allowedFields).size() == 0;
+      
+      // Ensure protected fields are not being changed
+      let protectedFieldsUnchanged = requestData.uid == resourceData.uid &&
+                                     requestData.email == resourceData.email &&
+                                     requestData.ecoPoints == resourceData.ecoPoints;
+
+      return otherFieldsUnchanged && protectedFieldsUnchanged;
+    }
+
+    function isIncrementingEcoPoints(requestData, resourceData) {
+      // Check that only ecoPoints is being updated
+      let onlyEcoPointsChanged = requestData.keys().removeAll(['ecoPoints']).size() == 0;
+      
+       // Ensure ecoPoints are only ever increased
+      let pointsIncreased = requestData.ecoPoints > resourceData.ecoPoints;
+
+      // Ensure other fields are not being changed
+      let otherFieldsUnchanged = requestData.uid == resourceData.uid &&
+                                  requestData.email == resourceData.email &&
+                                  requestData.displayName == resourceData.displayName &&
+                                  requestData.photoURL == resourceData.photoURL &&
+                                  requestData.location == resourceData.location;
+                                  
+      return onlyEcoPointsChanged && pointsIncreased && otherFieldsUnchanged;
+    }
 
     // USERS collection
     match /users/{userId} {
@@ -21,12 +51,10 @@ service cloud.firestore {
                     && request.resource.data.uid == userId
                     && request.resource.data.ecoPoints == 0;
 
-      // A user can update their own displayName and photoURL
-      // ecoPoints can only be incremented, not set directly
-      allow update: if isOwner(userId)
-                    && request.resource.data.uid == resource.data.uid
-                    && request.resource.data.email == resource.data.email
-                    && request.resource.data.ecoPoints == resource.data.ecoPoints + request.resource.data.pointsIncrement;
+      // A user can update their own profile OR increment their ecoPoints
+      allow update: if isOwner(userId) && 
+                       (isUpdatingProfile(request.resource.data, resource.data) ||
+                        isIncrementingEcoPoints(request.resource.data, resource.data));
 
       // Users cannot delete their profiles
       allow delete: if false;
