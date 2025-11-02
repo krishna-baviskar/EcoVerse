@@ -13,7 +13,6 @@ service cloud.firestore {
     }
 
     // This function checks if a user is updating ONLY their allowed profile fields.
-    // It makes sure no other fields (like ecoPoints) are being illegally changed.
     function isUpdatingAllowedProfileFields() {
       // The list of fields a user is allowed to change on their profile.
       let allowedFields = ['displayName', 'photoURL', 'location'];
@@ -21,25 +20,27 @@ service cloud.firestore {
       let incomingKeys = request.resource.data.keys();
 
       // Ensure that every key in the incoming request is in our allowed list.
-      let allKeysInRequestAreAllowed = incomingKeys.hasOnly(allowedFields);
-      
-      // Crucially, ensure ecoPoints is NOT part of this update request.
-      let ecoPointsIsUnchanged = !('ecoPoints' in request.resource.data);
-
-      return allKeysInRequestAreAllowed && ecoPointsIsUnchanged;
+      // And crucially, ensure that other protected fields are NOT part of this update.
+      return incomingKeys.hasOnly(allowedFields)
+          && request.resource.data.uid == resource.data.uid
+          && request.resource.data.email == resource.data.email
+          && request.resource.data.ecoPoints == resource.data.ecoPoints;
     }
 
     // This function securely checks if a user is ONLY incrementing their ecoPoints.
     function isSecurelyIncrementingEcoPoints() {
-      // This ensures that 'ecoPoints' is the ONLY field in the update request.
-      let onlyEcoPointsIsPresent = request.resource.data.keys().size() == 1 && 
-                                 'ecoPoints' in request.resource.data;
-      
-      // This is the crucial part: it verifies that the new ecoPoints value is
-      // greater than the old one. This works for `increment()` operations.
-      let pointsAreIncreased = request.resource.data.ecoPoints > resource.data.ecoPoints;
+        // Use diff() to see exactly what fields are changing between the old and new document.
+        let changes = request.resource.data.diff(resource.data);
+        
+        // Check that the *only* field affected is 'ecoPoints'.
+        let onlyEcoPointsAffected = changes.affectedKeys().size() == 1 &&
+                                    'ecoPoints' in changes.affectedKeys();
+                                    
+        // This is the CRITICAL part: it verifies that the new ecoPoints value is
+        // greater than the old one. This works for `increment()` operations.
+        let pointsAreIncreased = request.resource.data.ecoPoints > resource.data.ecoPoints;
 
-      return onlyEcoPointsIsPresent && pointsAreIncreased;
+        return onlyEcoPointsAffected && pointsAreIncreased;
     }
 
 
@@ -54,7 +55,6 @@ service cloud.firestore {
                     && request.resource.data.ecoPoints == 0;
 
       // A user can EITHER update their profile OR increment their ecoPoints.
-      // The two cases are handled by separate helper functions for clarity and security.
       allow update: if isOwner(userId) && 
                        (isUpdatingAllowedProfileFields() || isSecurelyIncrementingEcoPoints());
 
