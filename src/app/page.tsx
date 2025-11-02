@@ -51,14 +51,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/lib/types';
 import { SuggestedChallenges } from '@/components/dashboard/suggested-challenges';
 import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
+import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('');
-  const [locationInput, setLocationInput] = useState('');
   const [ecoScoreData, setEcoScoreData] = useState<PredictEcoScoreOutput | null>(null);
   const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoadingChallenges, setIsLoadingChallenges] = useState(true);
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+
 
   const router = useRouter();
   const { user, isUserLoading } = useUser();
@@ -128,8 +130,15 @@ export default function DashboardPage() {
   useEffect(() => {
     if (userProfile) {
       const userLocation = userProfile.location || '';
-      setLocation(userLocation);
-      fetchDashboardData(userLocation, false);
+      if (!userLocation) {
+        // If user has no location, open the dialog to prompt them.
+        setIsLocationDialogOpen(true);
+        setIsLoadingEcoScore(false);
+        setIsLoadingChallenges(false);
+      } else {
+        setLocation(userLocation);
+        fetchDashboardData(userLocation, false);
+      }
     } else if (!isProfileLoading) {
       // If there's no profile and we are not loading one, stop loading spinners.
       setIsLoadingEcoScore(false);
@@ -147,14 +156,11 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLocationChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!locationInput.trim() || !userDocRef) return;
+  const handleLocationUpdate = async (newLocation: string) => {
+    if (!newLocation.trim() || !userDocRef) return;
     
-    const newLocation = locationInput.trim();
     setLocation(newLocation); 
-    setLocationInput('');
-
+    
     updateDocumentNonBlocking(userDocRef, { location: newLocation });
 
     await fetchDashboardData(newLocation, true);
@@ -253,23 +259,25 @@ export default function DashboardPage() {
         </div>
       </header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <UpdateLocationDialog
+          open={isLocationDialogOpen}
+          onOpenChange={setIsLocationDialogOpen}
+          onLocationSubmit={handleLocationUpdate}
+          isLoading={isLoadingEcoScore || isLoadingChallenges}
+        />
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
             <Card>
               <CardHeader>
-                <CardTitle className="font-headline">Update Location</CardTitle>
-                <CardDescription>Enter your city to update your location and EcoScore.</CardDescription>
+                <CardTitle className="font-headline">Location Settings</CardTitle>
+                <CardDescription>
+                  Your location is used to calculate your EcoScore and find local challenges.
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleLocationChange} className="flex space-x-2">
-                  <Input
-                    placeholder="Enter your city"
-                    value={locationInput}
-                    onChange={(e) => setLocationInput(e.target.value)}
-                  />
-                  <Button type="submit" disabled={isLoadingEcoScore || isLoadingChallenges}>
-                    {(isLoadingEcoScore || isLoadingChallenges) ? 'Updating...' : 'Update'}
-                  </Button>
-                </form>
+                <Button onClick={() => setIsLocationDialogOpen(true)}>
+                  <MapPin className="mr-2 h-4 w-4" />
+                  Update Location
+                </Button>
               </CardContent>
             </Card>
             {ecoScoreData && !isLoadingEcoScore ? (
@@ -334,5 +342,7 @@ export default function DashboardPage() {
       </div>
   );
 }
+
+    
 
     
