@@ -6,273 +6,48 @@
       "type": "object",
       "description": "Represents a user's profile in the EcoVerse application.",
       "properties": {
-        "id": {
+        "uid": {
           "type": "string",
-          "description": "Unique identifier for the user profile."
+          "description": "The user's unique ID from Firebase Authentication."
         },
-        "userId": {
+        "displayName": {
           "type": "string",
-          "description": "Reference to the user in the authentication system."
+          "description": "The user's display name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the user's profile picture."
         },
         "ecoPoints": {
           "type": "number",
-          "description": "The user's current EcoPoints balance."
-        },
-        "lastLogin": {
-          "type": "string",
-          "description": "Timestamp of the user's last login.",
-          "format": "date-time"
-        },
-        "badges": {
-          "type": "array",
-          "description": "Array of badges earned by the user. References Badge entity.",
-          "items": {
-            "type": "string"
-          }
+          "description": "The user's current EcoPoints balance.",
+          "default": 0
         }
       },
-      "required": [
-        "id",
-        "userId",
-        "ecoPoints"
-      ]
-    },
-    "EcoAction": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "EcoAction",
-      "type": "object",
-      "description": "Represents a sustainable action performed by a user.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the eco action."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to UserProfile. (Relationship: UserProfile 1:N EcoAction)"
-        },
-        "actionType": {
-          "type": "string",
-          "description": "Type of sustainable action (e.g., recycling, carpooling)."
-        },
-        "pointsAwarded": {
-          "type": "number",
-          "description": "Number of EcoPoints awarded for the action."
-        },
-        "timestamp": {
-          "type": "string",
-          "description": "Timestamp of when the action was performed.",
-          "format": "date-time"
-        },
-        "validationData": {
-          "type": "string",
-          "description": "Data used to validate the action, potentially from Gemini API."
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "actionType",
-        "pointsAwarded",
-        "timestamp"
-      ]
-    },
-    "LeaderboardEntry": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "LeaderboardEntry",
-      "type": "object",
-      "description": "Represents an entry on the EcoVerse leaderboard.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the leaderboard entry."
-        },
-        "userId": {
-          "type": "string",
-          "description": "Reference to UserProfile."
-        },
-        "ecoPoints": {
-          "type": "number",
-          "description": "The user's EcoPoints used for leaderboard ranking."
-        },
-        "rank": {
-          "type": "number",
-          "description": "The user's current rank on the leaderboard."
-        },
-        "communityId": {
-          "type": "string",
-          "description": "Reference to Community. (Relationship: Community 1:N LeaderboardEntry)"
-        }
-      },
-      "required": [
-        "id",
-        "userId",
-        "ecoPoints",
-        "rank"
-      ]
-    },
-    "Badge": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Badge",
-      "type": "object",
-      "description": "Represents a badge that can be earned by users.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the badge."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the badge."
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the badge and how to earn it."
-        },
-        "imageUrl": {
-          "type": "string",
-          "description": "URL of the badge image.",
-          "format": "uri"
-        },
-        "ecoPointsRequired": {
-          "type": "number",
-          "description": "EcoPoints required to earn this badge."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "description",
-        "imageUrl"
-      ]
-    },
-    "Community": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Community",
-      "type": "object",
-      "description": "Represents a community or city within the EcoVerse application.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the community."
-        },
-        "name": {
-          "type": "string",
-          "description": "Name of the community (e.g., city name)."
-        },
-        "description": {
-          "type": "string",
-          "description": "Description of the community."
-        },
-        "location": {
-          "type": "string",
-          "description": "Location of the community (e.g., coordinates)."
-        }
-      },
-      "required": [
-        "id",
-        "name",
-        "description"
-      ]
+      "required": ["uid", "displayName", "email", "ecoPoints"]
     }
   },
   "auth": {
-    "providers": [
-      "password",
-      "anonymous"
-    ]
+    "providers": ["password"]
   },
   "firestore": {
     "structure": [
       {
-        "path": "/users/{userId}/profile",
+        "path": "/users/{userId}",
         "definition": {
           "entityName": "UserProfile",
           "schema": {
             "$ref": "#/backend/entities/UserProfile"
           },
-          "description": "Stores user profile information. The `userId` parameter ensures that only the authenticated user can access their profile. Includes denormalized 'badges' array for efficient retrieval of assigned badges.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/users/{userId}/eco_actions/{ecoActionId}",
-        "definition": {
-          "entityName": "EcoAction",
-          "schema": {
-            "$ref": "#/backend/entities/EcoAction"
-          },
-          "description": "Stores eco actions performed by a user. The `userId` parameter ensures that only the authenticated user can access their eco actions.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier of the user."
-            },
-            {
-              "name": "ecoActionId",
-              "description": "The unique identifier of the eco action."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/communities/{communityId}/leaderboard_entries/{leaderboardEntryId}",
-        "definition": {
-          "entityName": "LeaderboardEntry",
-          "schema": {
-            "$ref": "#/backend/entities/LeaderboardEntry"
-          },
-          "description": "Stores leaderboard entries for each community. Includes denormalized 'ecoPoints' for efficient leaderboard queries.",
-          "params": [
-            {
-              "name": "communityId",
-              "description": "The unique identifier of the community."
-            },
-            {
-              "name": "leaderboardEntryId",
-              "description": "The unique identifier of the leaderboard entry."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/badges/{badgeId}",
-        "definition": {
-          "entityName": "Badge",
-          "schema": {
-            "$ref": "#/backend/entities/Badge"
-          },
-          "description": "Stores badge information.",
-          "params": [
-            {
-              "name": "badgeId",
-              "description": "The unique identifier of the badge."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/communities/{communityId}",
-        "definition": {
-          "entityName": "Community",
-          "schema": {
-            "$ref": "#/backend/entities/Community"
-          },
-          "description": "Stores community information.",
-          "params": [
-            {
-              "name": "communityId",
-              "description": "The unique identifier of the community."
-            }
-          ]
+          "description": "Stores user profile information, including their ecoPoints. The document ID is the user's UID from Firebase Auth."
         }
       }
-    ],
-    "reasoning": "The Firestore structure is designed to support the EcoVerse application's features, focusing on user profiles, eco-actions, leaderboards, badges, and communities. It prioritizes authorization independence by denormalizing relevant data, enabling secure list operations, and ensuring data clarity.\n\n*   **User Profiles:** User profiles are stored under `/users/{userId}/profile` allowing for straightforward ownership-based security rules. This also ensures that user profile data can be read and managed only by the respective user.\n*   **Eco Actions:** Eco actions are stored under `/users/{userId}/eco_actions/{ecoActionId}`. This structure enables easy querying of a user's actions and allows for efficient calculation of EcoPoints. Security rules can be enforced based on the user ID.\n*   **Leaderboard:** Leaderboard entries are stored in the `/communities/{communityId}/leaderboard_entries/{leaderboardEntryId}` collection. Each entry contains a denormalized `ecoPoints` field. This denormalization facilitates leaderboard queries without requiring complex joins. Security rules ensure that only authorized users can modify leaderboard entries.\n*   **Badges:** Badges are stored in the `/badges/{badgeId}` collection. User's badges are managed through the `badges` array in the `/users/{userId}/profile` document. Security rules can ensure that badge assignments are only performed through validated EcoActions.\n*   **Communities:** Communities are stored in the `/communities/{communityId}` collection. This allows for organizing users and leaderboard entries within specific communities.\n\n**Authorization Independence:** The structure ensures authorization independence by avoiding hierarchical `get()` calls in security rules. For example, the `leaderboard_entries` collection denormalizes the `ecoPoints` property, eliminating the need to fetch user profile data during leaderboard queries and updates. Similarly, ownership is verified directly in the path for user profiles and eco-actions.\n\n**QAPs Support:**\n\n*   **Secure List Operations:** The segregation of data into collections with homogeneous security postures (e.g., `/users/{userId}/eco_actions`) enables secure list operations. Rules can be written to allow listing only the eco-actions belonging to the authenticated user, preventing unauthorized access to other users' data.\n*   **Membership Model:** For collaborative features (if implemented later), a membership map (`members: {uid1: \"role\", uid2: \"role\"}`) can be added to community documents to manage access control. The `leaderboard_entries` collection inherits community context through the `communityId` field, enabling community-specific leaderboards and access control."
+    ]
   }
 }

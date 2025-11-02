@@ -1,8 +1,6 @@
 'use client';
 import {
-  Award,
   Bot,
-  Coins,
   Droplets,
   LayoutDashboard,
   MapPin,
@@ -13,8 +11,12 @@ import {
   Users,
   Wind,
   Info,
+  LogIn,
+  LogOut,
+  User as UserIcon,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { predictEcoScore, type PredictEcoScoreOutput } from '@/ai/flows';
@@ -53,12 +55,27 @@ import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { OverviewCard } from '@/components/dashboard/overview-card';
 import { Logo } from '@/components/logo';
 import { EcoScoreRatingScale } from '@/components/dashboard/ecoscore-rating-scale';
+import { useAuth, useUser } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('Greenville');
   const [locationInput, setLocationInput] = useState('');
   const [ecoScoreData, setEcoScoreData] = useState<PredictEcoScoreOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
+
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const handleLocationChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,19 +168,43 @@ export default function DashboardPage() {
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
                 <Avatar>
-                  <AvatarImage src="https://picsum.photos/seed/100/40/40" />
-                  <AvatarFallback>U</AvatarFallback>
+                   {user?.photoURL ? (
+                    <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
+                  ) : (
+                    <AvatarImage src="https://picsum.photos/seed/100/40/40" />
+                  )}
+                  <AvatarFallback>
+                    {user?.displayName ? user.displayName.charAt(0).toUpperCase() : <UserIcon />}
+                  </AvatarFallback>
                 </Avatar>
                 <span className="sr-only">Toggle user menu</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
+              <DropdownMenuLabel>{user ? user.displayName : 'My Account'}</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Profile</DropdownMenuItem>
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              {user ? (
+                <>
+                  <DropdownMenuItem onClick={() => router.push('/profile')}>
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>Profile</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem disabled>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Logout</span>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem onClick={() => router.push('/login')}>
+                  <LogIn className="mr-2 h-4 w-4" />
+                  <span>Login</span>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </header>

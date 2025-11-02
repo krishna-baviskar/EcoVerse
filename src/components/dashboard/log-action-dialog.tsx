@@ -4,6 +4,8 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
+import { doc, updateDoc, increment } from 'firebase/firestore';
+
 
 import {
   Dialog,
@@ -29,6 +31,8 @@ import { useToast } from '@/hooks/use-toast';
 import { validateSustainableAction } from '@/ai/flows';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CheckCircle, Info, Loader2, XCircle, Paperclip, Video } from 'lucide-react';
+import { useUser, useFirestore } from '@/firebase';
+import { updateDocumentNonBlocking } from '@/firebase';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'];
@@ -75,6 +79,9 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
   const [mediaType, setMediaType] = useState<string | null>(null);
 
   const { toast } = useToast();
+  const { user } = useUser();
+  const firestore = useFirestore();
+
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -87,6 +94,17 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     setResult(null);
+
+    if (!user) {
+      toast({
+        variant: 'destructive',
+        title: 'Not Logged In',
+        description: 'You must be logged in to log an action.',
+      });
+      setIsLoading(false);
+      return;
+    }
+
 
     let mediaDataUri: string | undefined;
     if (values.media && values.media.length > 0) {
@@ -113,10 +131,14 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
 
       setResult(validationResult);
       
-      if(validationResult.isValid){
+      if(validationResult.isValid && validationResult.ecoPoints){
           toast({
             title: "Action Validated!",
             description: `You've earned ${validationResult.ecoPoints} eco-points.`,
+          });
+          const userRef = doc(firestore, 'users', user.uid);
+          updateDocumentNonBlocking(userRef, {
+            ecoPoints: increment(validationResult.ecoPoints),
           });
       }
 
@@ -231,9 +253,9 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
 
 
             <DialogFooter>
-                <Button type="submit" disabled={isLoading}>
+                <Button type="submit" disabled={isLoading || !user}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    Validate Action
+                    { !user ? 'Login to Validate' : 'Validate Action' }
                 </Button>
             </DialogFooter>
           </form>

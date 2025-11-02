@@ -7,18 +7,25 @@ import {
   LogIn,
   LogOut,
   PlusCircle,
-  TrendingUp,
   Trophy,
   User as UserIcon,
   Users,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import { doc } from 'firebase/firestore';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,18 +46,25 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 
-import { EcoTutorChat } from '@/components/dashboard/eco-tutor-chat';
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { Logo } from '@/components/logo';
-import { useState, useEffect } from 'react';
-import { predictEcoScore } from '@/ai/flows';
+import { Skeleton } from '@/components/ui/skeleton';
+import type { UserProfile } from '@/lib/types';
 
-export default function EcoGptTutorPage() {
-  const [location, setLocation] = useState('Greenville');
-  const [isLoading, setIsLoading] = useState(true);
+
+export default function ProfilePage() {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(
+    () => (user ? doc(firestore, 'users', user.uid) : null),
+    [firestore, user]
+  );
+  
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
+
 
   const handleLogout = async () => {
     try {
@@ -61,26 +75,22 @@ export default function EcoGptTutorPage() {
     }
   };
 
+  if (isUserLoading) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-[250px]" />
+                <Skeleton className="h-4 w-[200px]" />
+            </div>
+        </div>
+    )
+  }
 
-  useEffect(() => {
-    async function fetchLocation() {
-      try {
-        // We can use a default location or try to get it from the browser
-        // For now, let's keep it simple and use a default.
-        // In a real app, you might use browser geolocation.
-        const result = await predictEcoScore({ location: 'Greenville' });
-        if (result) {
-          // No need to set location from result as it's the input
-        }
-      } catch (error) {
-        console.error("Failed to predict ecoscore for initial location", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-    fetchLocation();
-  }, []);
-
+  if (!user) {
+    router.push('/login');
+    return null;
+  }
 
   return (
     <SidebarProvider>
@@ -99,10 +109,12 @@ export default function EcoGptTutorPage() {
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/eco-gpt-tutor" isActive>
-                <Bot />
-                <span className="truncate">EcoGPT Tutor</span>
-              </SidebarMenuButton>
+              <Link href="/eco-gpt-tutor">
+                <SidebarMenuButton>
+                  <Bot />
+                  <span className="truncate">EcoGPT Tutor</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <Link href="/leaderboard">
@@ -128,7 +140,7 @@ export default function EcoGptTutorPage() {
           <SidebarTrigger className="shrink-0 md:hidden" />
           <div className="w-full flex-1">
             <h1 className="text-lg font-semibold md:text-2xl font-headline">
-              EcoGPT Tutor
+              Profile
             </h1>
           </div>
           <LogActionDialog>
@@ -162,7 +174,7 @@ export default function EcoGptTutorPage() {
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem disabled>
+                   <DropdownMenuItem disabled>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </DropdownMenuItem>
@@ -182,7 +194,48 @@ export default function EcoGptTutorPage() {
           </DropdownMenu>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <EcoTutorChat location={location} />
+          <Card>
+            <CardHeader>
+              <CardTitle className="font-headline">My Profile</CardTitle>
+              <CardDescription>
+                View and manage your profile details.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-20 w-20">
+                  <AvatarImage src={userProfile?.photoURL || `https://picsum.photos/seed/${user.uid}/80/80`} />
+                  <AvatarFallback className="text-3xl">
+                    {userProfile?.displayName?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h2 className="text-2xl font-bold">{userProfile?.displayName}</h2>
+                  <p className="text-muted-foreground">{userProfile?.email}</p>
+                </div>
+              </div>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    EcoPoints
+                  </CardTitle>
+                  <Coins className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  {isProfileLoading ? (
+                    <Skeleton className="h-8 w-24" />
+                  ) : (
+                    <div className="text-2xl font-bold text-primary">
+                      {userProfile?.ecoPoints}
+                    </div>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Your total accumulated points from sustainable actions.
+                  </p>
+                </CardContent>
+              </Card>
+            </CardContent>
+          </Card>
         </main>
       </SidebarInset>
     </SidebarProvider>

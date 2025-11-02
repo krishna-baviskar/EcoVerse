@@ -18,56 +18,110 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Trophy } from 'lucide-react';
-import type { User } from '@/lib/types';
+import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, orderBy, limit } from 'firebase/firestore';
+import { useUser } from '@/firebase';
 
-const leaderboardData: User[] = [
-    { rank: 1, name: 'EcoWarrior', ecoscore: 980, city: 'Greenville', avatar: 'https://picsum.photos/seed/1/40/40' },
-    { rank: 2, name: 'SustainablySam', ecoscore: 965, city: 'Riverside', avatar: 'https://picsum.photos/seed/2/40/40' },
-    { rank: 3, name: 'PlanetPatty', ecoscore: 950, city: 'Greenville', avatar: 'https://picsum.photos/seed/3/40/40' },
-    { rank: 4, name: 'RecycleRick', ecoscore: 920, city: 'Metropolis', avatar: 'https://picsum.photos/seed/4/40/40' },
-    { rank: 12, name: 'You', ecoscore: 850, city: 'Metropolis', avatar: 'https://picsum.photos/seed/100/40/40', isCurrentUser: true },
-    { rank: 13, name: 'CompostClara', ecoscore: 845, city: 'Riverside', avatar: 'https://picsum.photos/seed/5/40/40' },
-];
+interface LeaderboardUser {
+  id: string;
+  displayName: string;
+  photoURL: string;
+  ecoPoints: number;
+}
 
 export function Leaderboard() {
+  const firestore = useFirestore();
+  const { user } = useUser();
+
+  const usersCollectionRef = useMemoFirebase(
+    () => collection(firestore, 'users'),
+    [firestore]
+  );
+  const leaderboardQuery = useMemoFirebase(
+    () =>
+      usersCollectionRef
+        ? query(usersCollectionRef, orderBy('ecoPoints', 'desc'), limit(10))
+        : null,
+    [usersCollectionRef]
+  );
+
+  const { data: leaderboardData, isLoading } =
+    useCollection<LeaderboardUser>(leaderboardQuery);
+
   return (
     <Card className="h-full">
       <CardHeader>
         <CardTitle className="font-headline flex items-center gap-2">
           <Trophy /> Community Leaderboard
         </CardTitle>
-        <CardDescription>See how you stack up against others in the community.</CardDescription>
+        <CardDescription>
+          See how you stack up against others in the community.
+        </CardDescription>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[80px]">Rank</TableHead>
-              <TableHead>User</TableHead>
-              <TableHead>EcoScore</TableHead>
-              <TableHead>City</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {leaderboardData.sort((a, b) => a.rank - b.rank).map((user) => (
-              <TableRow key={user.rank} className={user.isCurrentUser ? 'bg-primary/10' : ''}>
-                <TableCell className="font-medium">{user.rank}</TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium">{user.name}</span>
-                     {user.rank <= 3 && <Badge variant={user.rank === 1 ? 'default' : 'secondary'} className="ml-2">Top {user.rank}</Badge>}
-                  </div>
-                </TableCell>
-                <TableCell className="font-semibold text-primary">{user.ecoscore}</TableCell>
-                <TableCell>{user.city}</TableCell>
+        {isLoading ? (
+          <div className="space-y-2">
+            <div className="h-10 w-full animate-pulse rounded-md bg-muted"></div>
+            <div className="h-10 w-full animate-pulse rounded-md bg-muted"></div>
+            <div className="h-10 w-full animate-pulse rounded-md bg-muted"></div>
+          </div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[80px]">Rank</TableHead>
+                <TableHead>User</TableHead>
+                <TableHead>EcoScore</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {leaderboardData &&
+                leaderboardData.map((leaderboardUser, index) => (
+                  <TableRow
+                    key={leaderboardUser.id}
+                    className={
+                      user && leaderboardUser.id === user.uid
+                        ? 'bg-primary/10'
+                        : ''
+                    }
+                  >
+                    <TableCell className="font-medium">{index + 1}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={
+                              leaderboardUser.photoURL ||
+                              `https://picsum.photos/seed/${leaderboardUser.id}/40/40`
+                            }
+                            alt={leaderboardUser.displayName}
+                          />
+                          <AvatarFallback>
+                            {leaderboardUser.displayName?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">
+                          {leaderboardUser.displayName}
+                          {user && leaderboardUser.id === user.uid ? ' (You)' : ''}
+                        </span>
+                        {index < 3 && (
+                          <Badge
+                            variant={index === 0 ? 'default' : 'secondary'}
+                            className="ml-2"
+                          >
+                            Top {index + 1}
+                          </Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-semibold text-primary">
+                      {leaderboardUser.ecoPoints}
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        )}
       </CardContent>
     </Card>
   );

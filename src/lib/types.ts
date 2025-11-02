@@ -6,3 +6,11 @@ export interface User {
     avatar: string;
     isCurrentUser?: boolean;
 }
+
+export interface UserProfile {
+    uid: string;
+    displayName: string;
+    email: string;
+    photoURL: string;
+    ecoPoints: number;
+}
