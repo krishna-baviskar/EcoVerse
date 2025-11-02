@@ -9,6 +9,7 @@ import {
   Trophy,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -52,22 +53,28 @@ export default function CommunityPage() {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/">
-                <LayoutDashboard />
-                <span className="truncate">Dashboard</span>
-              </SidebarMenuButton>
+              <Link href="/">
+                <SidebarMenuButton>
+                  <LayoutDashboard />
+                  <span className="truncate">Dashboard</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/eco-gpt-tutor">
-                <Bot />
-                <span className="truncate">EcoGPT Tutor</span>
-              </SidebarMenuButton>
+              <Link href="/eco-gpt-tutor">
+                <SidebarMenuButton>
+                  <Bot />
+                  <span className="truncate">EcoGPT Tutor</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/leaderboard">
-                <Trophy />
-                <span className="truncate">Leaderboard</span>
-              </SidebarMenuButton>
+              <Link href="/leaderboard">
+                <SidebarMenuButton>
+                  <Trophy />
+                  <span className="truncate">Leaderboard</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton href="/community" isActive>

@@ -9,6 +9,7 @@ import {
   Trophy,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -46,16 +47,20 @@ export default function LeaderboardPage() {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/">
-                <LayoutDashboard />
-                <span className="truncate">Dashboard</span>
-              </SidebarMenuButton>
+              <Link href="/">
+                <SidebarMenuButton>
+                  <LayoutDashboard />
+                  <span className="truncate">Dashboard</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/eco-gpt-tutor">
-                <Bot />
-                <span className="truncate">EcoGPT Tutor</span>
-              </SidebarMenuButton>
+              <Link href="/eco-gpt-tutor">
+                <SidebarMenuButton>
+                  <Bot />
+                  <span className="truncate">EcoGPT Tutor</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton href="/leaderboard" isActive>
@@ -64,10 +69,12 @@ export default function LeaderboardPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/community">
-                <Users />
-                <span className="truncate">Community</span>
-              </SidebarMenuButton>
+              <Link href="/community">
+                <SidebarMenuButton>
+                  <Users />
+                  <span className="truncate">Community</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>

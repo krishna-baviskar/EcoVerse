@@ -101,22 +101,28 @@ export default function DashboardPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/eco-gpt-tutor">
-                <Bot />
-                <span className="truncate">EcoGPT Tutor</span>
-              </SidebarMenuButton>
+              <Link href="/eco-gpt-tutor">
+                <SidebarMenuButton>
+                  <Bot />
+                  <span className="truncate">EcoGPT Tutor</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/leaderboard">
-                <Trophy />
-                <span className="truncate">Leaderboard</span>
-              </SidebarMenuButton>
+              <Link href="/leaderboard">
+                <SidebarMenuButton>
+                  <Trophy />
+                  <span className="truncate">Leaderboard</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/community">
-                <Users />
-                <span className="truncate">Community</span>
-              </SidebarMenuButton>
+              <Link href="/community">
+                <SidebarMenuButton>
+                  <Users />
+                  <span className="truncate">Community</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>

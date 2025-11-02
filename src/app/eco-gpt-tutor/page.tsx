@@ -47,10 +47,12 @@ export default function EcoGptTutorPage() {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/">
-                <LayoutDashboard />
-                <span className="truncate">Dashboard</span>
-              </SidebarMenuButton>
+              <Link href="/">
+                <SidebarMenuButton>
+                  <LayoutDashboard />
+                  <span className="truncate">Dashboard</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <SidebarMenuButton href="/eco-gpt-tutor" isActive>
@@ -59,16 +61,20 @@ export default function EcoGptTutorPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/leaderboard">
-                <Trophy />
-                <span className="truncate">Leaderboard</span>
-              </SidebarMenuButton>
+              <Link href="/leaderboard">
+                <SidebarMenuButton>
+                  <Trophy />
+                  <span className="truncate">Leaderboard</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/community">
-                <Users />
-                <span className="truncate">Community</span>
-              </SidebarMenuButton>
+              <Link href="/community">
+                <SidebarMenuButton>
+                  <Users />
+                  <span className="truncate">Community</span>
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
