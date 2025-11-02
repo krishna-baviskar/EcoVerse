@@ -69,7 +69,6 @@ export default function DashboardPage() {
   const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoadingChallenges, setIsLoadingChallenges] = useState(false);
-  const [challengeToLog, setChallengeToLog] = useState<{title: string, ecoPoints: number} | null>(null);
 
   const router = useRouter();
   const { user, isUserLoading } = useUser();
@@ -87,25 +86,6 @@ export default function DashboardPage() {
       router.push('/login');
     }
   }, [isUserLoading, user, router]);
-
-  useEffect(() => {
-    if (userProfile?.location && !location) {
-      setLocation(userProfile.location);
-      updateEcoScore(userProfile.location);
-    } else {
-        setIsLoadingEcoScore(false);
-    }
-  }, [userProfile, location]);
-
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
 
   const updateEcoScore = useCallback(async (loc: string) => {
     if (!loc) {
@@ -132,6 +112,25 @@ export default function DashboardPage() {
       setIsLoadingChallenges(false);
     }
   }, []);
+  
+  useEffect(() => {
+    if (userProfile?.location && !location) {
+      setLocation(userProfile.location);
+      updateEcoScore(userProfile.location);
+    } else if (!userProfile?.location) {
+        setIsLoadingEcoScore(false);
+    }
+  }, [userProfile, location, updateEcoScore]);
+
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   const handleLocationChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -143,7 +142,6 @@ export default function DashboardPage() {
     setLocationInput('');
 
     try {
-      // Update Firestore document. This is non-blocking but we await the AI calls.
       updateDocumentNonBlocking(userDocRef, { location: newLocation });
       await updateEcoScore(newLocation);
     } catch (error) {
@@ -152,16 +150,6 @@ export default function DashboardPage() {
       setIsLoadingEcoScore(false);
     }
   };
-  
-  const handleLogChallenge = (challenge: { title: string, ecoPoints: number }) => {
-    setChallengeToLog(challenge);
-  };
-
-  const onLogActionDialogOpenChange = (open: boolean) => {
-    if (!open) {
-      setChallengeToLog(null);
-    }
-  }
 
   if (isUserLoading || isProfileLoading || !user) {
     return (
@@ -232,7 +220,7 @@ export default function DashboardPage() {
               Dashboard
             </h1>
           </div>
-          <LogActionDialog challenge={challengeToLog} onOpenChange={onLogActionDialogOpenChange}>
+          <LogActionDialog>
              <Button className="hidden sm:flex" variant="outline">
               <PlusCircle className="mr-2 h-4 w-4" />
               Log Action
@@ -353,7 +341,6 @@ export default function DashboardPage() {
              <SuggestedChallenges 
                 challenges={challenges} 
                 isLoading={isLoadingChallenges}
-                onLogChallenge={handleLogChallenge}
              />
           </div>
           

@@ -1,19 +1,16 @@
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Lightbulb, PlusCircle } from "lucide-react";
+import { Lightbulb } from "lucide-react";
 import type { Challenge } from "@/ai/flows";
-import { LogActionDialog } from "@/components/dashboard/log-action-dialog";
 
 interface SuggestedChallengesProps {
   challenges: Challenge[];
   isLoading: boolean;
-  onLogChallenge: (challenge: { title: string; ecoPoints: number }) => void;
 }
 
-export function SuggestedChallenges({ challenges, isLoading, onLogChallenge }: SuggestedChallengesProps) {
+export function SuggestedChallenges({ challenges, isLoading }: SuggestedChallengesProps) {
   return (
     <Card>
       <CardHeader>
@@ -33,7 +30,7 @@ export function SuggestedChallenges({ challenges, isLoading, onLogChallenge }: S
                   <Skeleton className="h-5 w-48 mb-2" />
                   <Skeleton className="h-4 w-64" />
                 </div>
-                <Skeleton className="h-10 w-24" />
+                 <Skeleton className="h-6 w-20" />
               </div>
             ))}
           </div>
@@ -47,12 +44,6 @@ export function SuggestedChallenges({ challenges, isLoading, onLogChallenge }: S
                 </div>
                 <div className="flex items-center gap-4 shrink-0">
                     <span className="font-bold text-primary text-lg">{challenge.ecoPoints} pts</span>
-                    <LogActionDialog challenge={challenge}>
-                        <Button size="sm" variant="outline" onClick={() => onLogChallenge(challenge)}>
-                            <PlusCircle className="mr-2 h-4 w-4" />
-                            Log
-                        </Button>
-                    </LogActionDialog>
                 </div>
               </div>
             ))}
