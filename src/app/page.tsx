@@ -59,7 +59,6 @@ export default function DashboardPage() {
   const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoadingChallenges, setIsLoadingChallenges] = useState(true);
-  const [hasFetchedInitialData, setHasFetchedInitialData] = useState(false);
 
   const router = useRouter();
   const { user, isUserLoading } = useUser();
@@ -78,26 +77,44 @@ export default function DashboardPage() {
     }
   }, [isUserLoading, user, router]);
 
-  const fetchDashboardData = useCallback(async (loc: string) => {
+  const fetchDashboardData = useCallback(async (loc: string, forceRefresh = false) => {
     if (!loc) {
       setIsLoadingEcoScore(false);
       setIsLoadingChallenges(false);
       return;
+    }
+
+    if (!forceRefresh) {
+        const cachedEcoScore = sessionStorage.getItem('ecoScoreData');
+        const cachedChallenges = sessionStorage.getItem('challenges');
+        const cachedLocation = sessionStorage.getItem('userLocation');
+
+        if (cachedEcoScore && cachedChallenges && cachedLocation === loc) {
+            setEcoScoreData(JSON.parse(cachedEcoScore));
+            setChallenges(JSON.parse(cachedChallenges));
+            setLocation(loc);
+            setIsLoadingEcoScore(false);
+            setIsLoadingChallenges(false);
+            return;
+        }
     }
     
     setIsLoadingEcoScore(true);
     setIsLoadingChallenges(true);
 
     try {
-      const ecoScoreResult = await predictEcoScore({ location: loc });
-      setEcoScoreData(ecoScoreResult);
+      const ecoScorePromise = predictEcoScore({ location: loc });
+      const challengesPromise = generateChallenges({ location: loc, ecoScore: 80 }); // Using a placeholder score to initiate
+      
+      const [ecoScoreResult, challengesResult] = await Promise.all([ecoScorePromise, challengesPromise]);
 
-      if (ecoScoreResult.ecoScore) {
-        const challengesResult = await generateChallenges({ location: loc, ecoScore: ecoScoreResult.ecoScore });
-        setChallenges(challengesResult.challenges);
-      } else {
-        setChallenges([]);
-      }
+      setEcoScoreData(ecoScoreResult);
+      setChallenges(challengesResult.challenges);
+      
+      sessionStorage.setItem('ecoScoreData', JSON.stringify(ecoScoreResult));
+      sessionStorage.setItem('challenges', JSON.stringify(challengesResult.challenges));
+      sessionStorage.setItem('userLocation', loc);
+
     } catch (error) {
       console.error("Failed to fetch dashboard data", error);
       setEcoScoreData(null);
@@ -109,22 +126,21 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Only fetch data if we have a user profile, haven't fetched before, and there's no existing ecoScoreData
-    if (userProfile && !hasFetchedInitialData && !ecoScoreData) {
-      if (userProfile.location) {
-        setLocation(userProfile.location);
-        fetchDashboardData(userProfile.location);
-      } else {
-        setIsLoadingEcoScore(false);
-        setIsLoadingChallenges(false);
-      }
-      setHasFetchedInitialData(true);
+    if (userProfile) {
+      const userLocation = userProfile.location || '';
+      setLocation(userLocation);
+      fetchDashboardData(userLocation, false);
+    } else if (!isProfileLoading) {
+      // If there's no profile and we are not loading one, stop loading spinners.
+      setIsLoadingEcoScore(false);
+      setIsLoadingChallenges(false);
     }
-  }, [userProfile, hasFetchedInitialData, fetchDashboardData, ecoScoreData]);
+  }, [userProfile, isProfileLoading, fetchDashboardData]);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      sessionStorage.clear();
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -141,10 +157,10 @@ export default function DashboardPage() {
 
     updateDocumentNonBlocking(userDocRef, { location: newLocation });
 
-    await fetchDashboardData(newLocation);
+    await fetchDashboardData(newLocation, true);
   };
 
-  if (isUserLoading || (isProfileLoading && !hasFetchedInitialData)) {
+  if (isUserLoading || isProfileLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -170,13 +186,7 @@ export default function DashboardPage() {
             <Logo />
             <span className="sr-only">EcoVerse</span>
           </Link>
-          <Link
-            href="/"
-            className="text-foreground transition-colors hover:text-foreground font-bold"
-          >
-            Dashboard
-          </Link>
-           {location ? (
+          {location ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4" />
               <span>{location}</span>
@@ -324,3 +334,5 @@ export default function DashboardPage() {
       </div>
   );
 }
+
+    
