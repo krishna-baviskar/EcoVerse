@@ -16,15 +16,17 @@ service cloud.firestore {
     function isUpdatingAllowedProfileFields() {
       // The list of fields a user is allowed to change on their profile.
       let allowedFields = ['displayName', 'photoURL', 'location'];
+      // The list of fields that must NOT be changed by this operation.
+      let protectedFields = ['uid', 'email', 'ecoPoints'];
+      
       // Get all the fields the user is trying to change in this request.
       let incomingKeys = request.resource.data.keys();
 
       // Ensure that every key in the incoming request is in our allowed list.
-      // And crucially, ensure that other protected fields are NOT part of this update.
       return incomingKeys.hasOnly(allowedFields)
-          && request.resource.data.uid == resource.data.uid
-          && request.resource.data.email == resource.data.email
-          && request.resource.data.ecoPoints == resource.data.ecoPoints;
+          // And also ensure that no protected fields are being modified by comparing
+          // the incoming resource with the existing one.
+          && request.resource.data.diff(resource.data).unchangedKeys().hasAll(protectedFields);
     }
 
     // This function securely checks if a user is ONLY incrementing their ecoPoints.
@@ -34,7 +36,7 @@ service cloud.firestore {
         
         // Check that the *only* field affected is 'ecoPoints'.
         let onlyEcoPointsAffected = changes.affectedKeys().size() == 1 &&
-                                    'ecoPoints' in changes.affectedKeys();
+                                    changes.affectedKeys().hasAny(['ecoPoints']);
                                     
         // This is the CRITICAL part: it verifies that the new ecoPoints value is
         // greater than the old one. This works for `increment()` operations.
