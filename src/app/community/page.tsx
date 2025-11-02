@@ -9,10 +9,16 @@ import {
   Trophy,
   Users,
 } from 'lucide-react';
-import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,11 +39,10 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 
-import { EcoTutorChat } from '@/components/dashboard/eco-tutor-chat';
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { Logo } from '@/components/logo';
 
-export default function EcoGptTutorPage() {
+export default function CommunityPage() {
   return (
     <SidebarProvider>
       <Sidebar>
@@ -53,7 +58,7 @@ export default function EcoGptTutorPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/eco-gpt-tutor" isActive>
+              <SidebarMenuButton href="/eco-gpt-tutor">
                 <Bot />
                 <span className="truncate">EcoGPT Tutor</span>
               </SidebarMenuButton>
@@ -65,7 +70,7 @@ export default function EcoGptTutorPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/community">
+              <SidebarMenuButton href="/community" isActive>
                 <Users />
                 <span className="truncate">Community</span>
               </SidebarMenuButton>
@@ -78,7 +83,7 @@ export default function EcoGptTutorPage() {
           <SidebarTrigger className="shrink-0 md:hidden" />
           <div className="w-full flex-1">
             <h1 className="text-lg font-semibold md:text-2xl font-headline">
-              EcoGPT Tutor
+              Community
             </h1>
           </div>
           <LogActionDialog>
@@ -107,8 +112,18 @@ export default function EcoGptTutorPage() {
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <EcoTutorChat />
+        <main className="flex flex-1 flex-col items-center justify-center gap-4 p-4 lg:gap-6 lg:p-6">
+           <Card>
+                <CardHeader>
+                  <CardTitle className="font-headline">Coming Soon</CardTitle>
+                  <CardDescription>
+                    The community page is under construction.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p>Check back later for updates!</p>
+                </CardContent>
+              </Card>
         </main>
       </SidebarInset>
     </SidebarProvider>

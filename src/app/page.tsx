@@ -49,7 +49,6 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 
-import { Leaderboard } from '@/components/dashboard/leaderboard';
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { OverviewCard } from '@/components/dashboard/overview-card';
 import { Logo } from '@/components/logo';
@@ -108,13 +107,13 @@ export default function DashboardPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
+              <SidebarMenuButton href="/leaderboard">
                 <Trophy />
                 <span className="truncate">Leaderboard</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#">
+              <SidebarMenuButton href="/community">
                 <Users />
                 <span className="truncate">Community</span>
               </SidebarMenuButton>
@@ -229,8 +228,7 @@ export default function DashboardPage() {
             />
           </div>
           
-          <div className="grid gap-4 lg:grid-cols-2">
-              <Leaderboard />
+          <div className="grid gap-4 lg:grid-cols-1">
               <EcoScoreRatingScale />
           </div>
         </main>

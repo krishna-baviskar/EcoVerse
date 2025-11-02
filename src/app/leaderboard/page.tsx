@@ -9,7 +9,6 @@ import {
   Trophy,
   Users,
 } from 'lucide-react';
-import Link from 'next/link';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -33,11 +32,11 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 
-import { EcoTutorChat } from '@/components/dashboard/eco-tutor-chat';
+import { Leaderboard } from '@/components/dashboard/leaderboard';
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { Logo } from '@/components/logo';
 
-export default function EcoGptTutorPage() {
+export default function LeaderboardPage() {
   return (
     <SidebarProvider>
       <Sidebar>
@@ -53,13 +52,13 @@ export default function EcoGptTutorPage() {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/eco-gpt-tutor" isActive>
+              <SidebarMenuButton href="/eco-gpt-tutor">
                 <Bot />
                 <span className="truncate">EcoGPT Tutor</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/leaderboard">
+              <SidebarMenuButton href="/leaderboard" isActive>
                 <Trophy />
                 <span className="truncate">Leaderboard</span>
               </SidebarMenuButton>
@@ -78,7 +77,7 @@ export default function EcoGptTutorPage() {
           <SidebarTrigger className="shrink-0 md:hidden" />
           <div className="w-full flex-1">
             <h1 className="text-lg font-semibold md:text-2xl font-headline">
-              EcoGPT Tutor
+              Leaderboard
             </h1>
           </div>
           <LogActionDialog>
@@ -108,7 +107,7 @@ export default function EcoGptTutorPage() {
           </DropdownMenu>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <EcoTutorChat />
+          <Leaderboard />
         </main>
       </SidebarInset>
     </SidebarProvider>
