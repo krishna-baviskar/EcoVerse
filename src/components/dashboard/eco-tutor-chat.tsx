@@ -36,7 +36,7 @@ export function EcoTutorChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
+  const lastMessageRef = useRef<HTMLDivElement>(null);
 
   const handleActionClick = async (action: () => Promise<void>) => {
     await action();
@@ -166,11 +166,8 @@ export function EcoTutorChat() {
   }, []);
 
   useEffect(() => {
-    const viewport = scrollAreaViewportRef.current;
-    if (viewport) {
-      setTimeout(() => {
-        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
-      }, 100);
+    if (lastMessageRef.current) {
+      lastMessageRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [messages]);
 
@@ -225,11 +222,12 @@ export function EcoTutorChat() {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
-        <ScrollArea className="h-full pr-4" viewportRef={scrollAreaViewportRef}>
+        <ScrollArea className="h-full pr-4">
           <div className="space-y-4">
-            {messages.map(message => (
+            {messages.map((message, index) => (
               <div
                 key={message.id}
+                ref={index === messages.length - 1 ? lastMessageRef : null}
                 className={cn(
                   'flex items-start gap-3',
                   message.sender === 'user' ? 'justify-end' : 'justify-start'
