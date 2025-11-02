@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Award,
@@ -34,17 +35,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar';
 
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { Logo } from '@/components/logo';
@@ -92,36 +82,29 @@ export default function ProfilePage() {
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <Logo />
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton href="/">
-                <LayoutDashboard />
-                <span className="truncate">Dashboard</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarContent>
-      </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card/50 px-4 lg:h-[60px] lg:px-6">
-          <SidebarTrigger className="shrink-0 md:hidden" />
-          <div className="w-full flex-1">
-            <h1 className="text-lg font-semibold md:text-2xl font-headline">
-              Profile
-            </h1>
-          </div>
-          <LogActionDialog>
-             <Button className="hidden sm:flex" variant="outline">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Log Action
-            </Button>
-          </LogActionDialog>
+    <div className="flex min-h-screen w-full flex-col">
+       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+          <Link href="#" className="flex items-center gap-2 text-lg font-semibold md:text-base">
+            <Logo />
+            <span className="sr-only">EcoVerse</span>
+          </Link>
+          <Link
+            href="/"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Dashboard
+          </Link>
+        </nav>
+        <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+            <div className="ml-auto flex-1 sm:flex-initial">
+                 <LogActionDialog>
+                    <Button className="hidden sm:flex" variant="outline">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Log Action
+                    </Button>
+                </LogActionDialog>
+            </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
@@ -165,7 +148,8 @@ export default function ProfilePage() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        </header>
+        </div>
+      </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
           <Card>
             <CardHeader>
@@ -212,7 +196,6 @@ export default function ProfilePage() {
           <Leaderboard />
         </main>
         {userProfile?.location && <FloatingEcoTutor location={userProfile.location} />}
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
   );
 }

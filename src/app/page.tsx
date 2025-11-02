@@ -39,18 +39,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarInset,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarProvider,
-  SidebarTrigger,
-} from '@/components/ui/sidebar';
 
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { OverviewCard } from '@/components/dashboard/overview-card';
@@ -97,11 +85,6 @@ export default function DashboardPage() {
       return;
     }
     
-    // Only refetch if location is different
-    if (ecoScoreData && ecoScoreData.location === loc) {
-        return;
-    }
-
     setIsLoadingEcoScore(true);
     setIsLoadingChallenges(true);
 
@@ -123,7 +106,7 @@ export default function DashboardPage() {
       setIsLoadingEcoScore(false);
       setIsLoadingChallenges(false);
     }
-  }, [ecoScoreData]);
+  }, []);
 
   useEffect(() => {
     // Only fetch data if we have a user profile, haven't fetched before, and there's no existing ecoScoreData
@@ -180,42 +163,29 @@ export default function DashboardPage() {
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <Logo />
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton href="/" isActive>
-                <LayoutDashboard />
-                <span className="truncate">Dashboard</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarContent>
-        <SidebarFooter>
-          <div className="flex items-center gap-2 p-2 text-sm text-sidebar-foreground/70">
-            <MapPin className="h-4 w-4" />
-            <span className="truncate">{location || 'Set location'}</span>
-          </div>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card/50 px-4 lg:h-[60px] lg:px-6">
-          <SidebarTrigger className="shrink-0 md:hidden" />
-          <div className="w-full flex-1">
-            <h1 className="text-lg font-semibold md:text-2xl font-headline">
-              Dashboard
-            </h1>
-          </div>
-          <LogActionDialog>
-             <Button className="hidden sm:flex" variant="outline">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Log Action
-            </Button>
-          </LogActionDialog>
+    <div className="flex min-h-screen w-full flex-col">
+      <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+          <Link href="#" className="flex items-center gap-2 text-lg font-semibold md:text-base">
+            <Logo />
+            <span className="sr-only">EcoVerse</span>
+          </Link>
+          <Link
+            href="/"
+            className="text-foreground transition-colors hover:text-foreground"
+          >
+            Dashboard
+          </Link>
+        </nav>
+        <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+            <div className="ml-auto flex-1 sm:flex-initial">
+                 <LogActionDialog>
+                    <Button className="hidden sm:flex" variant="outline">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Log Action
+                    </Button>
+                </LogActionDialog>
+            </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">
@@ -259,9 +229,10 @@ export default function DashboardPage() {
               )}
             </DropdownMenuContent>
           </DropdownMenu>
-        </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
+        </div>
+      </header>
+      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
             <Card>
               <CardHeader>
                 <CardTitle className="font-headline">Update Location</CardTitle>
@@ -284,7 +255,7 @@ export default function DashboardPage() {
                <Card>
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2">
-                    <Info /> EcoScore Insights
+                    <Info /> EcoScore Insights for {location}
                   </CardTitle>
                   <CardDescription>{ecoScoreData.condition}: {ecoScoreData.suggestion}</CardDescription>
                 </CardHeader>
@@ -339,9 +310,6 @@ export default function DashboardPage() {
           </div>
         </main>
         {location && <FloatingEcoTutor location={location} />}
-      </SidebarInset>
-    </SidebarProvider>
+      </div>
   );
 }
-
-    
