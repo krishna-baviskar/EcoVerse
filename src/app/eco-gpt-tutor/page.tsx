@@ -36,8 +36,33 @@ import {
 import { EcoTutorChat } from '@/components/dashboard/eco-tutor-chat';
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { Logo } from '@/components/logo';
+import { useState, useEffect } from 'react';
+import { predictEcoScore } from '@/ai/flows';
 
 export default function EcoGptTutorPage() {
+  const [location, setLocation] = useState('Greenville');
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchLocation() {
+      try {
+        // We can use a default location or try to get it from the browser
+        // For now, let's keep it simple and use a default.
+        // In a real app, you might use browser geolocation.
+        const result = await predictEcoScore({ location: 'Greenville' });
+        if (result) {
+          // No need to set location from result as it's the input
+        }
+      } catch (error) {
+        console.error("Failed to predict ecoscore for initial location", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchLocation();
+  }, []);
+
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -114,7 +139,7 @@ export default function EcoGptTutorPage() {
           </DropdownMenu>
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
-          <EcoTutorChat />
+          <EcoTutorChat location={location} />
         </main>
       </SidebarInset>
     </SidebarProvider>

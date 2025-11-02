@@ -32,7 +32,7 @@ interface TutorAction {
   action: () => Promise<void>;
 }
 
-export function EcoTutorChat() {
+export function EcoTutorChat({ location }: { location: string }) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -100,7 +100,7 @@ export function EcoTutorChat() {
         userProfile:
           'A person interested in sustainability, living in an urban area, looking for challenges.',
         ecoScore: 850,
-        location: 'New York City',
+        location: location,
       });
       const suggestionsText =
         'Here are some challenges for you:\n- ' +
@@ -189,7 +189,7 @@ export function EcoTutorChat() {
         userProfile:
           'A person interested in sustainability, living in an urban area.',
         ecoScore: 850,
-        location: 'New York City',
+        location: location,
       });
 
       const suggestionsText =
