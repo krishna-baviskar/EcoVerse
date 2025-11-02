@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
-import { doc, updateDoc, increment } from 'firebase/firestore';
+import { doc, increment } from 'firebase/firestore';
 
 
 import {
@@ -45,6 +45,7 @@ const formSchema = z.object({
   evidence: z.string().optional(),
   media: z
     .any()
+    .optional()
     .refine(
         (files) => !files || files.length === 0 || files?.[0]?.size <= MAX_FILE_SIZE,
         `Max file size is 5MB.`
@@ -53,7 +54,6 @@ const formSchema = z.object({
         (files) => !files || files.length === 0 || ACCEPTED_MEDIA_TYPES.includes(files?.[0]?.type),
         'Only .jpg, .png, .webp, .mp4 and .webm formats are supported.'
     )
-    .optional(),
 });
 
 type ValidationResult = {
@@ -172,7 +172,7 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
         <DialogHeader>
           <DialogTitle className="font-headline">Log Sustainable Action</DialogTitle>
           <DialogDescription>
-            Tell us about a sustainable action you've taken to earn eco-points. Upload an image or video as evidence.
+            Tell us about a sustainable action you've taken to earn eco-points. You can optionally upload an image or video as evidence.
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -211,7 +211,7 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
               name="media"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Evidence (Image/Video)</FormLabel>
+                  <FormLabel>Evidence (Image/Video) (Optional)</FormLabel>
                   <FormControl>
                     <Input 
                         type="file" 
