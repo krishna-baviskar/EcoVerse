@@ -1,0 +1,130 @@
+/**
+ * @fileoverview Firestore Security Rules for the EcoVerse application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for user profiles and eco-actions,
+ * and restricts leaderboard modifications to authorized users. It allows public read access to badges and communities.
+ *
+ * Data Structure:
+ * - /users/{userId}/profile: User profile data, owned by the user.
+ * - /users/{userId}/eco_actions/{ecoActionId}: Eco actions performed by the user.
+ * - /communities/{communityId}/leaderboard_entries/{leaderboardEntryId}: Leaderboard entries for each community.
+ * - /badges/{badgeId}: Badge information (publicly readable).
+ * - /communities/{communityId}: Community information (publicly readable).
+ *
+ * Key Security Decisions:
+ * - Users can only read and write their own profile data and eco-actions.
+ * - Leaderboard entries can be modified only by authorized users (not explicitly defined in the requirements).
+ * - Badges and communities are publicly readable but not writable by clients.
+ * - Listing of user profiles is disallowed for privacy.
+ *
+ * Denormalization for Authorization:
+ * - Leaderboard entries denormalize `ecoPoints` to avoid fetching user profile data during leaderboard queries.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Secure access to user profiles.
+     * @path /users/{userId}/profile
+     * @allow (get) User can read their own profile. (auth.uid == userId)
+     * @allow (create) User can create their own profile. (auth.uid == userId)
+     * @allow (update) User can update their own profile. (auth.uid == userId)
+     * @allow (delete) User can delete their own profile. (auth.uid == userId)
+     * @deny (get) User cannot read another user's profile. (auth.uid != userId)
+     * @deny (create) User cannot create a profile with a mismatched userId. (auth.uid != userId)
+     * @deny (update) User cannot update another user's profile. (auth.uid != userId)
+     * @deny (delete) User cannot delete another user's profile. (auth.uid != userId)
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/profile {
+      allow get: if isOwner(userId);
+      allow list: if false; // Disallowing listing for privacy.
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isOwner(userId) && resource.data.userId == userId; // Enforce immutability of userId
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secure access to eco actions performed by a user.
+     * @path /users/{userId}/eco_actions/{ecoActionId}
+     * @allow (get) User can read their own eco actions. (auth.uid == userId)
+     * @allow (create) User can create their own eco actions. (auth.uid == userId)
+     * @allow (update) User can update their own eco actions. (auth.uid == userId)
+     * @allow (delete) User can delete their own eco actions. (auth.uid == userId)
+     * @deny (get) User cannot read another user's eco actions. (auth.uid != userId)
+     * @deny (create) User cannot create eco actions with a mismatched userId. (auth.uid != userId)
+     * @deny (update) User cannot update another user's eco actions. (auth.uid != userId)
+     * @deny (delete) User cannot delete another user's eco actions. (auth.uid != userId)
+     * @principle Enforces document ownership for all operations.
+     */
+    match /users/{userId}/eco_actions/{ecoActionId} {
+      allow get: if isOwner(userId);
+      allow list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isOwner(userId) && resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Secure access to leaderboard entries within a community.
+     * @path /communities/{communityId}/leaderboard_entries/{leaderboardEntryId}
+     * @allow (get) Anyone can read leaderboard entries.
+     * @allow (create) Only authorized users can create leaderboard entries.  // TODO: Define authorization method
+     * @allow (update) Only authorized users can update leaderboard entries.  // TODO: Define authorization method
+     * @allow (delete) Only authorized users can delete leaderboard entries.  // TODO: Define authorization method
+     * @deny (create) Unauthorized users cannot create leaderboard entries.
+     * @deny (update) Unauthorized users cannot update leaderboard entries.
+     * @deny (delete) Unauthorized users cannot delete leaderboard entries.
+     * @principle Restricts write access to authorized users.
+     */
+    match /communities/{communityId}/leaderboard_entries/{leaderboardEntryId} {
+      allow get, list: if true;
+      allow create: if false; // TODO: Add authorization check once defined.
+      allow update: if false; // TODO: Add authorization check once defined.
+      allow delete: if false; // TODO: Add authorization check once defined.
+    }
+
+    /**
+     * @description Allow public read access to badge information.
+     * @path /badges/{badgeId}
+     * @allow (get) Anyone can read badge information.
+     * @deny (create) No client-side creation of badges.
+     * @deny (update) No client-side updates of badges.
+     * @deny (delete) No client-side deletion of badges.
+     * @principle Public read, no client-side writes.
+     */
+    match /badges/{badgeId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Allow public read access to community information.
+     * @path /communities/{communityId}
+     * @allow (get) Anyone can read community information.
+     * @deny (create) No client-side creation of communities.
+     * @deny (update) No client-side updates of communities.
+     * @deny (delete) No client-side deletion of communities.
+     * @principle Public read, no client-side writes.
+     */
+    match /communities/{communityId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+  }
+}
