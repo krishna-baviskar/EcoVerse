@@ -96,56 +96,96 @@ const getEnvironmentalData = async (location: string) => {
   return { aqi, temperature, humidity };
 };
 
+const calculateEcoScore = (aqi: number, temperature: number, humidity: number) => {
+    const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(max, value));
+    
+    // 1. Normalize scores (0-100)
+    const airQualityScore = clamp(100 - (aqi / 500 * 100), 0, 100);
+    const tempScore = clamp(100 - (Math.abs(temperature - 24) * 4), 0, 100);
+    const humidityScore = clamp(100 - Math.abs(humidity - 55), 0, 100);
+    
+    // 2. Define weights
+    const weights = {
+        aqi: 0.5,
+        temp: 0.3,
+        humidity: 0.2,
+    };
+    
+    // 3. Calculate weighted contributions
+    const aqiContribution = airQualityScore * weights.aqi;
+    const tempContribution = tempScore * weights.temp;
+    const humidityContribution = humidityScore * weights.humidity;
+    
+    // 4. Calculate final EcoScore
+    const ecoScore = aqiContribution + tempContribution + humidityContribution;
+    
+    // 5. Determine condition and suggestion
+    let condition = '';
+    let suggestion = '';
+    let explanation = '';
+    
+    if (ecoScore <= 30) {
+        condition = 'Critical';
+        suggestion = 'Avoid outdoor activity, wear mask.';
+        explanation = 'The environment is in a critical state with hazardous air quality or extreme weather, posing significant health risks.';
+    } else if (ecoScore <= 50) {
+        condition = 'Poor';
+        suggestion = 'Plant trees, reduce emissions.';
+        explanation = 'Environmental conditions are poor, likely due to high pollution levels. It\'s advisable to take steps to improve air quality.';
+    } else if (ecoScore <= 70) {
+        condition = 'Moderate';
+        suggestion = 'Conserve power, use public transport.';
+        explanation = 'The environment is acceptable but has room for improvement. Air quality or weather conditions are slightly outside the ideal range.';
+    } else if (ecoScore <= 85) {
+        condition = 'Good';
+        suggestion = 'Maintain eco habits, spread awareness.';
+        explanation = 'The environment is clean and healthy. Continue your sustainable practices to help maintain these positive conditions.';
+    } else {
+        condition = 'Excellent';
+        suggestion = 'Keep it up — become an Eco Ambassador!';
+        explanation = 'Congratulations! The environment is in an excellent, sustainable state. Your efforts contribute to a green and healthy community.';
+    }
+
+    // 6. Create breakdown
+    const breakdown = [
+        {
+            factor: "Air Quality",
+            rawValue: `${aqi.toFixed(0)} AQI`,
+            derivedScore: airQualityScore,
+            weight: weights.aqi,
+            contribution: aqiContribution,
+        },
+        {
+            factor: "Temperature",
+            rawValue: `${temperature.toFixed(1)}°C`,
+            derivedScore: tempScore,
+            weight: weights.temp,
+            contribution: tempContribution,
+        },
+        {
+            factor: "Humidity",
+            rawValue: `${humidity.toFixed(0)}%`,
+            derivedScore: humidityScore,
+            weight: weights.humidity,
+            contribution: humidityContribution,
+        },
+    ];
+
+    return {
+        ecoScore,
+        explanation,
+        breakdown,
+        condition,
+        suggestion,
+    };
+}
+
+
 export async function predictEcoScore(
   input: PredictEcoScoreInput
 ): Promise<PredictEcoScoreOutput> {
   return predictEcoScoreFlow(input);
 }
-
-const prompt = ai.definePrompt({
-  name: 'predictEcoScorePrompt',
-  input: {
-    schema: z.object({
-      location: z.string(),
-      aqi: z.number(),
-      temperature: z.number(),
-      humidity: z.number(),
-    }),
-  },
-  output: {
-    schema: z.object({
-      ecoScore: z.number(),
-      explanation: z.string(),
-      breakdown: z.array(ScoreBreakdownSchema),
-      condition: z.string(),
-      suggestion: z.string(),
-    }),
-  },
-  prompt: `Given the following environmental data for the city of {{{location}}}: {AQI: {{{aqi}}}, Temperature: {{{temperature}}}°C, Humidity: {{{humidity}}}%}, calculate the EcoScore.
-
-  Use the following formula:
-  EcoScore = (AirQualityScore * 0.5) + (TempScore * 0.3) + (HumidityScore * 0.2)
-
-  Normalize each factor score from 0-100 as follows:
-  1. AirQualityScore = 100 - (AQI / 500 * 100)
-  2. TempScore = 100 - (abs(Temp - 24) * 4)
-  3. HumidityScore = 100 - abs(Humidity - 55)
-
-  Then, determine the city's condition and a suggested action based on this table:
-  - 0–30: Critical (🚨 Highly polluted / unsafe) -> "Avoid outdoor activity, wear mask."
-  - 31–50: Poor (⚠️ Low-quality environment) -> "Plant trees, reduce emissions."
-  - 51–70: Moderate (🌤 Acceptable but improvable) -> "Conserve power, use public transport."
-  - 71–85: Good (🌿 Clean & healthy) -> "Maintain eco habits, spread awareness."
-  - 86–100: Excellent (🌎 Green & sustainable) -> "Keep it up — become an Eco Ambassador!"
-
-  Return a response with:
-  1. The final 'ecoScore' (rounded to one decimal place).
-  2. A 'breakdown' table with columns: "Factor", "Raw Value", "Derived Score", "Weight", "Contribution".
-  3. The 'condition' string (e.g., "Good").
-  4. A brief 'explanation' of the score.
-  5. The corresponding 'suggestion' from the table.
-  `,
-});
 
 const predictEcoScoreFlow = ai.defineFlow(
   {
@@ -156,13 +196,14 @@ const predictEcoScoreFlow = ai.defineFlow(
   async input => {
     const environmentalData = await getEnvironmentalData(input.location);
 
-    const { output } = await prompt({
-      ...input,
-      ...environmentalData,
-    });
+    const calculationResult = calculateEcoScore(
+        environmentalData.aqi,
+        environmentalData.temperature,
+        environmentalData.humidity
+    );
 
     return {
-      ...output!,
+      ...calculationResult,
       ...environmentalData,
     };
   }
