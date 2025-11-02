@@ -137,6 +137,12 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    // Wait until the user profile has been loaded.
+    if (isProfileLoading) {
+      return;
+    }
+
+    // If we have a user profile, use its location.
     if (userProfile) {
       const userLocation = userProfile.location || '';
       if (!userLocation) {
@@ -146,21 +152,25 @@ export default function DashboardPage() {
         setIsLoadingChallenges(false);
       } else {
         setLocation(userLocation);
-        fetchDashboardData(userLocation, false); // Pass false, let the function decide based on cache
+        // Let fetchDashboardData handle the caching logic.
+        fetchDashboardData(userLocation, false);
       }
-    } else if (!isProfileLoading) {
-      // If there's no profile and we are not loading one, check session storage for a location.
+    } else {
+      // If there's no profile (e.g., still loading or non-existent), check session storage.
       const cachedLocation = sessionStorage.getItem('userLocation');
       if (cachedLocation) {
           setLocation(cachedLocation);
           fetchDashboardData(cachedLocation, false);
       } else {
-        // Stop loading spinners if no profile and no cached location
+        // If there's no profile and no cached location, we don't have a location to fetch for.
+        // We might end up here briefly before the profile loads, or if the user is new and has no location.
+        // Stop loading spinners if we have nothing to go on.
         setIsLoadingEcoScore(false);
         setIsLoadingChallenges(false);
       }
     }
   }, [userProfile, isProfileLoading, fetchDashboardData]);
+
 
   const handleLogout = async () => {
     try {
@@ -361,5 +371,6 @@ export default function DashboardPage() {
       </div>
   );
 }
+    
 
     
