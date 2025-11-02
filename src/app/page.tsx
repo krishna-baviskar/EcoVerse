@@ -89,8 +89,11 @@ export default function DashboardPage() {
   }, [isUserLoading, user, router]);
 
   useEffect(() => {
-    if (userProfile && userProfile.location && !location) {
+    if (userProfile?.location && !location) {
       setLocation(userProfile.location);
+      updateEcoScore(userProfile.location);
+    } else {
+        setIsLoadingEcoScore(false);
     }
   }, [userProfile, location]);
 
@@ -105,15 +108,21 @@ export default function DashboardPage() {
   };
 
   const updateEcoScore = useCallback(async (loc: string) => {
-    if (!loc) return;
+    if (!loc) {
+        setIsLoadingEcoScore(false);
+        setIsLoadingChallenges(false);
+        return;
+    };
     setIsLoadingEcoScore(true);
     setIsLoadingChallenges(true);
     setChallenges([]);
     try {
       const result = await predictEcoScore({ location: loc });
       setEcoScoreData(result);
-      const challengesResult = await generateChallenges({ location: loc, ecoScore: result.ecoScore });
-      setChallenges(challengesResult.challenges);
+      if (result.ecoScore) {
+        const challengesResult = await generateChallenges({ location: loc, ecoScore: result.ecoScore });
+        setChallenges(challengesResult.challenges);
+      }
     } catch (error) {
       console.error("Failed to predict ecoscore or challenges", error);
       setEcoScoreData(null);
@@ -126,21 +135,24 @@ export default function DashboardPage() {
 
   const handleLocationChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (locationInput.trim() && userDocRef) {
-      const newLocation = locationInput.trim();
-      setLocation(newLocation);
-      setLocationInput('');
+    if (!locationInput.trim() || !userDocRef) return;
+    
+    const newLocation = locationInput.trim();
+    setIsLoadingEcoScore(true);
+    setLocation(newLocation); 
+    setLocationInput('');
+
+    try {
+      // Update Firestore document. This is non-blocking but we await the AI calls.
       updateDocumentNonBlocking(userDocRef, { location: newLocation });
       await updateEcoScore(newLocation);
+    } catch (error) {
+      console.error("Error updating location and fetching new data:", error);
+    } finally {
+      setIsLoadingEcoScore(false);
     }
   };
   
-  useEffect(() => {
-    if (location) {
-      updateEcoScore(location);
-    }
-  }, [location, updateEcoScore]);
-
   const handleLogChallenge = (challenge: { title: string, ecoPoints: number }) => {
     setChallengeToLog(challenge);
   };
