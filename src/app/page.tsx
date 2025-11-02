@@ -69,6 +69,7 @@ export default function DashboardPage() {
   const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoadingChallenges, setIsLoadingChallenges] = useState(true);
+  const [hasFetchedInitialData, setHasFetchedInitialData] = useState(false);
 
   const router = useRouter();
   const { user, isUserLoading } = useUser();
@@ -134,14 +135,17 @@ export default function DashboardPage() {
   
   useEffect(() => {
     // This effect runs once on mount to fetch initial data
-    if (userProfile?.location && !location) {
-      setLocation(userProfile.location);
-      updateEcoScore(userProfile.location, true); // Initially fetch both score and challenges
-    } else if (!userProfile?.location) {
+    if (userProfile && !hasFetchedInitialData) {
+      if (userProfile.location) {
+        setLocation(userProfile.location);
+        updateEcoScore(userProfile.location, true); // Initially fetch both score and challenges
+      } else {
         setIsLoadingEcoScore(false);
         setIsLoadingChallenges(false);
+      }
+      setHasFetchedInitialData(true);
     }
-  }, [userProfile, location, updateEcoScore]);
+  }, [userProfile, hasFetchedInitialData, updateEcoScore]);
 
 
   const handleLogout = async () => {
@@ -161,9 +165,14 @@ export default function DashboardPage() {
     setLocation(newLocation); 
     setLocationInput('');
 
-    // This is a user-triggered update, so we should fetch new challenges.
+    setIsLoadingEcoScore(true);
+    setIsLoadingChallenges(true);
+
     updateDocumentNonBlocking(userDocRef, { location: newLocation });
     await updateEcoScore(newLocation, true);
+    
+    setIsLoadingEcoScore(false);
+    setIsLoadingChallenges(false);
   };
 
   if (isUserLoading || isProfileLoading || !user) {
@@ -367,5 +376,3 @@ export default function DashboardPage() {
     </SidebarProvider>
   );
 }
-
-    
