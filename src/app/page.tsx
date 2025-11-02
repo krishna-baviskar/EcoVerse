@@ -49,11 +49,11 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 
-import { EcoscoreTrendChart } from '@/components/dashboard/ecoscore-trend-chart';
 import { Leaderboard } from '@/components/dashboard/leaderboard';
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { OverviewCard } from '@/components/dashboard/overview-card';
 import { Logo } from '@/components/logo';
+import { EcoScoreRatingScale } from '@/components/dashboard/ecoscore-rating-scale';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('Greenville');
@@ -229,13 +229,9 @@ export default function DashboardPage() {
             />
           </div>
           
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <div className="lg:col-span-4">
+          <div className="grid gap-4 lg:grid-cols-2">
               <Leaderboard />
-            </div>
-            <div className="lg:col-span-3">
-              <EcoscoreTrendChart />
-            </div>
+              <EcoScoreRatingScale />
           </div>
         </main>
       </SidebarInset>
