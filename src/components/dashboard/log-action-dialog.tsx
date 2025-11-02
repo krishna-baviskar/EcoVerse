@@ -1,5 +1,5 @@
 'use client';
-import { useState, type ReactNode } from 'react';
+import { useState, type ReactNode, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -43,6 +43,7 @@ const formSchema = z.object({
     message: 'Action must be at least 5 characters.',
   }),
   evidence: z.string().optional(),
+  ecoPoints: z.coerce.number().optional(),
   media: z
     .any()
     .optional()
@@ -71,7 +72,14 @@ const fileToDataUri = (file: File): Promise<string> => {
     });
 };
 
-export function LogActionDialog({ children }: { children: ReactNode }) {
+interface LogActionDialogProps {
+  children: ReactNode;
+  challenge?: { title: string; ecoPoints: number } | null;
+  onOpenChange?: (open: boolean) => void;
+}
+
+
+export function LogActionDialog({ children, challenge, onOpenChange }: LogActionDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ValidationResult | null>(null);
@@ -88,8 +96,17 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
     defaultValues: {
       action: '',
       evidence: '',
+      ecoPoints: undefined,
     },
   });
+
+  useEffect(() => {
+    if (challenge) {
+      form.setValue('action', challenge.title);
+      form.setValue('ecoPoints', challenge.ecoPoints);
+      setOpen(true);
+    }
+  }, [challenge, form]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -103,6 +120,20 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
       });
       setIsLoading(false);
       return;
+    }
+
+    if (challenge) {
+        const userRef = doc(firestore, 'users', user.uid);
+        updateDocumentNonBlocking(userRef, {
+            ecoPoints: increment(challenge.ecoPoints),
+        });
+        setResult({ isValid: true, ecoPoints: challenge.ecoPoints });
+        toast({
+            title: "Challenge Logged!",
+            description: `You've earned ${challenge.ecoPoints} eco-points.`,
+        });
+        setIsLoading(false);
+        return;
     }
 
 
@@ -156,8 +187,9 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
+    onOpenChange?.(isOpen);
     if (!isOpen) {
-        form.reset();
+        form.reset({ action: '', evidence: '', ecoPoints: undefined });
         setResult(null);
         setIsLoading(false);
         setPreview(null);
@@ -172,7 +204,7 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
         <DialogHeader>
           <DialogTitle className="font-headline">Log Sustainable Action</DialogTitle>
           <DialogDescription>
-            Tell us about a sustainable action you've taken to earn eco-points. You can optionally upload an image or video as evidence.
+             {challenge ? `Log your completion of the challenge: "${challenge.title}"` : "Tell us about a sustainable action you've taken to earn eco-points."}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -184,56 +216,74 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
                 <FormItem>
                   <FormLabel>Action</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g., Carpooled to work" {...field} />
+                    <Input placeholder="e.g., Carpooled to work" {...field} disabled={!!challenge || isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="evidence"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="e.g., Described the route, mentioned car model for efficiency."
-                      {...field}
+            {challenge ? (
+                 <FormField
+                    control={form.control}
+                    name="ecoPoints"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>EcoPoints</FormLabel>
+                        <FormControl>
+                            <Input type="number" {...field} disabled />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="media"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Evidence (Image/Video) (Optional)</FormLabel>
-                  <FormControl>
-                    <Input 
-                        type="file" 
-                        accept={ACCEPTED_MEDIA_TYPES.join(',')}
-                        onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            field.onChange(e.target.files);
-                            if (file) {
-                                setMediaType(file.type);
-                                setPreview(URL.createObjectURL(file));
-                            } else {
-                                setPreview(null);
-                                setMediaType(null);
-                            }
-                        }}
-                        className="file:text-primary file:font-medium"
+            ) : (
+                <>
+                    <FormField
+                    control={form.control}
+                    name="evidence"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Description (Optional)</FormLabel>
+                        <FormControl>
+                            <Textarea
+                            placeholder="e.g., Described the route, mentioned car model for efficiency."
+                            {...field}
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
                     />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormField
+                    control={form.control}
+                    name="media"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Evidence (Image/Video) (Optional)</FormLabel>
+                        <FormControl>
+                            <Input 
+                                type="file" 
+                                accept={ACCEPTED_MEDIA_TYPES.join(',')}
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    field.onChange(e.target.files);
+                                    if (file) {
+                                        setMediaType(file.type);
+                                        setPreview(URL.createObjectURL(file));
+                                    } else {
+                                        setPreview(null);
+                                        setMediaType(null);
+                                    }
+                                }}
+                                className="file:text-primary file:font-medium"
+                            />
+                        </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                    />
+                </>
+            )}
 
             {preview && (
                  <div className="mt-4 rounded-md border p-2">
@@ -255,7 +305,7 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
             <DialogFooter>
                 <Button type="submit" disabled={isLoading || !user}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    { !user ? 'Login to Validate' : 'Validate Action' }
+                    { !user ? 'Login to Log' : challenge ? 'Log Challenge' : 'Validate Action' }
                 </Button>
             </DialogFooter>
           </form>
@@ -263,7 +313,7 @@ export function LogActionDialog({ children }: { children: ReactNode }) {
         {result && (
             <Alert variant={result.isValid ? "default" : "destructive"} className="mt-4 bg-card">
                  {result.isValid ? <CheckCircle className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
-                <AlertTitle>{result.isValid ? 'Action Approved!' : 'Action Not Approved'}</AlertTitle>
+                <AlertTitle>{result.isValid ? (challenge ? 'Challenge Logged!' : 'Action Approved!') : 'Action Not Approved'}</AlertTitle>
                 <AlertDescription>
                     {result.isValid
                      ? `Congratulations! You've been awarded ${result.ecoPoints} eco-points.`

@@ -17,9 +17,9 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
-import { predictEcoScore, type PredictEcoScoreOutput } from '@/ai/flows';
+import { predictEcoScore, type PredictEcoScoreOutput, generateChallenges, type Challenge } from '@/ai/flows';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
@@ -55,25 +55,45 @@ import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { OverviewCard } from '@/components/dashboard/overview-card';
 import { Logo } from '@/components/logo';
 import { EcoScoreRatingScale } from '@/components/dashboard/ecoscore-rating-scale';
-import { useAuth, useUser } from '@/firebase';
+import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { UserProfile } from '@/lib/types';
+import { SuggestedChallenges } from '@/components/dashboard/suggested-challenges';
 
 export default function DashboardPage() {
-  const [location, setLocation] = useState('Greenville');
+  const [location, setLocation] = useState('');
   const [locationInput, setLocationInput] = useState('');
   const [ecoScoreData, setEcoScoreData] = useState<PredictEcoScoreOutput | null>(null);
   const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
-  const router = useRouter();
+  const [challenges, setChallenges] = useState<Challenge[]>([]);
+  const [isLoadingChallenges, setIsLoadingChallenges] = useState(false);
+  const [challengeToLog, setChallengeToLog] = useState<{title: string, ecoPoints: number} | null>(null);
 
+  const router = useRouter();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
+
+  const userDocRef = useMemoFirebase(
+    () => (user ? doc(firestore, 'users', user.uid) : null),
+    [firestore, user]
+  );
+  const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
       router.push('/login');
     }
   }, [isUserLoading, user, router]);
+
+  useEffect(() => {
+    if (userProfile && userProfile.location && !location) {
+      setLocation(userProfile.location);
+    }
+  }, [userProfile, location]);
+
 
   const handleLogout = async () => {
     try {
@@ -84,35 +104,54 @@ export default function DashboardPage() {
     }
   };
 
-  const handleLocationChange = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (locationInput.trim()) {
-      const newLocation = locationInput.trim();
-      setLocation(newLocation);
-      setLocationInput('');
-      await updateEcoScore(newLocation);
-    }
-  };
-
-  const updateEcoScore = async (loc: string) => {
+  const updateEcoScore = useCallback(async (loc: string) => {
+    if (!loc) return;
     setIsLoadingEcoScore(true);
+    setIsLoadingChallenges(true);
+    setChallenges([]);
     try {
       const result = await predictEcoScore({ location: loc });
       setEcoScoreData(result);
+      const challengesResult = await generateChallenges({ location: loc, ecoScore: result.ecoScore });
+      setChallenges(challengesResult.challenges);
     } catch (error) {
-      console.error("Failed to predict ecoscore", error);
+      console.error("Failed to predict ecoscore or challenges", error);
+      setEcoScoreData(null);
+      setChallenges([]);
     } finally {
       setIsLoadingEcoScore(false);
+      setIsLoadingChallenges(false);
+    }
+  }, []);
+
+  const handleLocationChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (locationInput.trim() && userDocRef) {
+      const newLocation = locationInput.trim();
+      setLocation(newLocation);
+      setLocationInput('');
+      updateDocumentNonBlocking(userDocRef, { location: newLocation });
+      await updateEcoScore(newLocation);
+    }
+  };
+  
+  useEffect(() => {
+    if (location) {
+      updateEcoScore(location);
+    }
+  }, [location, updateEcoScore]);
+
+  const handleLogChallenge = (challenge: { title: string, ecoPoints: number }) => {
+    setChallengeToLog(challenge);
+  };
+
+  const onLogActionDialogOpenChange = (open: boolean) => {
+    if (!open) {
+      setChallengeToLog(null);
     }
   }
 
-  useEffect(() => {
-    if(user) {
-      updateEcoScore(location);
-    }
-  }, [user]);
-
-  if (isUserLoading || !user) {
+  if (isUserLoading || isProfileLoading || !user) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -169,7 +208,7 @@ export default function DashboardPage() {
         <SidebarFooter>
           <div className="flex items-center gap-2 p-2 text-sm text-sidebar-foreground/70">
             <MapPin className="h-4 w-4" />
-            <span className="truncate">{location}</span>
+            <span className="truncate">{location || 'Set location'}</span>
           </div>
         </SidebarFooter>
       </Sidebar>
@@ -181,7 +220,7 @@ export default function DashboardPage() {
               Dashboard
             </h1>
           </div>
-          <LogActionDialog>
+          <LogActionDialog challenge={challengeToLog} onOpenChange={onLogActionDialogOpenChange}>
              <Button className="hidden sm:flex" variant="outline">
               <PlusCircle className="mr-2 h-4 w-4" />
               Log Action
@@ -266,7 +305,7 @@ export default function DashboardPage() {
             ) : (
               <Card className="flex items-center justify-center">
                 <CardContent className="p-6">
-                  <p>Enter a location to see your EcoScore insights.</p>
+                  {isLoadingEcoScore ? <Skeleton className="h-4 w-[300px]" /> : <p>Enter a location to see your EcoScore insights.</p>}
                 </CardContent>
               </Card>
             )}
@@ -296,6 +335,14 @@ export default function DashboardPage() {
               icon={Thermometer}
               description="Current temperature"
             />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-1">
+             <SuggestedChallenges 
+                challenges={challenges} 
+                isLoading={isLoadingChallenges}
+                onLogChallenge={handleLogChallenge}
+             />
           </div>
           
           <div className="grid gap-4 lg:grid-cols-1">
