@@ -87,7 +87,6 @@ export default function DashboardPage() {
       return;
     }
 
-    // Use a composite key for caching to handle different locations
     const ecoScoreCacheKey = `ecoScoreData-${fetchCity}`;
     const challengesCacheKey = `challenges-${fetchCity}`;
 
@@ -107,10 +106,10 @@ export default function DashboardPage() {
     
     setIsLoadingEcoScore(true);
     setIsLoadingChallenges(true);
+    setLocation(loc); 
 
     try {
       const ecoScorePromise = predictEcoScore({ location: fetchCity });
-      // Use a placeholder score, as it's not critical for generating initial challenges.
       const challengesPromise = generateChallenges({ location: fetchCity, ecoScore: 75 }); 
       
       const [ecoScoreResult, challengesResult] = await Promise.all([ecoScorePromise, challengesPromise]);
@@ -120,12 +119,10 @@ export default function DashboardPage() {
       
       sessionStorage.setItem(ecoScoreCacheKey, JSON.stringify(ecoScoreResult));
       sessionStorage.setItem(challengesCacheKey, JSON.stringify(challengesResult.challenges));
-      // Also cache the full location string to maintain display consistency
       sessionStorage.setItem('userLocation', loc);
 
     } catch (error) {
       console.error("Failed to fetch dashboard data", error);
-      // Clear potentially bad cache on error
       sessionStorage.removeItem(ecoScoreCacheKey);
       sessionStorage.removeItem(challengesCacheKey);
       setEcoScoreData(null);
@@ -137,39 +134,24 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    // Wait until the user profile has been loaded.
-    if (isProfileLoading) {
+    if (isProfileLoading || isUserLoading) {
       return;
     }
 
-    // If we have a user profile, use its location.
-    if (userProfile) {
-      const userLocation = userProfile.location || '';
-      if (!userLocation) {
-        // If user has no location, open the dialog to prompt them.
+    if (!user) {
+        // Redirect handled by another effect
+        return;
+    }
+    
+    const userLocation = userProfile?.location || '';
+    if (!userLocation) {
         setIsLocationDialogOpen(true);
         setIsLoadingEcoScore(false);
         setIsLoadingChallenges(false);
-      } else {
-        setLocation(userLocation);
-        // Let fetchDashboardData handle the caching logic.
-        fetchDashboardData(userLocation, false);
-      }
     } else {
-      // If there's no profile (e.g., still loading or non-existent), check session storage.
-      const cachedLocation = sessionStorage.getItem('userLocation');
-      if (cachedLocation) {
-          setLocation(cachedLocation);
-          fetchDashboardData(cachedLocation, false);
-      } else {
-        // If there's no profile and no cached location, we don't have a location to fetch for.
-        // We might end up here briefly before the profile loads, or if the user is new and has no location.
-        // Stop loading spinners if we have nothing to go on.
-        setIsLoadingEcoScore(false);
-        setIsLoadingChallenges(false);
-      }
+        fetchDashboardData(userLocation, false);
     }
-  }, [userProfile, isProfileLoading, fetchDashboardData]);
+  }, [user, userProfile, isProfileLoading, isUserLoading, fetchDashboardData]);
 
 
   const handleLogout = async () => {
@@ -185,13 +167,10 @@ export default function DashboardPage() {
   const handleLocationUpdate = async (newLocation: string) => {
     if (!newLocation.trim()) return;
     
-    setLocation(newLocation); 
-    
     if (userDocRef) {
       updateDocumentNonBlocking(userDocRef, { location: newLocation });
     }
 
-    // Force a refresh with the new location
     await fetchDashboardData(newLocation, true);
   };
 
