@@ -35,12 +35,16 @@ export function UpdateLocationDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const locationParts = [city, state, country].filter(part => part.trim() !== '');
-    if (locationParts.length === 0) return;
+    // Use only the city for the immediate API call to predict the EcoScore.
+    const ecoScoreLocation = city;
+    // But construct the full location string to be saved in the user's profile.
+    const profileLocation = [city, state, country].filter(part => part.trim() !== '').join(', ');
 
-    const fullLocation = locationParts.join(', ');
-    
-    await onLocationSubmit(fullLocation);
+    if (!ecoScoreLocation.trim()) return;
+
+    // The `onLocationSubmit` function in page.tsx will handle both saving to the DB and fetching data.
+    // It should internally use the city for fetching, but we pass the full string to be saved.
+    await onLocationSubmit(profileLocation);
     onOpenChange(false); // Close the dialog after submission
     setAddress('');
     setCity('');
@@ -48,7 +52,7 @@ export function UpdateLocationDialog({
     setCountry('');
   };
 
-  const isSubmitDisabled = isLoading || !city.trim() || !state.trim() || !country.trim();
+  const isSubmitDisabled = isLoading || !city.trim();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,7 +65,7 @@ export function UpdateLocationDialog({
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">Address (Optional)</Label>
             <Input
               id="address"
               placeholder="e.g., 123 Main St"
@@ -81,7 +85,7 @@ export function UpdateLocationDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="state">State / Province</Label>
+            <Label htmlFor="state">State / Province (Optional)</Label>
             <Input
               id="state"
               placeholder="e.g., CA"
@@ -91,7 +95,7 @@ export function UpdateLocationDialog({
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
+            <Label htmlFor="country">Country (Optional)</Label>
             <Input
               id="country"
               placeholder="e.g., USA"

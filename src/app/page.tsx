@@ -80,7 +80,9 @@ export default function DashboardPage() {
   }, [isUserLoading, user, router]);
 
   const fetchDashboardData = useCallback(async (loc: string, forceRefresh = false) => {
-    if (!loc) {
+    // The location used for fetching should be just the city part.
+    const fetchCity = loc.split(',')[0].trim();
+    if (!fetchCity) {
       setIsLoadingEcoScore(false);
       setIsLoadingChallenges(false);
       return;
@@ -105,8 +107,8 @@ export default function DashboardPage() {
     setIsLoadingChallenges(true);
 
     try {
-      const ecoScorePromise = predictEcoScore({ location: loc });
-      const challengesPromise = generateChallenges({ location: loc, ecoScore: 80 }); // Using a placeholder score to initiate
+      const ecoScorePromise = predictEcoScore({ location: fetchCity });
+      const challengesPromise = generateChallenges({ location: fetchCity, ecoScore: 80 }); // Using a placeholder score to initiate
       
       const [ecoScoreResult, challengesResult] = await Promise.all([ecoScorePromise, challengesPromise]);
 
@@ -284,7 +286,7 @@ export default function DashboardPage() {
                <Card>
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2">
-                    <Info /> EcoScore Insights for {location}
+                    <Info /> EcoScore Insights for {location.split(',')[0].trim()}
                   </CardTitle>
                   <CardDescription>{ecoScoreData.condition}: {ecoScoreData.suggestion}</CardDescription>
                 </CardHeader>
@@ -305,7 +307,7 @@ export default function DashboardPage() {
               title="EcoScore"
               value={isLoadingEcoScore ? "..." : ecoScoreData?.ecoScore.toFixed(1) || 'N/A'}
               icon={TrendingUp}
-              description={isLoadingEcoScore ? "Calculating..." : `Based on ${location} data`}
+              description={isLoadingEcoScore ? "Calculating..." : `Based on ${location.split(',')[0].trim()} data`}
             />
              <OverviewCard
               title="AQI"
@@ -338,7 +340,7 @@ export default function DashboardPage() {
               <EcoScoreRatingScale />
           </div>
         </main>
-        {location && <FloatingEcoTutor location={location} />}
+        {location && <FloatingEcoTutor location={location.split(',')[0].trim()} />}
       </div>
   );
 }
