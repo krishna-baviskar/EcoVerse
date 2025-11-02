@@ -50,6 +50,7 @@ import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { Logo } from '@/components/logo';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 
 export default function CommunityPage() {
   const router = useRouter();
@@ -98,14 +99,6 @@ export default function CommunityPage() {
                 <SidebarMenuButton>
                   <LayoutDashboard />
                   <span className="truncate">Dashboard</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/eco-gpt-tutor">
-                <SidebarMenuButton>
-                  <Bot />
-                  <span className="truncate">EcoGPT Tutor</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -197,6 +190,7 @@ export default function CommunityPage() {
                 </CardContent>
               </Card>
         </main>
+        <FloatingEcoTutor location="Greenville" />
       </SidebarInset>
     </SidebarProvider>
   );

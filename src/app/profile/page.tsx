@@ -50,6 +50,7 @@ import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
 import { Logo } from '@/components/logo';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/lib/types';
+import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 
 
 export default function ProfilePage() {
@@ -102,14 +103,6 @@ export default function ProfilePage() {
                 <SidebarMenuButton>
                   <LayoutDashboard />
                   <span className="truncate">Dashboard</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/eco-gpt-tutor">
-                <SidebarMenuButton>
-                  <Bot />
-                  <span className="truncate">EcoGPT Tutor</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -234,6 +227,7 @@ export default function ProfilePage() {
             </CardContent>
           </Card>
         </main>
+        <FloatingEcoTutor location="Greenville" />
       </SidebarInset>
     </SidebarProvider>
   );

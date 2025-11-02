@@ -62,6 +62,7 @@ import { doc } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/lib/types';
 import { SuggestedChallenges } from '@/components/dashboard/suggested-challenges';
+import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('');
@@ -100,9 +101,13 @@ export default function DashboardPage() {
     setIsLoadingChallenges(true);
 
     try {
-      // Fetch ecoscore and challenges in parallel to improve performance
+      if (ecoScoreData && ecoScoreData.location === loc) {
+        setIsLoadingEcoScore(false);
+        setIsLoadingChallenges(false);
+        return;
+      }
+
       const ecoScorePromise = predictEcoScore({ location: loc });
-      // We need the ecoscore to generate challenges, so we await it first.
       const ecoScoreResult = await ecoScorePromise;
       setEcoScoreData(ecoScoreResult);
 
@@ -120,27 +125,20 @@ export default function DashboardPage() {
       setIsLoadingEcoScore(false);
       setIsLoadingChallenges(false);
     }
-  }, []); // Empty dependency array as it has no external dependencies
+  }, [ecoScoreData]);
 
   useEffect(() => {
-    // This effect runs only when the user profile is loaded for the first time.
-    // It fetches the initial dashboard data based on the user's saved location.
-    // The `hasFetchedInitialData` flag prevents this from running on subsequent re-renders,
-    // like when navigating back to the page.
     if (userProfile && !hasFetchedInitialData) {
       if (userProfile.location) {
         setLocation(userProfile.location);
         fetchDashboardData(userProfile.location);
       } else {
-        // If there's no location, we are not loading anything.
         setIsLoadingEcoScore(false);
         setIsLoadingChallenges(false);
       }
-      // CRITICAL: Mark that the initial data has been fetched (or attempted).
       setHasFetchedInitialData(true);
     }
   }, [userProfile, hasFetchedInitialData, fetchDashboardData]);
-
 
   const handleLogout = async () => {
     try {
@@ -159,45 +157,28 @@ export default function DashboardPage() {
     setLocation(newLocation); 
     setLocationInput('');
 
-    // Update firestore document (non-blocking)
     updateDocumentNonBlocking(userDocRef, { location: newLocation });
 
-    // Manually trigger a full data refresh for the new location.
     await fetchDashboardData(newLocation);
   };
 
-  if (isUserLoading || isProfileLoading || (isLoadingEcoScore && !ecoScoreData)) {
-    // Show a more comprehensive loading skeleton on initial load
-     if (!hasFetchedInitialData) {
-        return (
-          <div className="flex h-screen items-center justify-center">
-            <div className="flex flex-col items-center gap-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2">
-                  <Skeleton className="h-4 w-[250px]" />
-                  <Skeleton className="h-4 w-[200px]" />
-              </div>
-            </div>
-          </div>
-        )
-     }
-  }
-  
-  // Guard against rendering without a user
-  if (!user) {
+  if (isUserLoading || isProfileLoading || (isLoadingEcoScore && !hasFetchedInitialData)) {
     return (
-        <div className="flex h-screen items-center justify-center">
-             <div className="flex flex-col items-center gap-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
-              <div className="space-y-2">
-                  <Skeleton className="h-4 w-[250px]" />
-                  <Skeleton className="h-4 w-[200px]" />
-              </div>
-            </div>
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+          </div>
         </div>
+      </div>
     );
   }
-
+  
+  if (!user) {
+    return null; // or a login redirect, which is handled by the effect
+  }
 
   return (
     <SidebarProvider>
@@ -212,14 +193,6 @@ export default function DashboardPage() {
                 <LayoutDashboard />
                 <span className="truncate">Dashboard</span>
               </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/eco-gpt-tutor">
-                <SidebarMenuButton>
-                  <Bot />
-                  <span className="truncate">EcoGPT Tutor</span>
-                </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <Link href="/leaderboard">
@@ -382,6 +355,7 @@ export default function DashboardPage() {
               <EcoScoreRatingScale />
           </div>
         </main>
+        {location && <FloatingEcoTutor location={location} />}
       </SidebarInset>
     </SidebarProvider>
   );
