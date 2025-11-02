@@ -71,23 +71,22 @@ const getEnvironmentalData = async (location: string) => {
   }
   const { lat, lon } = geoData[0];
 
-  // 2. Get current weather data (temp, humidity) using OpenWeatherMap
-  const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${openWeatherApiKey}&units=metric`;
-  const weatherResponse = await fetch(weatherUrl);
-  if (!weatherResponse.ok) {
-    throw new Error('Failed to fetch weather data.');
-  }
-  const weatherData = await weatherResponse.json();
+  // 2. Fetch Weather and Air Quality data in parallel
+  const weatherPromise = fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${openWeatherApiKey}&units=metric`).then(res => {
+    if (!res.ok) throw new Error('Failed to fetch weather data.');
+    return res.json();
+  });
+
+  const airPromise = fetch(`https://api.waqi.info/feed/geo:${lat};${lon}/?token=${waqiApiKey}`).then(res => {
+    if (!res.ok) throw new Error('Failed to fetch air quality data from WAQI.');
+    return res.json();
+  });
+  
+  const [weatherData, airData] = await Promise.all([weatherPromise, airPromise]);
+
   const temperature = weatherData.main.temp;
   const humidity = weatherData.main.humidity;
-
-  // 3. Get Air Quality Index (AQI) from World Air Quality Index API
-  const airUrl = `https://api.waqi.info/feed/geo:${lat};${lon}/?token=${waqiApiKey}`;
-  const airResponse = await fetch(airUrl);
-   if (!airResponse.ok) {
-    throw new Error('Failed to fetch air quality data from WAQI.');
-  }
-  const airData = await airResponse.json();
+  
   if (airData.status !== 'ok') {
     throw new Error(`Failed to get AQI data: ${airData.data}`);
   }
