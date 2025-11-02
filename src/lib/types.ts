@@ -1,3 +1,4 @@
+
 export interface User {
     rank: number;
     name: string;
@@ -13,4 +14,5 @@ export interface UserProfile {
     email: string;
     photoURL: string;
     ecoPoints: number;
+    location?: string;
 }
