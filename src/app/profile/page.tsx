@@ -100,12 +100,10 @@ export default function ProfilePage() {
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/">
-                <SidebarMenuButton>
-                  <LayoutDashboard />
-                  <span className="truncate">Dashboard</span>
-                </SidebarMenuButton>
-              </Link>
+              <SidebarMenuButton href="/">
+                <LayoutDashboard />
+                <span className="truncate">Dashboard</span>
+              </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
@@ -213,7 +211,7 @@ export default function ProfilePage() {
           </Card>
           <Leaderboard />
         </main>
-        <FloatingEcoTutor location="Greenville" />
+        {userProfile?.location && <FloatingEcoTutor location={userProfile.location} />}
       </SidebarInset>
     </SidebarProvider>
   );
