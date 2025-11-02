@@ -97,17 +97,16 @@ export default function DashboardPage() {
       return;
     }
     
-    if (ecoScoreData?.location === loc) {
-      return;
+    // Only refetch if location is different
+    if (ecoScoreData && ecoScoreData.location === loc) {
+        return;
     }
 
     setIsLoadingEcoScore(true);
     setIsLoadingChallenges(true);
 
     try {
-      
-      const ecoScorePromise = predictEcoScore({ location: loc });
-      const ecoScoreResult = await ecoScorePromise;
+      const ecoScoreResult = await predictEcoScore({ location: loc });
       setEcoScoreData(ecoScoreResult);
 
       if (ecoScoreResult.ecoScore) {
@@ -127,7 +126,8 @@ export default function DashboardPage() {
   }, [ecoScoreData]);
 
   useEffect(() => {
-    if (userProfile && !hasFetchedInitialData) {
+    // Only fetch data if we have a user profile, haven't fetched before, and there's no existing ecoScoreData
+    if (userProfile && !hasFetchedInitialData && !ecoScoreData) {
       if (userProfile.location) {
         setLocation(userProfile.location);
         fetchDashboardData(userProfile.location);
@@ -137,7 +137,7 @@ export default function DashboardPage() {
       }
       setHasFetchedInitialData(true);
     }
-  }, [userProfile, hasFetchedInitialData, fetchDashboardData]);
+  }, [userProfile, hasFetchedInitialData, fetchDashboardData, ecoScoreData]);
 
   const handleLogout = async () => {
     try {
@@ -161,7 +161,7 @@ export default function DashboardPage() {
     await fetchDashboardData(newLocation);
   };
 
-  if (isUserLoading || isProfileLoading || (!hasFetchedInitialData && isProfileLoading)) {
+  if (isUserLoading || (isProfileLoading && !hasFetchedInitialData)) {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center gap-4">
@@ -192,14 +192,6 @@ export default function DashboardPage() {
                 <LayoutDashboard />
                 <span className="truncate">Dashboard</span>
               </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/community">
-                <SidebarMenuButton>
-                  <Users />
-                  <span className="truncate">Community</span>
-                </SidebarMenuButton>
-              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>

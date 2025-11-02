@@ -107,14 +107,6 @@ export default function ProfilePage() {
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
-            <SidebarMenuItem>
-              <Link href="/community">
-                <SidebarMenuButton>
-                  <Users />
-                  <span className="truncate">Community</span>
-                </SidebarMenuButton>
-              </Link>
-            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
       </Sidebar>
