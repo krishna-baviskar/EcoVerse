@@ -57,16 +57,23 @@ import { Logo } from '@/components/logo';
 import { EcoScoreRatingScale } from '@/components/dashboard/ecoscore-rating-scale';
 import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('Greenville');
   const [locationInput, setLocationInput] = useState('');
   const [ecoScoreData, setEcoScoreData] = useState<PredictEcoScoreOutput | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
   const router = useRouter();
 
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/login');
+    }
+  }, [isUserLoading, user, router]);
 
   const handleLogout = async () => {
     try {
@@ -88,20 +95,36 @@ export default function DashboardPage() {
   };
 
   const updateEcoScore = async (loc: string) => {
-    setIsLoading(true);
+    setIsLoadingEcoScore(true);
     try {
       const result = await predictEcoScore({ location: loc });
       setEcoScoreData(result);
     } catch (error) {
       console.error("Failed to predict ecoscore", error);
     } finally {
-      setIsLoading(false);
+      setIsLoadingEcoScore(false);
     }
   }
 
   useEffect(() => {
-    updateEcoScore(location);
-  }, []);
+    if(user) {
+      updateEcoScore(location);
+    }
+  }, [user]);
+
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Skeleton className="h-12 w-12 rounded-full" />
+          <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <SidebarProvider>
@@ -222,13 +245,13 @@ export default function DashboardPage() {
                     value={locationInput}
                     onChange={(e) => setLocationInput(e.target.value)}
                   />
-                  <Button type="submit" disabled={isLoading}>
-                    {isLoading ? 'Updating...' : 'Update'}
+                  <Button type="submit" disabled={isLoadingEcoScore}>
+                    {isLoadingEcoScore ? 'Updating...' : 'Update'}
                   </Button>
                 </form>
               </CardContent>
             </Card>
-            {ecoScoreData && !isLoading ? (
+            {ecoScoreData && !isLoadingEcoScore ? (
                <Card>
                 <CardHeader>
                   <CardTitle className="font-headline flex items-center gap-2">
@@ -251,25 +274,25 @@ export default function DashboardPage() {
           <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
             <OverviewCard
               title="EcoScore"
-              value={isLoading ? "..." : ecoScoreData?.ecoScore.toFixed(1) || 'N/A'}
+              value={isLoadingEcoScore ? "..." : ecoScoreData?.ecoScore.toFixed(1) || 'N/A'}
               icon={TrendingUp}
-              description={isLoading ? "Calculating..." : `Based on ${location} data`}
+              description={isLoadingEcoScore ? "Calculating..." : `Based on ${location} data`}
             />
              <OverviewCard
               title="AQI"
-              value={isLoading ? "..." : ecoScoreData?.aqi.toFixed(0) || 'N/A'}
+              value={isLoadingEcoScore ? "..." : ecoScoreData?.aqi.toFixed(0) || 'N/A'}
               icon={Wind}
               description="Air Quality Index"
             />
             <OverviewCard
               title="Humidity"
-              value={isLoading ? "..." : `${ecoScoreData?.humidity.toFixed(0) || 'N/A'}%`}
+              value={isLoadingEcoScore ? "..." : `${ecoScoreData?.humidity.toFixed(0) || 'N/A'}%`}
               icon={Droplets}
               description="Relative Humidity"
             />
             <OverviewCard
               title="Temperature"
-              value={isLoading ? "..." : `${ecoScoreData?.temperature.toFixed(0) || 'N/A'}°C`}
+              value={isLoadingEcoScore ? "..." : `${ecoScoreData?.temperature.toFixed(0) || 'N/A'}°C`}
               icon={Thermometer}
               description="Current temperature"
             />
