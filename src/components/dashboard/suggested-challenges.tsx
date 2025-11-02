@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Lightbulb, PlusCircle } from "lucide-react";
 import type { Challenge } from "@/ai/flows";
+import { LogActionDialog } from "@/components/dashboard/log-action-dialog";
 
 interface SuggestedChallengesProps {
   challenges: Challenge[];
@@ -47,7 +48,7 @@ export function SuggestedChallenges({ challenges, isLoading, onLogChallenge }: S
                 <div className="flex items-center gap-4 shrink-0">
                     <span className="font-bold text-primary text-lg">{challenge.ecoPoints} pts</span>
                     <LogActionDialog challenge={challenge}>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => onLogChallenge(challenge)}>
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Log
                         </Button>
