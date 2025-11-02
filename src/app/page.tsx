@@ -117,7 +117,6 @@ export default function DashboardPage() {
       const result = await predictEcoScore({ location: loc });
       setEcoScoreData(result);
       if (result.ecoScore && shouldUpdateChallenges) {
-        // Now call the separate function to update challenges
         await updateChallenges(loc, result.ecoScore);
       }
     } catch (error) {
@@ -126,7 +125,6 @@ export default function DashboardPage() {
       if (shouldUpdateChallenges) setChallenges([]);
     } finally {
       setIsLoadingEcoScore(false);
-      // Let updateChallenges handle its own loading state if it was called
       if (!shouldUpdateChallenges) {
         setIsLoadingChallenges(false);
       }
@@ -140,9 +138,11 @@ export default function DashboardPage() {
         setLocation(userProfile.location);
         updateEcoScore(userProfile.location, true); // Initially fetch both score and challenges
       } else {
+        // If there's no location, we stop the loading indicators.
         setIsLoadingEcoScore(false);
         setIsLoadingChallenges(false);
       }
+      // CRITICAL: Set the flag to true to prevent this from re-running
       setHasFetchedInitialData(true);
     }
   }, [userProfile, hasFetchedInitialData, updateEcoScore]);
@@ -165,14 +165,17 @@ export default function DashboardPage() {
     setLocation(newLocation); 
     setLocationInput('');
 
+    // Manually set loading states before starting the update process
     setIsLoadingEcoScore(true);
     setIsLoadingChallenges(true);
 
+    // Update firestore document (non-blocking)
     updateDocumentNonBlocking(userDocRef, { location: newLocation });
+
+    // Await the full update of EcoScore and Challenges
     await updateEcoScore(newLocation, true);
     
-    setIsLoadingEcoScore(false);
-    setIsLoadingChallenges(false);
+    // Loading states are now managed within updateEcoScore
   };
 
   if (isUserLoading || isProfileLoading || !user) {
