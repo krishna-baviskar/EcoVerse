@@ -16,17 +16,11 @@ service cloud.firestore {
     function isUpdatingAllowedProfileFields() {
       // The list of fields a user is allowed to change on their profile.
       let allowedFields = ['displayName', 'photoURL', 'location'];
-      // The list of fields that must NOT be changed by this operation.
-      let protectedFields = ['uid', 'email', 'ecoPoints'];
-      
       // Get all the fields the user is trying to change in this request.
-      let incomingKeys = request.resource.data.keys();
+      let incomingKeys = request.resource.data.diff(resource.data).affectedKeys();
 
       // Ensure that every key in the incoming request is in our allowed list.
-      return incomingKeys.hasOnly(allowedFields)
-          // And also ensure that no protected fields are being modified by comparing
-          // the incoming resource with the existing one.
-          && request.resource.data.diff(resource.data).unchangedKeys().hasAll(protectedFields);
+      return incomingKeys.hasOnly(allowedFields);
     }
 
     // This function securely checks if a user is ONLY incrementing their ecoPoints.
