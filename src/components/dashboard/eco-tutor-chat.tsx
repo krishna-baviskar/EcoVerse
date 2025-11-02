@@ -36,7 +36,7 @@ export function EcoTutorChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const scrollAreaViewportRef = useRef<HTMLDivElement>(null);
 
   const handleActionClick = async (action: () => Promise<void>) => {
     await action();
@@ -166,15 +166,10 @@ export function EcoTutorChat() {
   }, []);
 
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      // A simple way to scroll to the bottom.
+    const viewport = scrollAreaViewportRef.current;
+    if (viewport) {
       setTimeout(() => {
-        if (scrollAreaRef.current) {
-          scrollAreaRef.current.scrollTo(
-            0,
-            scrollAreaRef.current.scrollHeight
-          );
-        }
+        viewport.scrollTo({ top: viewport.scrollHeight, behavior: 'smooth' });
       }, 100);
     }
   }, [messages]);
@@ -230,7 +225,7 @@ export function EcoTutorChat() {
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
-        <ScrollArea className="h-full pr-4" ref={scrollAreaRef}>
+        <ScrollArea className="h-full pr-4" viewportRef={scrollAreaViewportRef}>
           <div className="space-y-4">
             {messages.map(message => (
               <div
