@@ -10,47 +10,56 @@ service cloud.firestore {
     function isOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
-    
+
+    // This function checks if a user is updating only their allowed profile fields.
+    // They can update 'displayName', 'photoURL', or 'location'.
+    // It makes sure no other fields are being illegally changed.
     function isUpdatingProfile(requestData, resourceData) {
-      // Defines the fields a user is allowed to update.
+      // The list of fields a user is allowed to change.
       let allowedFields = ['displayName', 'photoURL', 'location'];
-      // Checks that the request is not trying to modify any fields *other* than the allowed ones.
-      let onlyAllowedFieldsArePresent = request.resource.data.keys().removeAll(allowedFields).size() == 0;
       
-      // Ensures protected fields are not being changed by comparing them to the existing document.
+      // Get all the fields the user is trying to change in this request.
+      let incomingKeys = request.resource.data.keys();
+      
+      // Ensure the incoming request only contains keys from the allowed list.
+      let allKeysAreAllowed = incomingKeys.hasAll(allowedFields) && incomingKeys.hasAny(allowedFields) == false;
+
+      // Check that protected fields are NOT being changed.
       let protectedFieldsUnchanged = requestData.uid == resourceData.uid &&
                                      requestData.email == resourceData.email &&
                                      requestData.ecoPoints == resourceData.ecoPoints;
-
-      return onlyAllowedFieldsArePresent && protectedFieldsUnchanged;
+                                     
+      return protectedFieldsUnchanged;
     }
 
+    // This function securely checks if a user is ONLY incrementing their ecoPoints.
     function isIncrementingEcoPoints(requestData, resourceData) {
-      // Checks that the only field in the update request is 'ecoPoints'.
-      let onlyEcoPointsChanged = request.resource.data.keys().size() == 1 && 'ecoPoints' in request.resource.data;
+      // This ensures that 'ecoPoints' is the ONLY field in the update request.
+      let onlyEcoPointsIsPresent = request.resource.data.keys().size() == 1 && 'ecoPoints' in request.resource.data;
       
-       // Ensures ecoPoints are only ever increased. This works for increments.
-      let pointsIncreased = requestData.ecoPoints > resourceData.ecoPoints;
+      // This is the crucial part: it verifies that the new ecoPoints value is
+      // greater than the old one, which is how increments are validated.
+      let pointsAreIncreased = requestData.ecoPoints > resourceData.ecoPoints;
                                   
-      return onlyEcoPointsChanged && pointsIncreased;
+      return onlyEcoPointsIsPresent && pointsAreIncreased;
     }
 
-    // USERS collection
+    // USERS collection rules
     match /users/{userId} {
-      // Anyone can see anyone else's profile for leaderboard purposes
+      // Anyone can read any profile for leaderboards.
       allow read: if true;
 
-      // A user can only create their own profile
+      // A user can only create their own profile document.
       allow create: if isOwner(userId)
                     && request.resource.data.uid == userId
                     && request.resource.data.ecoPoints == 0;
 
-      // A user can EITHER update their profile OR increment their ecoPoints
+      // A user can EITHER update their profile (e.g., location) OR increment their ecoPoints.
       allow update: if isOwner(userId) && 
                        (isUpdatingProfile(request.resource.data, resource.data) ||
                         isIncrementingEcoPoints(request.resource.data, resource.data));
 
-      // Users cannot delete their profiles
+      // Users cannot delete their own accounts through the app.
       allow delete: if false;
     }
   }
