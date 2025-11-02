@@ -68,7 +68,7 @@ export default function DashboardPage() {
   const [ecoScoreData, setEcoScoreData] = useState<PredictEcoScoreOutput | null>(null);
   const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [isLoadingChallenges, setIsLoadingChallenges] = useState(false);
+  const [isLoadingChallenges, setIsLoadingChallenges] = useState(true);
 
   const router = useRouter();
   const { user, isUserLoading } = useUser();
@@ -87,38 +87,59 @@ export default function DashboardPage() {
     }
   }, [isUserLoading, user, router]);
 
-  const updateEcoScore = useCallback(async (loc: string) => {
+  const updateChallenges = useCallback(async (loc: string, score: number) => {
+    if (!loc || !score) return;
+    setIsLoadingChallenges(true);
+    try {
+      const challengesResult = await generateChallenges({ location: loc, ecoScore: score });
+      setChallenges(challengesResult.challenges);
+    } catch (error) {
+      console.error("Failed to generate challenges", error);
+      setChallenges([]);
+    } finally {
+      setIsLoadingChallenges(false);
+    }
+  }, []);
+
+  const updateEcoScore = useCallback(async (loc: string, shouldUpdateChallenges: boolean) => {
     if (!loc) {
         setIsLoadingEcoScore(false);
         setIsLoadingChallenges(false);
         return;
     };
     setIsLoadingEcoScore(true);
-    setIsLoadingChallenges(true);
-    setChallenges([]);
+    if (shouldUpdateChallenges) {
+        setIsLoadingChallenges(true);
+    }
+    
     try {
       const result = await predictEcoScore({ location: loc });
       setEcoScoreData(result);
-      if (result.ecoScore) {
-        const challengesResult = await generateChallenges({ location: loc, ecoScore: result.ecoScore });
-        setChallenges(challengesResult.challenges);
+      if (result.ecoScore && shouldUpdateChallenges) {
+        // Now call the separate function to update challenges
+        await updateChallenges(loc, result.ecoScore);
       }
     } catch (error) {
-      console.error("Failed to predict ecoscore or challenges", error);
+      console.error("Failed to predict ecoscore", error);
       setEcoScoreData(null);
-      setChallenges([]);
+      if (shouldUpdateChallenges) setChallenges([]);
     } finally {
       setIsLoadingEcoScore(false);
-      setIsLoadingChallenges(false);
+      // Let updateChallenges handle its own loading state if it was called
+      if (!shouldUpdateChallenges) {
+        setIsLoadingChallenges(false);
+      }
     }
-  }, []);
+  }, [updateChallenges]);
   
   useEffect(() => {
+    // This effect runs once on mount to fetch initial data
     if (userProfile?.location && !location) {
       setLocation(userProfile.location);
-      updateEcoScore(userProfile.location);
+      updateEcoScore(userProfile.location, true); // Initially fetch both score and challenges
     } else if (!userProfile?.location) {
         setIsLoadingEcoScore(false);
+        setIsLoadingChallenges(false);
     }
   }, [userProfile, location, updateEcoScore]);
 
@@ -137,18 +158,12 @@ export default function DashboardPage() {
     if (!locationInput.trim() || !userDocRef) return;
     
     const newLocation = locationInput.trim();
-    setIsLoadingEcoScore(true);
     setLocation(newLocation); 
     setLocationInput('');
 
-    try {
-      updateDocumentNonBlocking(userDocRef, { location: newLocation });
-      await updateEcoScore(newLocation);
-    } catch (error) {
-      console.error("Error updating location and fetching new data:", error);
-    } finally {
-      setIsLoadingEcoScore(false);
-    }
+    // This is a user-triggered update, so we should fetch new challenges.
+    updateDocumentNonBlocking(userDocRef, { location: newLocation });
+    await updateEcoScore(newLocation, true);
   };
 
   if (isUserLoading || isProfileLoading || !user) {
@@ -352,3 +367,5 @@ export default function DashboardPage() {
     </SidebarProvider>
   );
 }
+
+    
