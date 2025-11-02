@@ -12,33 +12,27 @@ service cloud.firestore {
     }
     
     function isUpdatingProfile(requestData, resourceData) {
-      // Check if only allowed fields are being updated
+      // Defines the fields a user is allowed to update.
       let allowedFields = ['displayName', 'photoURL', 'location'];
-      let otherFieldsUnchanged = requestData.keys().removeAll(allowedFields).size() == 0;
+      // Checks that the request is not trying to modify any fields *other* than the allowed ones.
+      let onlyAllowedFieldsArePresent = request.resource.data.keys().removeAll(allowedFields).size() == 0;
       
-      // Ensure protected fields are not being changed
+      // Ensures protected fields are not being changed by comparing them to the existing document.
       let protectedFieldsUnchanged = requestData.uid == resourceData.uid &&
                                      requestData.email == resourceData.email &&
                                      requestData.ecoPoints == resourceData.ecoPoints;
 
-      return otherFieldsUnchanged && protectedFieldsUnchanged;
+      return onlyAllowedFieldsArePresent && protectedFieldsUnchanged;
     }
 
     function isIncrementingEcoPoints(requestData, resourceData) {
-      // Check that only ecoPoints is being updated
-      let onlyEcoPointsChanged = requestData.keys().removeAll(['ecoPoints']).size() == 0;
+      // Checks that the only field in the update request is 'ecoPoints'.
+      let onlyEcoPointsChanged = request.resource.data.keys().size() == 1 && 'ecoPoints' in request.resource.data;
       
-       // Ensure ecoPoints are only ever increased
+       // Ensures ecoPoints are only ever increased. This works for increments.
       let pointsIncreased = requestData.ecoPoints > resourceData.ecoPoints;
-
-      // Ensure other fields are not being changed
-      let otherFieldsUnchanged = requestData.uid == resourceData.uid &&
-                                  requestData.email == resourceData.email &&
-                                  requestData.displayName == resourceData.displayName &&
-                                  requestData.photoURL == resourceData.photoURL &&
-                                  requestData.location == resourceData.location;
                                   
-      return onlyEcoPointsChanged && pointsIncreased && otherFieldsUnchanged;
+      return onlyEcoPointsChanged && pointsIncreased;
     }
 
     // USERS collection
@@ -51,7 +45,7 @@ service cloud.firestore {
                     && request.resource.data.uid == userId
                     && request.resource.data.ecoPoints == 0;
 
-      // A user can update their own profile OR increment their ecoPoints
+      // A user can EITHER update their profile OR increment their ecoPoints
       allow update: if isOwner(userId) && 
                        (isUpdatingProfile(request.resource.data, resource.data) ||
                         isIncrementingEcoPoints(request.resource.data, resource.data));
