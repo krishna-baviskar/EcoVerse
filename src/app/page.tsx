@@ -1,3 +1,4 @@
+
 'use client';
 import {
   Bot,
@@ -88,64 +89,57 @@ export default function DashboardPage() {
     }
   }, [isUserLoading, user, router]);
 
-  const updateChallenges = useCallback(async (loc: string, score: number) => {
-    if (!loc || !score) return;
-    setIsLoadingChallenges(true);
-    try {
-      const challengesResult = await generateChallenges({ location: loc, ecoScore: score });
-      setChallenges(challengesResult.challenges);
-    } catch (error) {
-      console.error("Failed to generate challenges", error);
-      setChallenges([]);
-    } finally {
-      setIsLoadingChallenges(false);
-    }
-  }, []);
-
-  const updateEcoScore = useCallback(async (loc: string, shouldUpdateChallenges: boolean) => {
+  const fetchDashboardData = useCallback(async (loc: string) => {
     if (!loc) {
-        setIsLoadingEcoScore(false);
-        setIsLoadingChallenges(false);
-        return;
-    };
-    setIsLoadingEcoScore(true);
-    if (shouldUpdateChallenges) {
-        setIsLoadingChallenges(true);
+      setIsLoadingEcoScore(false);
+      setIsLoadingChallenges(false);
+      return;
     }
     
+    setIsLoadingEcoScore(true);
+    setIsLoadingChallenges(true);
+
     try {
-      const result = await predictEcoScore({ location: loc });
-      setEcoScoreData(result);
-      if (result.ecoScore && shouldUpdateChallenges) {
-        await updateChallenges(loc, result.ecoScore);
+      // Fetch ecoscore and challenges in parallel to improve performance
+      const ecoScorePromise = predictEcoScore({ location: loc });
+      // We need the ecoscore to generate challenges, so we await it first.
+      const ecoScoreResult = await ecoScorePromise;
+      setEcoScoreData(ecoScoreResult);
+
+      if (ecoScoreResult.ecoScore) {
+        const challengesResult = await generateChallenges({ location: loc, ecoScore: ecoScoreResult.ecoScore });
+        setChallenges(challengesResult.challenges);
+      } else {
+        setChallenges([]);
       }
     } catch (error) {
-      console.error("Failed to predict ecoscore", error);
+      console.error("Failed to fetch dashboard data", error);
       setEcoScoreData(null);
-      if (shouldUpdateChallenges) setChallenges([]);
+      setChallenges([]);
     } finally {
       setIsLoadingEcoScore(false);
-      if (!shouldUpdateChallenges) {
-        setIsLoadingChallenges(false);
-      }
+      setIsLoadingChallenges(false);
     }
-  }, [updateChallenges]);
-  
+  }, []); // Empty dependency array as it has no external dependencies
+
   useEffect(() => {
-    // This effect runs once on mount to fetch initial data
+    // This effect runs only when the user profile is loaded for the first time.
+    // It fetches the initial dashboard data based on the user's saved location.
+    // The `hasFetchedInitialData` flag prevents this from running on subsequent re-renders,
+    // like when navigating back to the page.
     if (userProfile && !hasFetchedInitialData) {
       if (userProfile.location) {
         setLocation(userProfile.location);
-        updateEcoScore(userProfile.location, true); // Initially fetch both score and challenges
+        fetchDashboardData(userProfile.location);
       } else {
-        // If there's no location, we stop the loading indicators.
+        // If there's no location, we are not loading anything.
         setIsLoadingEcoScore(false);
         setIsLoadingChallenges(false);
       }
-      // CRITICAL: Set the flag to true to prevent this from re-running
+      // CRITICAL: Mark that the initial data has been fetched (or attempted).
       setHasFetchedInitialData(true);
     }
-  }, [userProfile, hasFetchedInitialData, updateEcoScore]);
+  }, [userProfile, hasFetchedInitialData, fetchDashboardData]);
 
 
   const handleLogout = async () => {
@@ -165,32 +159,45 @@ export default function DashboardPage() {
     setLocation(newLocation); 
     setLocationInput('');
 
-    // Manually set loading states before starting the update process
-    setIsLoadingEcoScore(true);
-    setIsLoadingChallenges(true);
-
     // Update firestore document (non-blocking)
     updateDocumentNonBlocking(userDocRef, { location: newLocation });
 
-    // Await the full update of EcoScore and Challenges
-    await updateEcoScore(newLocation, true);
-    
-    // Loading states are now managed within updateEcoScore
+    // Manually trigger a full data refresh for the new location.
+    await fetchDashboardData(newLocation);
   };
 
-  if (isUserLoading || isProfileLoading || !user) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
+  if (isUserLoading || isProfileLoading || (isLoadingEcoScore && !ecoScoreData)) {
+    // Show a more comprehensive loading skeleton on initial load
+     if (!hasFetchedInitialData) {
+        return (
+          <div className="flex h-screen items-center justify-center">
+            <div className="flex flex-col items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    )
+        )
+     }
   }
+  
+  // Guard against rendering without a user
+  if (!user) {
+    return (
+        <div className="flex h-screen items-center justify-center">
+             <div className="flex flex-col items-center gap-4">
+              <Skeleton className="h-12 w-12 rounded-full" />
+              <div className="space-y-2">
+                  <Skeleton className="h-4 w-[250px]" />
+                  <Skeleton className="h-4 w-[200px]" />
+              </div>
+            </div>
+        </div>
+    );
+  }
+
 
   return (
     <SidebarProvider>
@@ -311,8 +318,8 @@ export default function DashboardPage() {
                     value={locationInput}
                     onChange={(e) => setLocationInput(e.target.value)}
                   />
-                  <Button type="submit" disabled={isLoadingEcoScore}>
-                    {isLoadingEcoScore ? 'Updating...' : 'Update'}
+                  <Button type="submit" disabled={isLoadingEcoScore || isLoadingChallenges}>
+                    {(isLoadingEcoScore || isLoadingChallenges) ? 'Updating...' : 'Update'}
                   </Button>
                 </form>
               </CardContent>
@@ -379,3 +386,5 @@ export default function DashboardPage() {
     </SidebarProvider>
   );
 }
+
+    
