@@ -42,22 +42,18 @@ const validateSustainableActionPrompt = ai.definePrompt({
   input: {schema: ValidateSustainableActionInputSchema},
   output: {schema: ValidateSustainableActionOutputSchema},
   prompt: `You are an AI assistant that validates user-reported sustainable actions and assigns eco-points.
-Analyze the user's action and any supporting evidence provided (which could be text, an image, or a video data URI).
+Analyze the user's action and any supporting evidence provided.
 
 User's reported action:
 Action: {{{action}}}
 
 {{#if supportingEvidence}}
-Supporting Evidence: 
-  {{#if (startsWith supportingEvidence "data:image")}}
-    {{media url=supportingEvidence}}
-  {{else if (startsWith supportingEvidence "data:video")}}
-    {{media url=supportingEvidence}}
-  {{else}}
-    {{{supportingEvidence}}}
-  {{/if}}
+Supporting Evidence:
+{{{supportingEvidence}}}
+{{media url=supportingEvidence}}
 {{/if}}
 
+The supporting evidence may be text, or it could be a data URI for an image or video. Use all available information to make your determination.
 Determine if the action is a valid sustainable action based on the evidence. If it is valid, award eco-points between 1 and 100 based on the environmental impact.
 If the action is not valid, explain why in the 'reason' field.
 
