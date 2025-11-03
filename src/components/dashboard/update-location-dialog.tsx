@@ -35,15 +35,13 @@ export function UpdateLocationDialog({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Use only the city for the immediate API call to predict the EcoScore.
-    const ecoScoreLocation = city;
-    // But construct the full location string to be saved in the user's profile.
-    const profileLocation = [city, state, country].filter(part => part.trim() !== '').join(', ');
+    // Construct the full location string for display and storage.
+    const profileLocation = [address, city, state, country].filter(part => part.trim() !== '').join(', ');
 
-    if (!ecoScoreLocation.trim()) return;
+    if (!city.trim()) return;
 
     // The `onLocationSubmit` function in page.tsx will handle both saving to the DB and fetching data.
-    // It should internally use the city for fetching, but we pass the full string to be saved.
+    // The fetching logic should be smart enough to extract the city for API calls.
     await onLocationSubmit(profileLocation);
     onOpenChange(false); // Close the dialog after submission
     setAddress('');

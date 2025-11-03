@@ -80,7 +80,10 @@ export default function DashboardPage() {
   }, [isUserLoading, user, router]);
 
   const fetchDashboardData = useCallback(async (loc: string, forceRefresh = false) => {
-    const fetchCity = loc.split(',')[0].trim();
+    const locationParts = loc.split(',').map(p => p.trim());
+    // Find the city. It's usually the second part if an address is present, or the first otherwise.
+    const fetchCity = locationParts.length > 1 ? locationParts[1] : locationParts[0];
+    
     if (!fetchCity) {
       setIsLoadingEcoScore(false);
       setIsLoadingChallenges(false);
@@ -110,6 +113,7 @@ export default function DashboardPage() {
 
     try {
       const ecoScorePromise = predictEcoScore({ location: fetchCity });
+      // Use a default ecoScore for challenge generation to avoid dependency on the predictEcoScore result
       const challengesPromise = generateChallenges({ location: fetchCity, ecoScore: 75 }); 
       
       const [ecoScoreResult, challengesResult] = await Promise.all([ecoScorePromise, challengesPromise]);
@@ -319,7 +323,7 @@ export default function DashboardPage() {
               title="EcoScore"
               value={isLoadingEcoScore ? "..." : ecoScoreData?.ecoScore.toFixed(1) || 'N/A'}
               icon={TrendingUp}
-              description={isLoadingEcoScore ? "Calculating..." : `Based on ${location.split(',')[0].trim()} data`}
+              description={isLoadingEcoScore ? "Calculating..." : `Based on location data`}
             />
              <OverviewCard
               title="AQI"
@@ -356,6 +360,3 @@ export default function DashboardPage() {
       </div>
   );
 }
-    
-
-    
