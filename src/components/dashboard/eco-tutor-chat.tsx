@@ -17,7 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { Bot, Send, User, BrainCircuit, Zap } from 'lucide-react';
+import { Bot, Send, User, BrainCircuit, Zap, Sparkles, HelpCircle, Recycle, Sprout, Lightbulb, ChefHat } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
 interface Message {
@@ -29,7 +29,8 @@ interface Message {
 
 interface TutorAction {
   label: string;
-  action: () => Promise<void>;
+  icon: React.ComponentType<{ className?: string }>;
+  action: (promptText: string) => Promise<void>;
 }
 
 export function EcoTutorChat({ location }: { location: string }) {
@@ -38,17 +39,55 @@ export function EcoTutorChat({ location }: { location: string }) {
   const [isLoading, setIsLoading] = useState(true);
   const lastMessageRef = useRef<HTMLDivElement>(null);
 
-  const handleActionClick = async (action: () => Promise<void>) => {
-    await action();
+  const handleActionClick = async (action: (promptText: string) => Promise<void>, label: string) => {
+    await action(label);
   };
 
-  const getQuiz = async () => {
+  const genericActionHandler = async (promptText: string) => {
     setIsLoading(true);
     setMessages(prev => [
       ...prev,
       {
         id: Date.now(),
-        text: 'Give me a quiz about sustainability.',
+        text: promptText,
+        sender: 'user',
+      },
+    ]);
+    try {
+      // Using suggestEcoActions as a generic handler for various prompts
+      const res = await suggestEcoActions({
+        userProfile: `A user is asking the following question: "${promptText}"`,
+        ecoScore: 75, // A neutral ecoScore
+        location: location,
+      });
+      // The prompt for suggestEcoActions is general enough to provide a relevant answer.
+      // We will use the first suggestion as the main response.
+      const responseText = res.suggestions.join('\n- ');
+      setMessages(prev => [
+        ...prev,
+        { id: Date.now() + 1, text: responseText, sender: 'tutor' },
+      ]);
+    } catch (error) {
+      console.error('Failed to get a response:', error);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          text: 'I apologize, but I am unable to answer that right now. Please try again later.',
+          sender: 'tutor',
+        },
+      ]);
+    }
+    setIsLoading(false);
+  };
+
+  const getQuiz = async (promptText: string) => {
+    setIsLoading(true);
+    setMessages(prev => [
+      ...prev,
+      {
+        id: Date.now(),
+        text: promptText,
         sender: 'user',
       },
     ]);
@@ -85,13 +124,13 @@ export function EcoTutorChat({ location }: { location: string }) {
     setIsLoading(false);
   };
 
-  const getChallenges = async () => {
+  const getChallenges = async (promptText: string) => {
     setIsLoading(true);
     setMessages(prev => [
       ...prev,
       {
         id: Date.now(),
-        text: 'Suggest some eco-challenges for me.',
+        text: promptText,
         sender: 'user',
       },
     ]);
@@ -132,14 +171,16 @@ export function EcoTutorChat({ location }: { location: string }) {
           text: "Hello! I'm your personal EcoGPT Tutor. I can help you learn about sustainability, suggest personalized challenges, or quiz you on your eco-knowledge. What would you like to do?",
           sender: 'tutor',
           actions: [
-            {
-              label: 'Give me a quiz',
-              action: getQuiz,
-            },
-            {
-              label: 'Suggest a challenge',
-              action: getChallenges,
-            },
+            { label: 'Give me a quiz', icon: BrainCircuit, action: getQuiz },
+            { label: 'Suggest a challenge', icon: Zap, action: getChallenges },
+            { label: 'Give me a fun fact', icon: Sparkles, action: genericActionHandler },
+            { label: 'What is an EcoScore?', icon: HelpCircle, action: genericActionHandler },
+            { label: 'How can I reduce waste?', icon: Recycle, action: genericActionHandler },
+            { label: 'Tell me about composting', icon: Sprout, action: genericActionHandler },
+            { label: 'Give me a water-saving tip', icon: Lightbulb, action: genericActionHandler },
+            { label: 'Suggest a sustainable recipe', icon: ChefHat, action: genericActionHandler },
+            { label: 'Explain carbon footprint', icon: HelpCircle, action: genericActionHandler },
+            { label: 'How to save energy at home?', icon: Lightbulb, action: genericActionHandler }
           ],
         },
       ]);
@@ -159,43 +200,8 @@ export function EcoTutorChat({ location }: { location: string }) {
     e.preventDefault();
     if (!input.trim()) return;
 
-    const userMessage: Message = {
-      id: Date.now(),
-      text: input,
-      sender: 'user',
-    };
-    setMessages(prev => [...prev, userMessage]);
+    await genericActionHandler(input);
     setInput('');
-    setIsLoading(true);
-
-    try {
-      const res = await suggestEcoActions({
-        userProfile:
-          'A person interested in sustainability, living in an urban area.',
-        ecoScore: 850,
-        location: location,
-      });
-
-      const suggestionsText =
-        'Here are some suggestions for you:\n- ' +
-        res.suggestions.join('\n- ');
-
-      const tutorResponse: Message = {
-        id: Date.now() + 1,
-        text: suggestionsText,
-        sender: 'tutor',
-      };
-      setMessages(prev => [...prev, tutorResponse]);
-    } catch (error) {
-      console.error('Failed to get suggestions:', error);
-      const errorResponse: Message = {
-        id: Date.now() + 1,
-        text: 'I apologize, but I am unable to provide suggestions at this moment. Please try again later.',
-        sender: 'tutor',
-      };
-      setMessages(prev => [...prev, errorResponse]);
-    }
-    setIsLoading(false);
   };
 
   return (
@@ -236,21 +242,17 @@ export function EcoTutorChat({ location }: { location: string }) {
                     {message.text}
                   </div>
                   {message.sender === 'tutor' && message.actions && (
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap max-w-lg">
                       {message.actions.map((action, index) => (
                         <Button
                           key={index}
                           variant="outline"
                           size="sm"
-                          onClick={() => handleActionClick(action.action)}
+                          onClick={() => handleActionClick(action.action, action.label)}
                           disabled={isLoading}
                           className="bg-card"
                         >
-                          {action.label === 'Give me a quiz' ? (
-                            <BrainCircuit className="mr-2 h-4 w-4" />
-                          ) : (
-                            <Zap className="mr-2 h-4 w-4" />
-                          )}
+                           <action.icon className="mr-2 h-4 w-4" />
                           {action.label}
                         </Button>
                       ))}
@@ -300,3 +302,5 @@ export function EcoTutorChat({ location }: { location: string }) {
     </Card>
   );
 }
+
+    
