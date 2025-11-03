@@ -52,6 +52,7 @@ import type { UserProfile } from '@/lib/types';
 import { SuggestedChallenges } from '@/components/dashboard/suggested-challenges';
 import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
+import { cn } from '@/lib/utils';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('');
@@ -199,30 +200,32 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-base">
+        <nav className="hidden w-full flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+          <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-base flex-shrink-0">
             <Logo />
             <span className="sr-only">EcoVerse</span>
           </Link>
           <Link
             href="/profile"
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground transition-colors hover:text-foreground flex-shrink-0"
           >
             Profile
           </Link>
-          {location ? (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>{location}</span>
-            </div>
-          ) : (
-             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              <span>No location set</span>
-            </div>
-          )}
+          <div className="flex-grow min-w-0">
+            {location ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4 flex-shrink-0" />
+                <span className="truncate">{location}</span>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <MapPin className="h-4 w-4" />
+                <span>No location set</span>
+              </div>
+            )}
+          </div>
         </nav>
-        <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
+        <div className="flex w-full items-center gap-4 md:ml-auto md:w-auto md:gap-2 lg:gap-4">
             <div className="ml-auto flex-1 sm:flex-initial">
                  <LogActionDialog>
                     <Button className="hidden sm:flex" variant="outline">
@@ -360,3 +363,5 @@ export default function DashboardPage() {
       </div>
   );
 }
+
+    
