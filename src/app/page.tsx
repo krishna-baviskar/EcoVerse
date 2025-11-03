@@ -53,6 +53,7 @@ import { SuggestedChallenges } from '@/components/dashboard/suggested-challenges
 import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('');
@@ -304,7 +305,17 @@ export default function DashboardPage() {
                   <CardDescription>{ecoScoreData.condition}: {ecoScoreData.suggestion}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-sm">{ecoScoreData.explanation}</p>
+                  <p className="text-sm mb-4">{ecoScoreData.explanation}</p>
+                  <Separator className="my-4" />
+                  <h4 className="font-semibold mb-2 text-sm">Score Breakdown:</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    {ecoScoreData.breakdown.map((item) => (
+                        <li key={item.factor} className="flex justify-between items-center">
+                            <span>{item.factor} ({item.rawValue}):</span>
+                            <span className="font-medium text-foreground">{item.contribution.toFixed(1)} pts</span>
+                        </li>
+                    ))}
+                  </ul>
                 </CardContent>
               </Card>
             ) : (
@@ -357,5 +368,7 @@ export default function DashboardPage() {
       </div>
   );
 }
+
+    
 
     
