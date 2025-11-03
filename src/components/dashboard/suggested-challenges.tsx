@@ -92,8 +92,8 @@ export function SuggestedChallenges({ challenges, isLoading }: SuggestedChalleng
         open={isLogOpen}
         onOpenChange={setIsLogOpen}
       >
-        {/* The trigger is handled programmatically, so this is empty */}
-        <></>
+        {/* The trigger is handled programmatically, so this is empty but needs a valid child */}
+        <span />
       </LogActionDialog>
     </>
   );
