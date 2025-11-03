@@ -70,7 +70,7 @@ export default function SignupPage() {
         description: "Welcome to EcoVerse!",
       });
 
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       console.error('Signup failed:', error);
       toast({
