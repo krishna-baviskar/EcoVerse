@@ -199,7 +199,7 @@ export function EcoTutorChat({ location }: { location: string }) {
   };
 
   return (
-    <Card className="flex flex-col h-[600px]">
+    <Card className="flex flex-col h-[500px]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-headline">
           <Bot /> EcoGPT Tutor
