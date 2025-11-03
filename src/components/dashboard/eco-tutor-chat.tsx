@@ -124,41 +124,25 @@ export function EcoTutorChat({ location }: { location: string }) {
   };
 
   useEffect(() => {
-    const getInitialMessage = async () => {
+    const getInitialMessage = () => {
       setIsLoading(true);
-      try {
-        const res = await ecoGptTutorInitialExplanation({
-          ecoScore: 850,
-          comparisonGroup: 'your city',
-          averageScore: 720,
-        });
-        setMessages([
-          {
-            id: 1,
-            text: res.explanation,
-            sender: 'tutor',
-            actions: [
-              {
-                label: 'Give me a quiz',
-                action: getQuiz,
-              },
-              {
-                label: 'Suggest a challenge',
-                action: getChallenges,
-              },
-            ],
-          },
-        ]);
-      } catch (error) {
-        console.error('Failed to get initial explanation:', error);
-        setMessages([
-          {
-            id: 1,
-            text: 'Hello! I am having trouble fetching your data right now, but I can still help. How can I assist you with your eco-journey today?',
-            sender: 'tutor',
-          },
-        ]);
-      }
+      setMessages([
+        {
+          id: 1,
+          text: "Hello! I'm your EcoGPT Tutor. How can I help you today?",
+          sender: 'tutor',
+          actions: [
+            {
+              label: 'Give me a quiz',
+              action: getQuiz,
+            },
+            {
+              label: 'Suggest a challenge',
+              action: getChallenges,
+            },
+          ],
+        },
+      ]);
       setIsLoading(false);
     };
 
