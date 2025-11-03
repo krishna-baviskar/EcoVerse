@@ -5,6 +5,7 @@ import {
   LineChart,
   Calendar as CalendarIcon,
   Target,
+  TrendingUp,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -16,6 +17,8 @@ import {
   Legend,
   LineChart as RechartsLineChart,
   Line,
+  AreaChart as RechartsAreaChart,
+  Area,
   CartesianGrid,
   RadialBarChart,
   PolarAngleAxis,
@@ -52,6 +55,15 @@ const lineChartData = [
   { date: 'Fri', points: 45 },
   { date: 'Sat', points: 60 },
   { date: 'Sun', points: 75 },
+];
+
+const ecoScoreTrendData = [
+  { month: 'Jan', ecoScore: 65 },
+  { month: 'Feb', ecoScore: 68 },
+  { month: 'Mar', ecoScore: 72 },
+  { month: 'Apr', ecoScore: 70 },
+  { month: 'May', ecoScore: 75 },
+  { month: 'Jun', ecoScore: 78 },
 ];
 
 const activityHeatmapData: Record<string, number> = {};
@@ -205,23 +217,29 @@ export function CommunityImpact({
         </Card>
 
 
-        {/* Chart 2: Line Chart for Weekly Progress */}
+        {/* Chart 2: Area Chart for EcoScore Trend */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-                <LineChart className="w-5 h-5" />
-                Your Weekly Progress
+                <TrendingUp className="w-5 h-5" />
+                EcoScore Trend
             </CardTitle>
           </CardHeader>
           <CardContent className="h-64">
             <ChartContainer config={{}} className="h-full w-full">
-              <RechartsLineChart data={lineChartData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+              <RechartsAreaChart data={ecoScoreTrendData} margin={{ top: 5, right: 20, left: -10, bottom: 0 }}>
+                <defs>
+                    <linearGradient id="colorEcoScore" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                    </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                <XAxis dataKey="date" tickLine={false} axisLine={false} />
-                <YAxis tickLine={false} axisLine={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} />
+                <YAxis tickLine={false} axisLine={false} domain={[60, 90]}/>
                 <RechartsTooltip content={<ChartTooltipContent />} />
-                <Line type="monotone" dataKey="points" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} />
-              </RechartsLineChart>
+                <Area type="monotone" dataKey="ecoScore" stroke="hsl(var(--primary))" strokeWidth={2} fillOpacity={1} fill="url(#colorEcoScore)" />
+              </RechartsAreaChart>
             </ChartContainer>
           </CardContent>
         </Card>
@@ -234,7 +252,7 @@ export function CommunityImpact({
                     Activity Heatmap
                 </CardTitle>
             </CardHeader>
-            <CardContent className="h-64 flex items-center justify-center">
+            <CardContent className="h-64 flex items-center justify-center overflow-x-auto p-4">
                <ActivityHeatmap />
             </CardContent>
         </Card>
