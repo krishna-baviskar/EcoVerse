@@ -86,6 +86,8 @@ export default function DashboardPage() {
       setIsLoadingChallenges(false);
       return;
     }
+    
+    setLocation(loc); // Set the full location string for display
 
     const ecoScoreCacheKey = `ecoScoreData-${fetchCity}`;
     const challengesCacheKey = `challenges-${fetchCity}`;
@@ -97,7 +99,6 @@ export default function DashboardPage() {
         if (cachedEcoScore && cachedChallenges) {
             setEcoScoreData(JSON.parse(cachedEcoScore));
             setChallenges(JSON.parse(cachedChallenges));
-            setLocation(loc);
             setIsLoadingEcoScore(false);
             setIsLoadingChallenges(false);
             return;
@@ -106,7 +107,6 @@ export default function DashboardPage() {
     
     setIsLoadingEcoScore(true);
     setIsLoadingChallenges(true);
-    setLocation(loc); 
 
     try {
       const ecoScorePromise = predictEcoScore({ location: fetchCity });
@@ -143,7 +143,7 @@ export default function DashboardPage() {
         return;
     }
     
-    const userLocation = userProfile?.location || '';
+    const userLocation = userProfile?.location || sessionStorage.getItem('userLocation') || '';
     if (!userLocation) {
         setIsLocationDialogOpen(true);
         setIsLoadingEcoScore(false);
@@ -199,6 +199,12 @@ export default function DashboardPage() {
           <Link href="/" className="flex items-center gap-2 text-lg font-semibold md:text-base">
             <Logo />
             <span className="sr-only">EcoVerse</span>
+          </Link>
+          <Link
+            href="/profile"
+            className="text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Profile
           </Link>
           {location ? (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">

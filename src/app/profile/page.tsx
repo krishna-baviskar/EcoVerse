@@ -101,7 +101,12 @@ export default function ProfilePage() {
               <MapPin className="h-4 w-4" />
               <span>{userProfile.location}</span>
             </div>
-          ) : null}
+          ) : (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MapPin className="h-4 w-4" />
+              <span>No location set</span>
+            </div>
+          )}
         </nav>
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
             <div className="ml-auto flex-1 sm:flex-initial">
