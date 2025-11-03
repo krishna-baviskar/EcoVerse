@@ -23,6 +23,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Logo } from '@/components/logo';
 import { Loader } from '@/components/ui/loader';
 import { motion } from 'framer-motion';
+import { FloatingParticles } from '@/components/ui/floating-particles';
+
 
 const loginSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }),
@@ -127,26 +129,7 @@ export default function LoginPage() {
         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px] [mask-image:radial-gradient(ellipse_80%_80%_at_50%_50%,black,transparent)]" />
         
         {/* Floating Particles */}
-        {[...Array(20)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-white/20 rounded-full"
-            animate={{
-              y: [Math.random() * 1000, Math.random() * -200],
-              x: [Math.random() * 100 - 50, Math.random() * 100 - 50],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: Math.random() * 10 + 10,
-              repeat: Infinity,
-              delay: Math.random() * 5,
-            }}
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-          />
-        ))}
+        <FloatingParticles />
       </div>
 
       {/* Logo */}
@@ -406,3 +389,4 @@ export default function LoginPage() {
     </div>
   );
 }
+
