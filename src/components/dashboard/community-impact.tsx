@@ -24,7 +24,7 @@ import {
   PolarAngleAxis,
   RadialBar,
 } from 'recharts';
-import { DayContent, DayContentProps } from 'react-day-picker';
+import type { DayContentProps } from 'react-day-picker';
 
 import {
   Card,
@@ -46,7 +46,7 @@ interface CommunityImpactProps {
   isLoading: boolean;
 }
 
-// MOCK DATA for new charts
+// MOCK DATA moved outside the component
 const lineChartData = [
   { date: 'Mon', points: 20 },
   { date: 'Tue', points: 35 },
@@ -78,7 +78,6 @@ const weeklyGoalData = [
     { name: 'Weekly Goal', value: 450, goal: 1000, fill: 'hsl(var(--primary))' },
 ];
 
-
 const getActivityColor = (level: number | undefined) => {
     if (level === undefined) return 'bg-muted/50';
     const colors = [
@@ -91,7 +90,6 @@ const getActivityColor = (level: number | undefined) => {
     return colors[level - 1] || 'bg-muted/50';
 };
   
-
 const ActivityHeatmap = () => {
     const today = new Date();
     const endDate = today;
@@ -127,7 +125,6 @@ const ActivityHeatmap = () => {
       </TooltipProvider>
     );
 };
-
 
 export function CommunityImpact({
   userEcoPoints,
@@ -216,7 +213,6 @@ export function CommunityImpact({
             </CardContent>
         </Card>
 
-
         {/* Chart 2: Area Chart for EcoScore Trend */}
         <Card className="lg:col-span-2">
           <CardHeader>
@@ -252,7 +248,7 @@ export function CommunityImpact({
                     Activity Heatmap
                 </CardTitle>
             </CardHeader>
-            <CardContent className="h-64 flex items-center justify-center overflow-x-auto p-4">
+            <CardContent className="overflow-x-auto p-4">
                <ActivityHeatmap />
             </CardContent>
         </Card>
