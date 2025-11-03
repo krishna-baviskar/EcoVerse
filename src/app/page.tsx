@@ -360,14 +360,6 @@ export default function DashboardPage() {
                 isLoading={isLoadingChallenges}
              />
           </div>
-
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-1">
-            <CommunityImpact 
-              userEcoPoints={userProfile?.ecoPoints || 0}
-              cityEcoScore={ecoScoreData?.ecoScore || 0}
-              isLoading={isProfileLoading || isLoadingEcoScore}
-            />
-          </div>
           
           <div className="grid gap-4 lg:grid-cols-1">
               <EcoScoreRatingScale />

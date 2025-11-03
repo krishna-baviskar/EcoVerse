@@ -18,7 +18,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -45,6 +45,8 @@ import type { UserProfile } from '@/lib/types';
 import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 import { Leaderboard } from '@/components/dashboard/leaderboard';
 import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
+import { CommunityImpact } from '@/components/dashboard/community-impact';
+import { predictEcoScore, type PredictEcoScoreOutput } from '@/ai/flows';
 
 
 export default function ProfilePage() {
@@ -53,6 +55,8 @@ export default function ProfilePage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const [ecoScoreData, setEcoScoreData] = useState<PredictEcoScoreOutput | null>(null);
+  const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
 
   const userDocRef = useMemoFirebase(
     () => (user ? doc(firestore, 'users', user.uid) : null),
@@ -60,6 +64,40 @@ export default function ProfilePage() {
   );
   
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
+
+  const fetchEcoScore = useCallback(async (loc: string) => {
+    if (!loc) {
+        setIsLoadingEcoScore(false);
+        return;
+    }
+    
+    const locationParts = loc.split(',').map(p => p.trim());
+    const fetchCity = locationParts.length > 1 ? locationParts[1] : locationParts[0];
+
+    if (!fetchCity) {
+        setIsLoadingEcoScore(false);
+        return;
+    }
+
+    setIsLoadingEcoScore(true);
+    try {
+        const result = await predictEcoScore({ location: fetchCity });
+        setEcoScoreData(result);
+    } catch (error) {
+        console.error("Failed to fetch eco score data", error);
+        setEcoScoreData(null);
+    } finally {
+        setIsLoadingEcoScore(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userProfile?.location) {
+        fetchEcoScore(userProfile.location);
+    } else {
+        setIsLoadingEcoScore(false);
+    }
+  }, [userProfile?.location, fetchEcoScore]);
 
 
   const handleLogout = async () => {
@@ -77,8 +115,8 @@ export default function ProfilePage() {
     if (userDocRef) {
       updateDocumentNonBlocking(userDocRef, { location: newLocation });
     }
-    // Note: This page does not fetch EcoScore data, so we don't need to re-trigger that here.
-    // The location will be updated in the user's profile and will be reflected on the dashboard.
+    
+    await fetchEcoScore(newLocation);
     setIsLocationDialogOpen(false);
   };
 
@@ -227,11 +265,14 @@ export default function ProfilePage() {
               </Card>
             </CardContent>
           </Card>
+          <CommunityImpact 
+            userEcoPoints={userProfile?.ecoPoints || 0}
+            cityEcoScore={ecoScoreData?.ecoScore || 0}
+            isLoading={isProfileLoading || isLoadingEcoScore}
+          />
           <Leaderboard />
         </main>
         {userProfile?.location && <FloatingEcoTutor location={userProfile.location} />}
       </div>
   );
 }
-
-    
