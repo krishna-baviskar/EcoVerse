@@ -12,7 +12,7 @@ import {
   XAxis,
   YAxis,
   Bar,
-  Tooltip,
+  Tooltip as RechartsTooltip,
   Legend,
   LineChart as RechartsLineChart,
   Line,
@@ -33,7 +33,9 @@ import {
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar } from '@/components/ui/calendar';
-import { addDays, format, isSameDay } from 'date-fns';
+import { addDays, format, isSameDay, startOfWeek, eachDayOfInterval, subDays } from 'date-fns';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface CommunityImpactProps {
   userEcoPoints: number;
@@ -52,42 +54,65 @@ const lineChartData = [
   { date: 'Sun', points: 75 },
 ];
 
-const activityHeatmapData: Record<string, number> = {
-    [format(new Date(), 'yyyy-MM-dd')]: 5,
-    [format(addDays(new Date(), -1), 'yyyy-MM-dd')]: 3,
-    [format(addDays(new Date(), -2), 'yyyy-MM-dd')]: 4,
-    [format(addDays(new Date(), -4), 'yyyy-MM-dd')]: 1,
-    [format(addDays(new Date(), -5), 'yyyy-MM-dd')]: 2,
-    [format(addDays(new Date(), -10), 'yyyy-MM-dd')]: 5,
-};
+const activityHeatmapData: Record<string, number> = {};
+for (let i = 0; i < 90; i++) {
+  if (Math.random() > 0.3) {
+    const date = format(subDays(new Date(), i), 'yyyy-MM-dd');
+    activityHeatmapData[date] = Math.floor(Math.random() * 5) + 1;
+  }
+}
 
 const weeklyGoalData = [
     { name: 'Weekly Goal', value: 450, goal: 1000, fill: 'hsl(var(--primary))' },
 ];
 
 
-const CustomDay = (props: DayContentProps) => {
-    const { date } = props;
-    let backgroundColor = 'transparent';
+const getActivityColor = (level: number | undefined) => {
+    if (level === undefined) return 'bg-muted/50';
+    const colors = [
+      'bg-primary/20',
+      'bg-primary/40',
+      'bg-primary/60',
+      'bg-primary/80',
+      'bg-primary',
+    ];
+    return colors[level - 1] || 'bg-muted/50';
+};
   
-    // Find if the current date has activity
-    const activityEntry = Object.entries(activityHeatmapData).find(([d]) =>
-      isSameDay(new Date(d.replace(/-/g, '/')), date)
-    );
+
+const ActivityHeatmap = () => {
+    const today = new Date();
+    const endDate = today;
+    const startDate = subDays(endDate, 89); // Approx 3 months
   
-    if (activityEntry) {
-      const level = activityEntry[1];
-      // We use hsla with the primary color's HSL values to create a heatmap effect.
-      backgroundColor = `hsla(123, 44%, 38%, ${level * 0.18})`;
-    }
+    const days = eachDayOfInterval({ start: startDate, end: endDate });
+  
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   
     return (
-      <span
-        className="relative flex h-full w-full items-center justify-center rounded-md"
-        style={{ backgroundColor }}
-      >
-        <DayContent {...props} />
-      </span>
+        <TooltipProvider>
+            <div className="flex gap-3 text-xs">
+                <div className="flex flex-col gap-1 text-muted-foreground">
+                    {weekDays.map(day => <div key={day} className="h-4 leading-4">{day}</div>).filter((_, i) => i % 2 !== 0)}
+                </div>
+                <div className="grid grid-flow-col grid-rows-7 gap-1">
+                    {days.map(day => {
+                    const dateString = format(day, 'yyyy-MM-dd');
+                    const activityLevel = activityHeatmapData[dateString];
+                    return (
+                        <Tooltip key={dateString}>
+                        <TooltipTrigger asChild>
+                            <div className={cn("h-4 w-4 rounded-sm", getActivityColor(activityLevel))} />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            {activityLevel ? `${activityLevel} actions` : 'No actions'} on {format(day, 'MMM d, yyyy')}
+                        </TooltipContent>
+                        </Tooltip>
+                    );
+                    })}
+                </div>
+            </div>
+      </TooltipProvider>
     );
 };
 
@@ -155,7 +180,7 @@ export function CommunityImpact({
                             cornerRadius={10}
                             angleAxisId={0}
                         />
-                        <Tooltip content={<ChartTooltipContent />} />
+                        <RechartsTooltip content={<ChartTooltipContent />} />
                         <text
                             x="50%"
                             y="50%"
@@ -194,35 +219,29 @@ export function CommunityImpact({
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="date" tickLine={false} axisLine={false} />
                 <YAxis tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltipContent />} />
+                <RechartsTooltip content={<ChartTooltipContent />} />
                 <Line type="monotone" dataKey="points" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 4, fill: 'hsl(var(--primary))' }} />
               </RechartsLineChart>
             </ChartContainer>
           </CardContent>
         </Card>
-
-        {/* Chart 3: Activity Heatmap Calendar */}
-        <Card className="lg:col-span-1">
+        
+        {/* Chart 3: Activity Heatmap */}
+        <Card className="lg:col-span-2">
             <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                     <CalendarIcon className="w-5 h-5" />
                     Activity Heatmap
                 </CardTitle>
             </CardHeader>
-            <CardContent className="h-64 flex justify-center">
-                <Calendar
-                    mode="single"
-                    selected={new Date()}
-                    className="p-0"
-                    components={{
-                        Day: CustomDay
-                    }}
-                />
+            <CardContent className="h-64 flex items-center justify-center">
+               <ActivityHeatmap />
             </CardContent>
         </Card>
+
         
         {/* Chart 4: Bar Chart for Score Comparison */}
-        <Card className="lg:col-span-2">
+        <Card>
             <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                     <BarChart className="w-5 h-5" />
@@ -234,7 +253,7 @@ export function CommunityImpact({
                     <RechartsBarChart data={barChartData} accessibilityLayer layout="vertical" margin={{ left: 20 }}>
                         <XAxis type="number" hide />
                         <YAxis dataKey="name" type="category" tickLine={false} axisLine={false} hide/>
-                        <Tooltip
+                        <RechartsTooltip
                             cursor={{ fill: 'hsl(var(--muted))' }}
                             content={<ChartTooltipContent />}
                         />
