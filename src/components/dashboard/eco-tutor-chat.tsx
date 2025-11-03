@@ -168,7 +168,7 @@ export function EcoTutorChat({ location }: { location: string }) {
       setMessages([
         {
           id: 1,
-          text: "Hello! I'm your personal EcoGPT Tutor. I can help you learn about sustainability, suggest personalized challenges, or quiz you on your eco-knowledge. What would you like to do?",
+          text: "Hello! I'm your personal EcoGPT. I can help you learn about sustainability, suggest personalized challenges, or quiz you on your eco-knowledge. What would you like to do?",
           sender: 'tutor',
           actions: [
             { label: 'Give me a quiz', icon: BrainCircuit, action: getQuiz },
@@ -208,7 +208,7 @@ export function EcoTutorChat({ location }: { location: string }) {
     <Card className="flex flex-col h-[500px]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 font-headline">
-          <Bot /> EcoGPT Tutor
+          <Bot /> EcoGPT
         </CardTitle>
       </CardHeader>
       <CardContent className="flex-grow overflow-hidden">
@@ -302,5 +302,4 @@ export function EcoTutorChat({ location }: { location: string }) {
     </Card>
   );
 }
-
     
