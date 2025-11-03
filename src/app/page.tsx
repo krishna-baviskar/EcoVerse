@@ -205,12 +205,6 @@ export default function DashboardPage() {
             <Logo />
             <span className="sr-only">EcoVerse</span>
           </Link>
-          <Link
-            href="/profile"
-            className="text-muted-foreground transition-colors hover:text-foreground flex-shrink-0"
-          >
-            Profile
-          </Link>
           <div className="flex-grow min-w-0">
             {location ? (
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
