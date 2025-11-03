@@ -11,6 +11,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 
 // Simple Markdown to React component renderer
 const MarkdownContent = ({ content }: { content: string }) => {
+    // If content is not a string (i.e., it's undefined or null), return null to render nothing.
+    if (typeof content !== 'string') {
+        return null;
+    }
     const lines = content.split('\\n');
     return (
         <div className="prose prose-sm dark:prose-invert max-w-none">
