@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Lightbulb, Info } from "lucide-react";
 import type { Challenge } from "@/ai/flows";
 import { ChallengeDetailDialog } from './challenge-detail-dialog';
-import { LogActionDialog } from './log-action-dialog';
 
 interface SuggestedChallengesProps {
   challenges: Challenge[];
@@ -15,19 +14,12 @@ interface SuggestedChallengesProps {
 
 export function SuggestedChallenges({ challenges, isLoading }: SuggestedChallengesProps) {
   const [selectedChallengeForDetail, setSelectedChallengeForDetail] = useState<Challenge | null>(null);
-  const [selectedChallengeToLog, setSelectedChallengeToLog] = useState<Challenge | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-  const [isLogOpen, setIsLogOpen] = useState(false);
 
 
   const handleViewDetails = (challenge: Challenge) => {
     setSelectedChallengeForDetail(challenge);
     setIsDetailOpen(true);
-  };
-
-  const handleStartChallenge = (challenge: Challenge) => {
-    setSelectedChallengeToLog(challenge);
-    setIsLogOpen(true);
   };
 
   return (
@@ -68,9 +60,6 @@ export function SuggestedChallenges({ challenges, isLoading }: SuggestedChalleng
                         <Info className="mr-2 h-4 w-4" />
                         Details
                     </Button>
-                     <Button size="sm" onClick={() => handleStartChallenge(challenge)}>
-                        Start Challenge
-                    </Button>
                   </div>
                 </div>
               ))}
@@ -86,15 +75,6 @@ export function SuggestedChallenges({ challenges, isLoading }: SuggestedChalleng
         open={isDetailOpen}
         onOpenChange={setIsDetailOpen}
       />
-      
-      <LogActionDialog
-        challenge={selectedChallengeToLog}
-        open={isLogOpen}
-        onOpenChange={setIsLogOpen}
-      >
-        {/* The trigger is handled programmatically, so this is empty but needs a valid child */}
-        <span />
-      </LogActionDialog>
     </>
   );
 }
