@@ -77,8 +77,7 @@ const CustomDay = (props: DayContentProps) => {
   
     if (activityEntry) {
       const level = activityEntry[1];
-      // Note: We can't use HSL with CSS variables directly in JS. We'll use a fixed color with opacity.
-      // 123, 44%, 38% is the HSL for primary color.
+      // We use hsla with the primary color's HSL values to create a heatmap effect.
       backgroundColor = `hsla(123, 44%, 38%, ${level * 0.18})`;
     }
   
@@ -210,7 +209,7 @@ export function CommunityImpact({
                     Activity Heatmap
                 </CardTitle>
             </CardHeader>
-            <CardContent className="flex justify-center items-center h-64">
+            <CardContent className="h-64 flex justify-center">
                 <Calendar
                     mode="single"
                     selected={new Date()}
