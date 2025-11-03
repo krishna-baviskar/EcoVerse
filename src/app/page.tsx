@@ -54,6 +54,7 @@ import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
+import { CommunityImpact } from '@/components/dashboard/community-impact';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('');
@@ -359,6 +360,14 @@ export default function DashboardPage() {
                 isLoading={isLoadingChallenges}
              />
           </div>
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-1">
+            <CommunityImpact 
+              userEcoPoints={userProfile?.ecoPoints || 0}
+              cityEcoScore={ecoScoreData?.ecoScore || 0}
+              isLoading={isProfileLoading || isLoadingEcoScore}
+            />
+          </div>
           
           <div className="grid gap-4 lg:grid-cols-1">
               <EcoScoreRatingScale />
@@ -368,7 +377,3 @@ export default function DashboardPage() {
       </div>
   );
 }
-
-    
-
-    
