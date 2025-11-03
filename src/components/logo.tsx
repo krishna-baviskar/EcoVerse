@@ -5,7 +5,9 @@ export function Logo({ className }: { className?: string }) {
     return (
         <div className={cn("flex items-center gap-2 text-lg font-semibold font-headline", className)}>
             <Leaf className="h-6 w-6 text-primary" />
-            <span>EcoVerse</span>
+            <span className="text-white">EcoVerse</span>
         </div>
     );
 }
+
+    
