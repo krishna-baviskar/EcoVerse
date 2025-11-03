@@ -15,9 +15,10 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase } from '@/firebase';
+import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { doc } from 'firebase/firestore';
+import { useState } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/lib/types';
 import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 import { Leaderboard } from '@/components/dashboard/leaderboard';
+import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
 
 
 export default function ProfilePage() {
@@ -50,6 +52,7 @@ export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
+  const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
 
   const userDocRef = useMemoFirebase(
     () => (user ? doc(firestore, 'users', user.uid) : null),
@@ -66,6 +69,17 @@ export default function ProfilePage() {
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleLocationUpdate = async (newLocation: string) => {
+    if (!newLocation.trim()) return;
+    
+    if (userDocRef) {
+      updateDocumentNonBlocking(userDocRef, { location: newLocation });
+    }
+    // Note: This page does not fetch EcoScore data, so we don't need to re-trigger that here.
+    // The location will be updated in the user's profile and will be reflected on the dashboard.
+    setIsLocationDialogOpen(false);
   };
 
   if (isUserLoading || !user) {
@@ -144,7 +158,7 @@ export default function ProfilePage() {
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                   <DropdownMenuItem disabled>
+                   <DropdownMenuItem onClick={() => setIsLocationDialogOpen(true)}>
                     <LayoutDashboard className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </DropdownMenuItem>
@@ -165,6 +179,12 @@ export default function ProfilePage() {
         </div>
       </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+        <UpdateLocationDialog
+          open={isLocationDialogOpen}
+          onOpenChange={setIsLocationDialogOpen}
+          onLocationSubmit={handleLocationUpdate}
+          isLoading={isProfileLoading}
+        />
           <Card>
             <CardHeader>
               <CardTitle className="font-headline">My Profile</CardTitle>
