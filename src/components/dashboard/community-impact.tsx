@@ -4,6 +4,7 @@ import {
   Users,
   LineChart,
   Calendar as CalendarIcon,
+  Target,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -16,6 +17,9 @@ import {
   LineChart as RechartsLineChart,
   Line,
   CartesianGrid,
+  RadialBarChart,
+  PolarAngleAxis,
+  RadialBar,
 } from 'recharts';
 import { DayContent, DayContentProps } from 'react-day-picker';
 
@@ -56,6 +60,10 @@ const activityHeatmapData: Record<string, number> = {
     [format(addDays(new Date(), -5), 'yyyy-MM-dd')]: 2,
     [format(addDays(new Date(), -10), 'yyyy-MM-dd')]: 5,
 };
+
+const weeklyGoalData = [
+    { name: 'Weekly Goal', value: 450, goal: 1000, fill: 'hsl(var(--primary))' },
+];
 
 
 const CustomDay = (props: DayContentProps) => {
@@ -122,8 +130,58 @@ export function CommunityImpact({
         </CardDescription>
       </CardHeader>
       <CardContent className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Chart 1: Radial Bar Chart for Weekly Goal */}
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    Weekly Goal Progress
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="h-64 flex flex-col items-center justify-center">
+                <ChartContainer config={{}} className="h-full w-full">
+                    <RadialBarChart 
+                        data={weeklyGoalData}
+                        startAngle={-270}
+                        endAngle={90}
+                        innerRadius="70%"
+                        outerRadius="100%"
+                        barSize={20}
+                    >
+                        <PolarAngleAxis type="number" domain={[0, weeklyGoalData[0].goal]} tick={false} angleAxisId={0} />
+                        <RadialBar 
+                            background 
+                            dataKey="value" 
+                            cornerRadius={10}
+                            angleAxisId={0}
+                        />
+                        <Tooltip content={<ChartTooltipContent />} />
+                        <text
+                            x="50%"
+                            y="50%"
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className="fill-foreground text-3xl font-bold"
+                        >
+                            {`${((weeklyGoalData[0].value / weeklyGoalData[0].goal) * 100).toFixed(0)}%`}
+                        </text>
+                         <text
+                            x="50%"
+                            y="65%"
+                            textAnchor="middle"
+                            dominantBaseline="middle"
+                            className="fill-muted-foreground text-sm"
+                        >
+                            of weekly goal
+                        </text>
+                    </RadialBarChart>
+                </ChartContainer>
+            </CardContent>
+        </Card>
 
-        {/* Chart 1: Line Chart for Weekly Progress */}
+
+        {/* Chart 2: Line Chart for Weekly Progress */}
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -144,8 +202,8 @@ export function CommunityImpact({
           </CardContent>
         </Card>
 
-        {/* Chart 2: Activity Heatmap Calendar */}
-        <Card>
+        {/* Chart 3: Activity Heatmap Calendar */}
+        <Card className="lg:col-span-1">
             <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                     <CalendarIcon className="w-5 h-5" />
@@ -164,8 +222,8 @@ export function CommunityImpact({
             </CardContent>
         </Card>
         
-        {/* Chart 3: Bar Chart for Score Comparison */}
-        <Card className="lg:col-span-3">
+        {/* Chart 4: Bar Chart for Score Comparison */}
+        <Card className="lg:col-span-2">
             <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                     <BarChart className="w-5 h-5" />
