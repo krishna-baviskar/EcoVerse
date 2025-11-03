@@ -75,12 +75,20 @@ const fileToDataUri = (file: File): Promise<string> => {
 interface LogActionDialogProps {
   children: ReactNode;
   challenge?: { title: string; ecoPoints: number } | null;
+  open?: boolean;
   onOpenChange?: (open: boolean) => void;
 }
 
 
-export function LogActionDialog({ children, challenge, onOpenChange }: LogActionDialogProps) {
-  const [open, setOpen] = useState(false);
+export function LogActionDialog({ children, challenge, open: controlledOpen, onOpenChange }: LogActionDialogProps) {
+  // Use internal state if not controlled
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined && onOpenChange !== undefined;
+  
+  const open = isControlled ? controlledOpen : internalOpen;
+  const setOpen = isControlled ? onOpenChange : setInternalOpen;
+
+
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<ValidationResult | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
@@ -99,14 +107,19 @@ export function LogActionDialog({ children, challenge, onOpenChange }: LogAction
       ecoPoints: undefined,
     },
   });
-
+  
+  // Effect to update form when a challenge is passed
   useEffect(() => {
-    if (challenge) {
+    if (challenge && open) {
       form.setValue('action', challenge.title);
       form.setValue('ecoPoints', challenge.ecoPoints);
-      setOpen(true);
+    } else if (!open) {
+      form.reset({ action: '', evidence: '', ecoPoints: undefined, media: undefined });
+      setResult(null);
+      setPreview(null);
     }
-  }, [challenge, form]);
+  }, [challenge, open, form]);
+
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
@@ -122,17 +135,20 @@ export function LogActionDialog({ children, challenge, onOpenChange }: LogAction
       return;
     }
 
-    if (challenge) {
+    // If it's a pre-defined challenge, just award points.
+    if (challenge && values.ecoPoints) {
         const userRef = doc(firestore, 'users', user.uid);
         updateDocumentNonBlocking(userRef, {
-            ecoPoints: increment(challenge.ecoPoints),
+            ecoPoints: increment(values.ecoPoints),
         });
-        setResult({ isValid: true, ecoPoints: challenge.ecoPoints });
+        setResult({ isValid: true, ecoPoints: values.ecoPoints });
         toast({
             title: "Challenge Logged!",
-            description: `You've earned ${challenge.ecoPoints} eco-points.`,
+            description: `You've earned ${values.ecoPoints} eco-points.`,
         });
         setIsLoading(false);
+        // Don't close immediately, show the result.
+        // The user will close it manually.
         return;
     }
 
@@ -187,13 +203,15 @@ export function LogActionDialog({ children, challenge, onOpenChange }: LogAction
 
   const handleOpenChange = (isOpen: boolean) => {
     setOpen(isOpen);
-    onOpenChange?.(isOpen);
     if (!isOpen) {
-        form.reset({ action: '', evidence: '', ecoPoints: undefined });
-        setResult(null);
-        setIsLoading(false);
-        setPreview(null);
-        setMediaType(null);
+        // Reset state when closing
+        setTimeout(() => {
+            form.reset({ action: '', evidence: '', ecoPoints: undefined, media: undefined });
+            setResult(null);
+            setIsLoading(false);
+            setPreview(null);
+            setMediaType(null);
+        }, 200); // Delay to allow animation
     }
   }
 

@@ -19,13 +19,14 @@ export type GenerateChallengesInput = z.infer<typeof GenerateChallengesInputSche
 
 const ChallengeSchema = z.object({
     title: z.string().describe('A short, catchy title for the challenge.'),
-    description: z.string().describe('A brief description of what the user needs to do.'),
+    description: z.string().describe('A one-sentence summary of what the user needs to do.'),
+    detailedExplanation: z.string().describe('A detailed, step-by-step guide for completing the challenge, formatted with Markdown (using # for headers, * for bullet points). Include sections for "Why It Matters", "Steps to Complete", and "Tips for Success".'),
     ecoPoints: z.number().describe('The number of EcoPoints awarded for completing the challenge.'),
 });
 export type Challenge = z.infer<typeof ChallengeSchema>;
 
 const GenerateChallengesOutputSchema = z.object({
-  challenges: z.array(ChallengeSchema).describe('A list of 3-5 personalized environmental challenges.'),
+  challenges: z.array(ChallengeSchema).describe('A list of 8-12 personalized environmental challenges.'),
 });
 export type GenerateChallengesOutput = z.infer<typeof GenerateChallengesOutputSchema>;
 
@@ -48,7 +49,11 @@ The EcoScore is a measure from 0-100, where higher is better.
 User's Location: {{{location}}}
 User's EcoScore: {{{ecoScore}}}
 
-Generate a list of 3 to 4 creative and actionable challenges. For each challenge, provide a title, a short description, and assign a fair number of 'ecoPoints' between 20 and 100 based on the challenge's difficulty and impact.
+Generate a list of 8 to 12 creative and actionable challenges. For each challenge, provide:
+1.  A short, catchy 'title'.
+2.  A one-sentence 'description'.
+3.  A 'detailedExplanation' formatted in Markdown. This should include sections for "Why It Matters", "Steps to Complete" (as a numbered or bulleted list), and "Tips for Success".
+4.  Assign a fair number of 'ecoPoints' between 20 and 150 based on the challenge's difficulty and impact.
 `,
 });
 
