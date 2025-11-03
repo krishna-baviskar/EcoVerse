@@ -12,8 +12,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { Loader } from '../ui/loader';
 
 interface UpdateLocationDialogProps {
   open: boolean;
@@ -104,7 +104,7 @@ export function UpdateLocationDialog({
           </div>
           <DialogFooter>
             <Button type="submit" disabled={isSubmitDisabled}>
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {isLoading && <Loader className="mr-2 h-4 w-4" />}
               {isLoading ? 'Updating...' : 'Set Location'}
             </Button>
           </DialogFooter>

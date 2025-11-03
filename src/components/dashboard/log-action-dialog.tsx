@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, type ReactNode, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
@@ -30,9 +31,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { validateSustainableAction } from '@/ai/flows';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle, Info, Loader2, XCircle, Paperclip, Video } from 'lucide-react';
+import { CheckCircle, Info, XCircle, Paperclip, Video } from 'lucide-react';
 import { useUser, useFirestore } from '@/firebase';
 import { updateDocumentNonBlocking } from '@/firebase';
+import { Loader } from '../ui/loader';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 const ACCEPTED_MEDIA_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'video/mp4', 'video/webm'];
@@ -322,7 +324,7 @@ export function LogActionDialog({ children, challenge, open: controlledOpen, onO
 
             <DialogFooter>
                 <Button type="submit" disabled={isLoading || !user}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isLoading && <Loader className="mr-2 h-4 w-4" />}
                     { !user ? 'Login to Log' : challenge ? 'Log Challenge' : 'Validate Action' }
                 </Button>
             </DialogFooter>

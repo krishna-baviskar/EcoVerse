@@ -55,6 +55,7 @@ import { UpdateLocationDialog } from '@/components/dashboard/update-location-dia
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { CommunityImpact } from '@/components/dashboard/community-impact';
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('');
@@ -182,17 +183,7 @@ export default function DashboardPage() {
   };
 
   if (isUserLoading || isProfileLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="space-y-2">
-              <Skeleton className="h-4 w-[250px]" />
-              <Skeleton className="h-4 w-[200px]" />
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
   
   if (!user) {
