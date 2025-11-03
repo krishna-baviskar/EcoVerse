@@ -29,6 +29,7 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+import { DayContent, DayContentProps } from 'react-day-picker';
 
 import {
   Card,
@@ -40,7 +41,7 @@ import {
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Calendar } from '@/components/ui/calendar';
-import { addDays, format } from 'date-fns';
+import { addDays, format, isSameDay } from 'date-fns';
 
 interface CommunityImpactProps {
   userEcoPoints: number;
@@ -66,13 +67,40 @@ const pieChartData = [
   { name: 'Other', value: 200, icon: Users, fill: 'hsl(var(--chart-4))' },
 ];
 
-const activityHeatmapData = {
+const activityHeatmapData: Record<string, number> = {
     [format(new Date(), 'yyyy-MM-dd')]: 5,
     [format(addDays(new Date(), -1), 'yyyy-MM-dd')]: 3,
     [format(addDays(new Date(), -2), 'yyyy-MM-dd')]: 4,
     [format(addDays(new Date(), -4), 'yyyy-MM-dd')]: 1,
     [format(addDays(new Date(), -5), 'yyyy-MM-dd')]: 2,
-    [format(addDays(new Date(), -10), 'yyyy-M-dd')]: 5,
+    [format(addDays(new Date(), -10), 'yyyy-MM-dd')]: 5,
+};
+
+
+const CustomDay = (props: DayContentProps) => {
+    const { date, activeModifiers } = props;
+    let backgroundColor = 'transparent';
+  
+    // Find if the current date has activity
+    const activityEntry = Object.entries(activityHeatmapData).find(([d]) =>
+      isSameDay(new Date(d.replace(/-/g, '/')), date)
+    );
+  
+    if (activityEntry) {
+      const level = activityEntry[1];
+      // Note: We can't use HSL with CSS variables directly in JS. We'll use a fixed color with opacity.
+      // 123, 44%, 38% is the HSL for primary color.
+      backgroundColor = `hsla(123, 44%, 38%, ${level * 0.18})`;
+    }
+  
+    return (
+      <span
+        className="relative flex h-full w-full items-center justify-center"
+        style={{ backgroundColor }}
+      >
+        <DayContent {...props} />
+      </span>
+    );
 };
 
 
@@ -148,22 +176,8 @@ export function CommunityImpact({
                     mode="single"
                     selected={new Date()}
                     className="p-0"
-                    modifiers={{
-                        activity: Object.keys(activityHeatmapData).map(dateStr => new Date(dateStr.replace(/-/g, '/'))),
-                    }}
-                    modifiersClassNames={{
-                        activity: 'bg-primary/20',
-                    }}
-                    styles={{
-                        day: {
-                            // This is a bit of a hack to color days based on activity level.
-                            // A proper implementation would use a custom day renderer.
-                            ...Object.fromEntries(
-                                Object.entries(activityHeatmapData).map(([date, level]) => [
-                                    `[aria-label="${format(new Date(date.replace(/-/g, '/')), 'PPP')}"]`, { backgroundColor: `hsla(var(--primary-hsl) / ${level * 0.2})` }
-                                ])
-                            )
-                        },
+                    components={{
+                        Day: CustomDay
                     }}
                 />
             </CardContent>
