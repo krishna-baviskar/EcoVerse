@@ -1,14 +1,8 @@
 'use client';
 import {
   BarChart,
-  PieChart,
   Users,
-  TrendingUp,
   LineChart,
-  Donut,
-  Recycle,
-  Lightbulb,
-  Train,
   Calendar as CalendarIcon,
 } from 'lucide-react';
 import {
@@ -19,15 +13,9 @@ import {
   Bar,
   Tooltip,
   Legend,
-  RadialBarChart,
-  RadialBar,
-  PolarAngleAxis,
   LineChart as RechartsLineChart,
   Line,
   CartesianGrid,
-  PieChart as RechartsPieChart,
-  Pie,
-  Cell,
 } from 'recharts';
 import { DayContent, DayContentProps } from 'react-day-picker';
 
@@ -60,13 +48,6 @@ const lineChartData = [
   { date: 'Sun', points: 75 },
 ];
 
-const pieChartData = [
-  { name: 'Recycling', value: 400, icon: Recycle, fill: 'hsl(var(--chart-1))' },
-  { name: 'Energy Saving', value: 300, icon: Lightbulb, fill: 'hsl(var(--chart-2))' },
-  { name: 'Sustainable Transit', value: 300, icon: Train, fill: 'hsl(var(--chart-3))' },
-  { name: 'Other', value: 200, icon: Users, fill: 'hsl(var(--chart-4))' },
-];
-
 const activityHeatmapData: Record<string, number> = {
     [format(new Date(), 'yyyy-MM-dd')]: 5,
     [format(addDays(new Date(), -1), 'yyyy-MM-dd')]: 3,
@@ -78,7 +59,7 @@ const activityHeatmapData: Record<string, number> = {
 
 
 const CustomDay = (props: DayContentProps) => {
-    const { date, activeModifiers } = props;
+    const { date } = props;
     let backgroundColor = 'transparent';
   
     // Find if the current date has activity
@@ -95,7 +76,7 @@ const CustomDay = (props: DayContentProps) => {
   
     return (
       <span
-        className="relative flex h-full w-full items-center justify-center"
+        className="relative flex h-full w-full items-center justify-center rounded-md"
         style={{ backgroundColor }}
       >
         <DayContent {...props} />
@@ -182,32 +163,9 @@ export function CommunityImpact({
                 />
             </CardContent>
         </Card>
-
-        {/* Chart 3: Donut Chart for Contribution by Type */}
-        <Card>
-          <CardHeader>
-             <CardTitle className="text-lg flex items-center gap-2">
-                <Donut className="w-5 h-5" />
-                Contribution by Action Type
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-64">
-             <ChartContainer config={{}} className="h-full w-full">
-                <RechartsPieChart>
-                    <Tooltip content={<ChartTooltipContent />} />
-                    <Pie data={pieChartData} dataKey="value" nameKey="name" innerRadius="60%" >
-                        {pieChartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                    </Pie>
-                    <Legend iconType='circle' layout="vertical" verticalAlign="middle" align="right" />
-                </RechartsPieChart>
-             </ChartContainer>
-          </CardContent>
-        </Card>
-
-        {/* Chart 4: Bar Chart for Score Comparison */}
-        <Card className="lg:col-span-2">
+        
+        {/* Chart 3: Bar Chart for Score Comparison */}
+        <Card className="lg:col-span-3">
             <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                     <BarChart className="w-5 h-5" />
