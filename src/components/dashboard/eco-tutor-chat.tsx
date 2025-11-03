@@ -129,7 +129,7 @@ export function EcoTutorChat({ location }: { location: string }) {
       setMessages([
         {
           id: 1,
-          text: "Hello! I'm your EcoGPT Tutor. How can I help you today?",
+          text: "Hello! I'm your personal EcoGPT Tutor. I can help you learn about sustainability, suggest personalized challenges, or quiz you on your eco-knowledge. What would you like to do?",
           sender: 'tutor',
           actions: [
             {
