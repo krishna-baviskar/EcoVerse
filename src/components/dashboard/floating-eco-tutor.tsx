@@ -25,8 +25,8 @@ export function FloatingEcoTutor({ location }: { location: string }) {
                 side="top"
                 align="end"
                 className={cn(
-                    "w-80 rounded-xl shadow-lg mr-2 mb-2 p-0 border-0",
-                    "sm:w-96"
+                    "w-96 rounded-xl shadow-lg mr-2 mb-2 p-0 border-0",
+                    "sm:w-[450px]"
                 )}
             >
                 <EcoTutorChat location={location} />
