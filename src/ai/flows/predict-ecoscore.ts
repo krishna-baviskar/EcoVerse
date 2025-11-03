@@ -127,23 +127,23 @@ const calculateEcoScore = (aqi: number, temperature: number, humidity: number) =
     if (ecoScore <= 30) {
         condition = 'Critical';
         suggestion = 'Avoid outdoor activity, wear mask.';
-        explanation = 'The environment is in a critical state with hazardous air quality or extreme weather, posing significant health risks.';
+        explanation = 'The environment is in a critical state. This score indicates hazardous air quality, extreme temperatures, or other severe weather conditions that pose significant health risks. Immediate precautionary measures are strongly advised.';
     } else if (ecoScore <= 50) {
         condition = 'Poor';
         suggestion = 'Plant trees, reduce emissions.';
-        explanation = 'Environmental conditions are poor, likely due to high pollution levels. It\'s advisable to take steps to improve air quality.';
+        explanation = 'Environmental conditions are poor, likely due to high pollution levels or uncomfortable weather. Air quality may be unhealthy for sensitive groups, and it is advisable to take collective steps to improve local environmental factors.';
     } else if (ecoScore <= 70) {
         condition = 'Moderate';
         suggestion = 'Conserve power, use public transport.';
-        explanation = 'The environment is acceptable but has room for improvement. Air quality or weather conditions are slightly outside the ideal range.';
+        explanation = 'The environment is in an acceptable but mediocre state. While not immediately hazardous, there is clear room for improvement. Air quality, temperature, or humidity are outside their ideal ranges, impacting overall comfort and long-term sustainability.';
     } else if (ecoScore <= 85) {
         condition = 'Good';
         suggestion = 'Maintain eco habits, spread awareness.';
-        explanation = 'The environment is clean and healthy. Continue your sustainable practices to help maintain these positive conditions.';
+        explanation = 'The local environment is clean and healthy. Air quality is good, and weather conditions are generally pleasant. Your current location offers a great foundation for sustainable living. Keep up the great work!';
     } else {
         condition = 'Excellent';
         suggestion = 'Keep it up — become an Eco Ambassador!';
-        explanation = 'Congratulations! The environment is in an excellent, sustainable state. Your efforts contribute to a green and healthy community.';
+        explanation = 'Congratulations! The environment is in an excellent, sustainable state. This score reflects pristine air quality and ideal weather conditions. Your location is a prime example of a healthy, green community. Your positive actions help maintain it.';
     }
 
     // 6. Create breakdown
