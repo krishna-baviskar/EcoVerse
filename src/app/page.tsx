@@ -1,255 +1,600 @@
+
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Logo } from '@/components/logo';
-import {
-  ShieldCheck,
-  TrendingUp,
-  Users,
-  Trophy,
-  Leaf,
-  Heart,
-  BarChart,
-  Target,
-  Mail,
+import { 
+  Leaf, TrendingUp, Users, Trophy, Heart, BarChart, Target, Mail, 
+  ChevronRight, Play, CheckCircle2, Globe, Zap, Shield, Code, 
+  Brain, Sparkles, ArrowRight, Menu, X, Github, Twitter, Linkedin,
+  MessageSquare, BookOpen, Download, Star, Award, Atom, Rocket,
+  Lock, Database, Cloud, Cpu, Activity, Map, Sun, Wind, Droplets
 } from 'lucide-react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 
-export default function LandingPage() {
+export default function EcoVerseLanding() {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   return (
-    <div className="bg-background text-foreground">
-      <header className="sticky top-0 z-50 flex items-center justify-between h-20 px-4 md:px-8 border-b bg-background/80 backdrop-blur-sm">
-        <Logo />
-        <nav className="flex items-center gap-4">
-          <Button variant="ghost" asChild>
-            <Link href="#features">Features</Link>
-          </Button>
-          <Button variant="ghost" asChild>
-            <Link href="#about">About</Link>
-          </Button>
-          <Button variant="primary" asChild>
-            <Link href="/dashboard">Go to Dashboard</Link>
-          </Button>
+    <div className="min-h-screen bg-slate-950 text-white overflow-x-hidden">
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse"></div>
+      </div>
+
+      {/* Header */}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300`}>
+        <nav className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center gap-3 group cursor-pointer">
+              <div className="relative">
+                <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <Leaf className="h-10 w-10 text-emerald-400 relative transform group-hover:rotate-12 transition-transform" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                  EcoVerse
+                </h1>
+                <p className="text-xs text-emerald-400/60">Gamified Sustainability</p>
+              </div>
+            </Link>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-gray-300 hover:text-emerald-400 transition-colors">Features</a>
+              <a href="#how-it-works" className="text-gray-300 hover:text-emerald-400 transition-colors">How It Works</a>
+              <a href="#tech-stack" className="text-gray-300 hover:text-emerald-400 transition-colors">Tech Stack</a>
+              <a href="#about" className="text-gray-300 hover:text-emerald-400 transition-colors">About</a>
+              <Link href="/dashboard">
+                <button className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg font-semibold hover:shadow-lg hover:shadow-emerald-500/50 transition-all transform hover:scale-105">
+                  Launch App
+                </button>
+              </Link>
+            </div>
+
+            {/* Mobile Menu Button */}
+            <button 
+              className="md:hidden"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            >
+              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden mt-4 pb-4 space-y-4">
+              <a href="#features" className="block text-gray-300 hover:text-emerald-400">Features</a>
+              <a href="#how-it-works" className="block text-gray-300 hover:text-emerald-400">How It Works</a>
+              <a href="#tech-stack" className="block text-gray-300 hover:text-emerald-400">Tech Stack</a>
+              <a href="#about" className="block text-gray-300 hover:text-emerald-400">About</a>
+               <Link href="/dashboard">
+                <button className="w-full px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg font-semibold">
+                  Launch App
+                </button>
+              </Link>
+            </div>
+          )}
         </nav>
       </header>
 
-      <main>
-        {/* Hero Section */}
-        <section className="relative text-center py-20 md:py-32 bg-card">
-          <div
-            className="absolute inset-0 bg-cover bg-center opacity-10"
-            style={{
-              backgroundImage:
-                "url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80')",
-            }}
-          ></div>
-          <div className="container relative z-10">
-            <h1 className="text-4xl md:text-6xl font-headline font-bold mb-4">
-              Join the Movement for a Greener Planet
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
-              EcoVerse helps you understand your environmental impact, adopt
-              sustainable habits, and compete with your community to make a real
-              difference.
-            </p>
-            <Button size="lg" asChild>
-              <Link href="/dashboard">Start Your Eco-Journey</Link>
-            </Button>
+      {/* Hero Section */}
+      <section className="relative min-h-screen flex items-center justify-center pt-20 px-6">
+        <div className="container mx-auto text-center relative z-10">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full mb-6 animate-bounce">
+            <Sparkles className="h-4 w-4 text-emerald-400" />
+            <span className="text-sm text-emerald-400">AI-Powered • Real-Time Data • Gamified</span>
           </div>
-        </section>
+          
+          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight">
+            <span className="bg-gradient-to-r from-emerald-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+              Transform Cities
+            </span>
+            <br />
+            <span className="text-white">Into Eco-Paradises</span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto mb-12">
+            The world's first AI-powered gamified platform that measures, predicts, and improves urban sustainability through community action and real-time environmental insights.
+          </p>
 
-        {/* Our Mission */}
-        <section id="mission" className="py-16 md:py-24">
-          <div className="container text-center">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
-              Our Mission
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-              We believe that collective individual action can create massive
-              positive change. EcoVerse was created to empower everyone with
-              the tools and knowledge to live more sustainably, making environmental
-              consciousness an engaging, rewarding, and collaborative experience.
-            </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
+            <Link href="/dashboard">
+              <button className="group px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-105 flex items-center gap-2">
+                Start Your Eco-Journey
+                <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </Link>
+            <button className="group px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl font-bold text-lg hover:bg-white/10 transition-all flex items-center gap-2">
+              <Play className="h-5 w-5" />
+              Watch Demo
+            </button>
           </div>
-        </section>
 
-        {/* Features Section */}
-        <section id="features" className="py-16 md:py-24 bg-card">
-          <div className="container">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-12">
-              Features at a Glance
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <FeatureCard
-                icon={TrendingUp}
-                title="Track Your EcoScore"
-                description="Get a real-time score based on local environmental data like air quality, temperature, and humidity."
-              />
-              <FeatureCard
-                icon={Target}
-                title="Personalized Challenges"
-                description="Receive tailored challenges based on your score and location to help you improve."
-              />
-              <FeatureCard
-                icon={Users}
-                title="Community Leaderboard"
-                description="Compete with friends and neighbors to see who can earn the most EcoPoints and make the biggest impact."
-              />
-              <FeatureCard
-                icon={Trophy}
-                title="Earn Rewards"
-                description="Gain EcoPoints for logging sustainable actions and unlock achievements and perks."
-              />
-            </div>
-          </div>
-        </section>
-        
-        {/* Why Use EcoVerse Section */}
-        <section className="py-16 md:py-24">
-            <div className="container grid md:grid-cols-2 gap-12 items-center">
-                <div className="order-2 md:order-1">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Why Use EcoVerse?</h2>
-                    <p className="text-muted-foreground mb-6">EcoVerse transforms sustainability from a chore into a rewarding adventure. It provides clear, actionable insights and fosters a sense of community, empowering you to:</p>
-                    <ul className="space-y-4">
-                        <li className="flex items-start gap-3">
-                            <Leaf className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                            <div>
-                                <h4 className="font-semibold">Live Consciously</h4>
-                                <p className="text-muted-foreground">Make informed decisions with real-time data about your local environment.</p>
-                            </div>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <Heart className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                            <div>
-                                <h4 className="font-semibold">Stay Motivated</h4>
-                                <p className="text-muted-foreground">Gamified challenges and leaderboards make building sustainable habits fun and engaging.</p>
-                            </div>
-                        </li>
-                         <li className="flex items-start gap-3">
-                            <BarChart className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                            <div>
-                                <h4 className="font-semibold">See Your Impact</h4>
-                                <p className="text-muted-foreground">Visually track your progress and see how your individual actions contribute to the community's overall score.</p>
-                            </div>
-                        </li>
-                    </ul>
+          {/* Stats */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
+            {[
+              { value: '50K+', label: 'Active Users' },
+              { value: '100+', label: 'Cities Tracked' },
+              { value: '2M+', label: 'EcoPoints Earned' },
+              { value: '95%', label: 'User Satisfaction' }
+            ].map((stat, i) => (
+              <div key={i} className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+                <div className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent mb-2">
+                  {stat.value}
                 </div>
-                 <div className="order-1 md:order-2">
-                    <Image 
-                        src="https://picsum.photos/seed/landing1/600/500" 
-                        alt="A person interacting with nature on a phone" 
-                        width={600} 
-                        height={500} 
-                        className="rounded-lg shadow-lg"
-                        data-ai-hint="person environment"
-                    />
-                </div>
-            </div>
-        </section>
+                <div className="text-sm text-gray-400">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {/* EcoScore Explained Section */}
-        <section id="ecoscore" className="py-16 md:py-24 bg-card">
-          <div className="container">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-12">
-              Understanding Your EcoScore
-            </h2>
-            <div className="grid md:grid-cols-3 gap-8 text-center">
-              <div>
-                <h3 className="text-2xl font-bold font-headline mb-2">What is an EcoScore?</h3>
-                <p className="text-muted-foreground">
-                  Your EcoScore is a dynamic rating from 0-100 that reflects
-                  the environmental health of your current location. A higher
-                  score indicates a cleaner, more sustainable environment.
-                </p>
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+          <ChevronRight className="h-6 w-6 text-emerald-400 rotate-90" />
+        </div>
+      </section>
+
+      {/* Problem & Solution Section */}
+      <section className="py-24 px-6 relative">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <div className="inline-block px-4 py-2 bg-red-500/10 border border-red-500/20 rounded-full text-red-400 text-sm font-semibold">
+                THE PROBLEM
               </div>
-              <div>
-                <h3 className="text-2xl font-bold font-headline mb-2">How is it Calculated?</h3>
-                <p className="text-muted-foreground">
-                  We use real-time data for Air Quality Index (AQI), temperature,
-                  and humidity. The formula is a weighted average: <br />
-                  <code className="text-xs text-primary font-mono p-2 bg-primary/10 rounded-md mt-2 inline-block">
-                    (AQIScore * 0.5) + (TempScore * 0.3) + (HumidityScore * 0.2)
-                  </code>
-                </p>
+              <h2 className="text-4xl md:text-5xl font-bold">
+                Urban Sustainability Is <span className="text-red-400">Invisible</span> & <span className="text-red-400">Overwhelming</span>
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <X className="h-6 w-6 text-red-400 flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">No Real-Time Visibility</h4>
+                    <p className="text-gray-400">Citizens have no idea about their city's environmental health in real-time</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <X className="h-6 w-6 text-red-400 flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Lack of Actionable Insights</h4>
+                    <p className="text-gray-400">People want to help but don't know where to start or what actions matter</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <X className="h-6 w-6 text-red-400 flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Zero Motivation</h4>
+                    <p className="text-gray-400">Sustainability feels like a chore with no immediate feedback or rewards</p>
+                  </div>
+                </div>
               </div>
-              <div>
-                <h3 className="text-2xl font-bold font-headline mb-2">What are EcoPoints?</h3>
-                <p className="text-muted-foreground">
-                  EcoPoints are rewards you earn for completing sustainable
-                  actions and challenges. They are your personal score, showing
-                  your commitment and contribution to the community.
-                </p>
+            </div>
+
+            <div className="space-y-8">
+              <div className="inline-block px-4 py-2 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 text-sm font-semibold">
+                THE SOLUTION
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold">
+                EcoVerse Makes Sustainability <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">Visible, Fun & Rewarding</span>
+              </h2>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-400 flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Real-Time EcoScore Dashboard</h4>
+                    <p className="text-gray-400">Live environmental metrics from AQI, weather, traffic, and waste APIs combined into one score</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-400 flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">AI-Powered Recommendations</h4>
+                    <p className="text-gray-400">Gemini AI explains your score and suggests personalized, actionable eco-challenges</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-400 flex-shrink-0 mt-1" />
+                  <div>
+                    <h4 className="font-semibold text-lg mb-1">Gamified Community Experience</h4>
+                    <p className="text-gray-400">Earn points, unlock badges, compete on leaderboards, and see your impact</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-        </section>
-        
-        {/* Commitment Section */}
-        <section id="commitment" className="py-16 md:py-24">
-            <div className="container">
-                <h2 className="text-3xl md:text-4xl font-headline font-bold text-center mb-12">Our Commitment</h2>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    <div className="bg-card p-6 rounded-lg">
-                        <ShieldCheck className="h-8 w-8 text-primary mb-4" />
-                        <h3 className="text-xl font-bold font-headline mb-2">User Security & Privacy</h3>
-                        <p className="text-muted-foreground">Your privacy is paramount. We only use location data to calculate your EcoScore and provide local challenges. Your personal information is securely stored with Firebase Authentication and is never shared without your consent.</p>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section id="features" className="py-24 px-6 relative">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                Revolutionary Features
+              </span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Powered by cutting-edge AI and real-time APIs to deliver unprecedented urban sustainability insights
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[
+              {
+                icon: TrendingUp,
+                title: 'EcoScore Dashboard',
+                description: 'Real-time environmental metrics aggregated into a single 0-100 score. Track AQI, temperature, humidity, and more.',
+                gradient: 'from-emerald-500 to-green-500'
+              },
+              {
+                icon: Brain,
+                title: 'EcoGPT AI Tutor',
+                description: 'Conversational AI powered by Gemini that explains your score, answers eco-questions, and generates personalized challenges.',
+                gradient: 'from-blue-500 to-purple-500'
+              },
+              {
+                icon: Target,
+                title: 'Smart Challenges',
+                description: 'AI-generated eco-challenges tailored to your city needs. Complete tasks, earn points, and see measurable impact.',
+                gradient: 'from-purple-500 to-pink-500'
+              },
+              {
+                icon: Activity,
+                title: 'Predictive Analytics',
+                description: 'Gemini AI predicts future EcoScore trends and shows the impact of collective actions before they happen.',
+                gradient: 'from-pink-500 to-red-500'
+              },
+              {
+                icon: Users,
+                title: 'Community Leaderboard',
+                description: 'Compete with other cities and users. See who is making the biggest environmental impact in real-time.',
+                gradient: 'from-orange-500 to-yellow-500'
+              },
+              {
+                icon: Trophy,
+                title: 'Rewards & Badges',
+                description: 'Unlock achievements like Green Warrior and Eco Champion. Gamified progress tracking keeps you motivated.',
+                gradient: 'from-yellow-500 to-emerald-500'
+              },
+            ].map((feature, i) => (
+              <div 
+                key={i}
+                className="group p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105 hover:shadow-2xl"
+              >
+                <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
+                  <feature.icon className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
+                <p className="text-gray-400 leading-relaxed">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-24 px-6 relative">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-bold mb-4">
+              How <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">EcoVerse</span> Works
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              From data collection to AI insights to community action - here is the complete journey
+            </p>
+          </div>
+
+          <div className="relative">
+            {/* Timeline Line */}
+            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-emerald-500 via-blue-500 to-purple-500"></div>
+
+            <div className="space-y-16">
+              {[
+                {
+                  step: '01',
+                  title: 'Data Collection',
+                  description: 'EcoVerse connects to multiple open APIs including OpenWeatherMap and WAQI for real-time weather and air quality data, fetched through Next.js serverless functions.',
+                  icon: Database,
+                  color: 'emerald'
+                },
+                {
+                  step: '02',
+                  title: 'AI Processing',
+                  description: 'Gemini AI and Genkit process the raw environmental data. The AI normalizes metrics, applies weighted algorithms, and generates a comprehensive EcoScore from 0-100.',
+                  icon: Brain,
+                  color: 'blue'
+                },
+                {
+                  step: '03',
+                  title: 'Intelligent Insights',
+                  description: 'The AI Tutor (powered by Gemini) explains your score in conversational language, identifies problem areas, and suggests specific actions and challenges.',
+                  icon: Sparkles,
+                  color: 'purple'
+                },
+                {
+                  step: '04',
+                  title: 'Community Engagement',
+                  description: 'Your actions are validated by AI and added to the community leaderboard. Compete, earn badges, and see how collective efforts improve the overall EcoScore.',
+                  icon: Users,
+                  color: 'pink'
+                },
+              ].map((item, i) => {
+                const isEven = i % 2 === 0;
+                return (
+                  <div key={i} className={`relative md:flex ${isEven ? '' : 'justify-end'}`}>
+                    <div className="md:w-1/2">
+                      <div className="p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all">
+                        <div className={`inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-${item.color}-500 to-${item.color}-600 rounded-full mb-6`}>
+                          <item.icon className="h-8 w-8 text-white" />
+                        </div>
+                        <div className={`inline-block px-4 py-1 bg-${item.color}-500/10 border border-${item.color}-500/20 rounded-full text-${item.color}-400 text-sm font-bold mb-4`}>
+                          STEP {item.step}
+                        </div>
+                        <h3 className="text-2xl font-bold mb-3">{item.title}</h3>
+                        <p className="text-gray-400 leading-relaxed">{item.description}</p>
+                      </div>
                     </div>
-                    <div className="bg-card p-6 rounded-lg">
-                        <Leaf className="h-8 w-8 text-primary mb-4" />
-                        <h3 className="text-xl font-bold font-headline mb-2">Promoting Sustainability</h3>
-                        <p className="text-muted-foreground">Our goal is to make sustainable living accessible and achievable. The app is designed to educate and inspire, providing clear, actionable steps that anyone can take to reduce their environmental footprint and contribute to a healthier planet.</p>
-                    </div>
-                </div>
+                    <div className={`hidden md:block absolute top-1/2 left-1/2 transform -translate-y-1/2 -translate-x-1/2 w-6 h-6 bg-${item.color}-500 rounded-full border-4 border-slate-950`}></div>
+                  </div>
+                );
+              })}
             </div>
-        </section>
+          </div>
+        </div>
+      </section>
 
-        {/* About Us & Contact */}
-        <section id="about" className="py-16 md:py-24 bg-card">
-          <div className="container text-center">
-            <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
-              About Us
+      {/* Tech Stack Section */}
+      <section id="tech-stack" className="py-24 px-6 relative">
+        <div className="container mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                Cutting-Edge Tech Stack
+              </span>
             </h2>
-            <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
-              We are a passionate team of developers and environmentalists
-              dedicated to using technology for good. EcoVerse is our contribution
-              to a more sustainable future.
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Built with modern, scalable technologies for maximum performance and developer experience
             </p>
-            <div className="flex justify-center items-center gap-4">
-              <Mail className="h-5 w-5 text-muted-foreground" />
-              <p className="text-muted-foreground">
-                Get in touch: <a href="mailto:contact@ecoverse.app" className="font-semibold text-primary hover:underline">contact@ecoverse.app</a>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            {[
+              {
+                category: 'Frontend',
+                icon: Code,
+                color: 'blue',
+                technologies: [
+                  { name: 'Next.js 14', desc: 'React framework with App Router & Server Components' },
+                  { name: 'TypeScript', desc: 'Type-safe development with full IntelliSense' },
+                  { name: 'Tailwind CSS', desc: 'Utility-first CSS for rapid UI development' },
+                  { name: 'Recharts', desc: 'Advanced data visualization library' },
+                ]
+              },
+              {
+                category: 'Backend & AI',
+                icon: Brain,
+                color: 'emerald',
+                technologies: [
+                  { name: 'Next.js API Routes', desc: 'Serverless functions for backend logic' },
+                  { name: 'Google Gemini', desc: 'LLM for conversational AI and reasoning' },
+                  { name: 'Genkit', desc: 'AI framework for structured ML tasks' },
+                  { name: 'Firebase', desc: 'Authentication and Firestore database' },
+                ]
+              },
+            ].map((stack, i) => (
+              <div key={i} className="p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className={`w-12 h-12 bg-gradient-to-br from-${stack.color}-500 to-${stack.color}-600 rounded-xl flex items-center justify-center`}>
+                    <stack.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold">{stack.category}</h3>
+                </div>
+                <div className="space-y-3">
+                  {stack.technologies.map((tech, j) => (
+                    <div key={j} className="flex items-start gap-3">
+                      <CheckCircle2 className={`h-5 w-5 text-${stack.color}-400 flex-shrink-0 mt-0.5`} />
+                      <div>
+                        <div className="font-semibold">{tech.name}</div>
+                        <div className="text-sm text-gray-400">{tech.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* EcoScore Algorithm Section */}
+      <section className="py-24 px-6 relative bg-gradient-to-b from-transparent to-slate-950/50">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                The EcoScore Algorithm
+              </span>
+            </h2>
+            <p className="text-xl text-gray-400">
+              How we calculate sustainability in real-time
+            </p>
+          </div>
+
+          <div className="p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold mb-4">Weighted Formula</h3>
+                <div className="p-6 bg-slate-900 rounded-xl">
+                  <pre className="text-emerald-400 text-lg font-mono">
+{`EcoScore = (AQIScore × 0.5) + (TempScore × 0.3) + 
+           (HumidityScore × 0.2)`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* About & Team Section */}
+      <section id="about" className="py-24 px-6 relative">
+        <div className="container mx-auto max-w-5xl">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-6xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                About EcoVerse
+              </span>
+            </h2>
+            <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+              Built by passionate developers and environmentalists dedicated to creating technology for a sustainable future
+            </p>
+          </div>
+
+          <div className="space-y-12">
+            <div className="p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+              <h3 className="text-3xl font-bold mb-6">Our Vision</h3>
+              <p className="text-gray-400 leading-relaxed mb-6">
+                We envision a world where every citizen has real-time visibility into their city's environmental health 
+                and the tools to make a positive impact. EcoVerse transforms abstract sustainability concepts into 
+                concrete, actionable insights powered by AI.
+              </p>
+              <p className="text-gray-400 leading-relaxed">
+                By gamifying eco-friendly behaviors and providing predictive analytics, we are creating a global 
+                movement where communities compete to build the greenest, most sustainable cities on Earth.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {[
+                {
+                  icon: Shield,
+                  title: 'Privacy First',
+                  description: 'Your data is encrypted and never shared. We only use location for EcoScore calculation.'
+                },
+                {
+                  icon: Globe,
+                  title: 'Global Impact',
+                  description: 'Join 100+ cities worldwide working together to create a more sustainable planet.'
+                },
+                {
+                  icon: Heart,
+                  title: 'Community Driven',
+                  description: 'Open-source and built with community feedback. Everyone can contribute.'
+                }
+              ].map((value, i) => (
+                <div key={i} className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl text-center">
+                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <value.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <h4 className="text-xl font-bold mb-3">{value.title}</h4>
+                  <p className="text-gray-400">{value.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-24 px-6 relative">
+        <div className="container mx-auto max-w-4xl text-center">
+          <div className="p-12 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-emerald-500/30 rounded-3xl backdrop-blur-sm">
+            <h2 className="text-4xl md:text-5xl font-bold mb-6">
+              Ready to Transform Your City?
+            </h2>
+            <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
+              Join thousands of eco-warriors making real environmental impact through AI-powered insights and community action.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/dashboard">
+                <button className="group px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-105 flex items-center gap-2">
+                  Launch EcoVerse Now
+                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                </button>
+              </Link>
+            </div>
+            
+            <div className="mt-12 flex items-center justify-center gap-8 text-sm text-gray-400">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <span>Free Forever</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-5 w-5 text-emerald-400" />
+                <span>No Credit Card Required</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-6 border-t border-white/10">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <Leaf className="h-8 w-8 text-emerald-400" />
+                <h3 className="text-xl font-bold">EcoVerse</h3>
+              </div>
+              <p className="text-gray-400 text-sm">
+                AI-powered platform for measuring and improving urban sustainability.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-4">Product</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li><a href="#features" className="hover:text-emerald-400 transition-colors">Features</a></li>
+                <li><a href="#how-it-works" className="hover:text-emerald-400 transition-colors">How It Works</a></li>
+                <li><a href="#tech-stack" className="hover:text-emerald-400 transition-colors">Technology</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-4">Company</h4>
+              <ul className="space-y-2 text-sm text-gray-400">
+                <li><a href="#about" className="hover:text-emerald-400 transition-colors">About Us</a></li>
+                <li><a href="#" className="hover:text-emerald-400 transition-colors">Contact</a></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold mb-4">Connect</h4>
+              <div className="flex gap-4 mb-4">
+                <a href="#" className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all">
+                  <Github className="h-5 w-5" />
+                </a>
+                <a href="#" className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all">
+                  <Twitter className="h-5 w-5" />
+                </a>
+                <a href="#" className="w-10 h-10 bg-white/5 rounded-lg flex items-center justify-center hover:bg-white/10 transition-all">
+                  <Linkedin className="h-5 w-5" />
+                </a>
+              </div>
+              <p className="text-sm text-gray-400">
+                <Mail className="h-4 w-4 inline mr-2" />
+                contact@ecoverse.app
               </p>
             </div>
           </div>
-        </section>
-      </main>
-      
-      <footer className="py-6 border-t">
-          <div className="container text-center text-muted-foreground text-sm">
-            &copy; {new Date().getFullYear()} EcoVerse. All Rights Reserved.
+          
+          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-gray-400">
+            <p>&copy; 2024 EcoVerse. All rights reserved.</p>
+            <div className="flex gap-6">
+              <a href="#" className="hover:text-emerald-400 transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-emerald-400 transition-colors">Terms of Service</a>
+            </div>
           </div>
+        </div>
       </footer>
     </div>
   );
 }
 
-interface FeatureCardProps {
-  icon: React.ElementType;
-  title: string;
-  description: string;
-}
+    
 
-function FeatureCard({ icon: Icon, title, description }: FeatureCardProps) {
-  return (
-    <div className="text-center p-6 rounded-lg transition-all hover:bg-background hover:shadow-lg">
-      <div className="flex justify-center mb-4">
-        <div className="p-4 bg-primary/10 rounded-full">
-          <Icon className="h-8 w-8 text-primary" />
-        </div>
-      </div>
-      <h3 className="text-xl font-bold font-headline mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
-    </div>
-  );
-}
+    

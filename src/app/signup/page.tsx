@@ -102,7 +102,7 @@ export default function SignupPage() {
               <Input
                 id="displayName"
                 type="text"
-                placeholder="Jane Doe"
+                placeholder="Enter your name"
                 {...register('displayName')}
               />
               {errors.displayName && (
@@ -114,7 +114,7 @@ export default function SignupPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="Enter your Email"
                 {...register('email')}
               />
               {errors.email && (
@@ -126,6 +126,7 @@ export default function SignupPage() {
               <Input
                 id="password"
                 type="password"
+                placeholder='Enter your password'
                 {...register('password')}
               />
               {errors.password && (

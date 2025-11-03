@@ -90,7 +90,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="m@example.com"
+                placeholder="Enter your Email"
                 {...register('email')}
               />
               {errors.email && (
@@ -102,6 +102,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
+                placeholder="Enter your password"
                 {...register('password')}
               />
               {errors.password && (
