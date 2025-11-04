@@ -189,6 +189,18 @@ export default function DashboardPage() {
     return null; // or a login redirect, which is handled by the effect
   }
 
+  const getAqiGaugeValue = (aqi: number) => (aqi ? Math.min(100, (aqi / 300) * 100) : 0);
+  const getTempGaugeValue = (temp: number) => {
+    if (temp < 10) return 10;
+    if (temp > 35) return 100;
+    return ((temp - 10) / 25) * 100;
+  };
+   const getTempGaugeColor = (temp: number) => {
+    if (temp > 18 && temp < 27) return 'bg-green-500';
+    if (temp > 10 && temp < 35) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -323,24 +335,31 @@ export default function DashboardPage() {
               value={isLoadingEcoScore ? "..." : ecoScoreData?.ecoScore.toFixed(1) || 'N/A'}
               icon={TrendingUp}
               description={isLoadingEcoScore ? "Calculating..." : `Based on location data`}
+              gaugeValue={ecoScoreData?.ecoScore}
             />
              <OverviewCard
               title="AQI"
               value={isLoadingEcoScore ? "..." : ecoScoreData?.aqi.toFixed(0) || 'N/A'}
               icon={Wind}
               description="Air Quality Index"
+              gaugeValue={getAqiGaugeValue(ecoScoreData?.aqi || 0)}
+              gaugeColor={ecoScoreData?.aqi ? (ecoScoreData.aqi < 51 ? 'bg-green-500' : ecoScoreData.aqi < 101 ? 'bg-yellow-500' : 'bg-red-500') : 'bg-muted'}
             />
             <OverviewCard
               title="Humidity"
               value={isLoadingEcoScore ? "..." : `${ecoScoreData?.humidity.toFixed(0) || 'N/A'}%`}
               icon={Droplets}
               description="Relative Humidity"
+              gaugeValue={ecoScoreData?.humidity}
+              gaugeColor={ecoScoreData?.humidity ? (ecoScoreData.humidity > 40 && ecoScoreData.humidity < 60 ? 'bg-green-500' : 'bg-yellow-500') : 'bg-muted'}
             />
             <OverviewCard
               title="Temperature"
               value={isLoadingEcoScore ? "..." : `${ecoScoreData?.temperature.toFixed(0) || 'N/A'}°C`}
               icon={Thermometer}
               description="Current temperature"
+              gaugeValue={getTempGaugeValue(ecoScoreData?.temperature || 20)}
+              gaugeColor={getTempGaugeColor(ecoScoreData?.temperature || 20)}
             />
           </div>
 
