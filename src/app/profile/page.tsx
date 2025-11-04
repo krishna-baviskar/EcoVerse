@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -295,12 +296,13 @@ export default function ProfilePage() {
               {/* Avatar */}
               <div className="relative group">
                 <div className="absolute -inset-2 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white/20 overflow-hidden bg-slate-800">
+                <Avatar className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white/20 overflow-hidden bg-slate-800">
                   <AvatarImage src={userProfile?.photoURL || `https://picsum.photos/seed/${user?.uid}/160/160`} className="w-full h-full object-cover" />
+                   <AvatarFallback>{userProfile?.displayName?.charAt(0) || 'U'}</AvatarFallback>
                   <button className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <Camera className="h-8 w-8" />
                   </button>
-                </div>
+                </Avatar>
               </div>
 
               {/* User Info */}
@@ -764,7 +766,7 @@ export default function ProfilePage() {
                 <h3 className="text-xl font-bold">Activity Streak</h3>
                 <div className="flex items-center gap-1">
                   <Flame className="h-5 w-5 text-orange-400" />
-                  <span className="font-bold text-orange-400">{15}d</span>
+                  <span className="font-bold text-orange-400">15d</span>
                 </div>
               </div>
               
