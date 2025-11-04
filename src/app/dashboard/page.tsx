@@ -412,13 +412,19 @@ export default function DashboardPage() {
 
                 <div className="mt-20 p-6 bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-sm border border-orange-500/30 rounded-2xl">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Air Quality Index</h3>
+                    <h3 className="text-lg font-semibold">Air Quality & EcoScore</h3>
                     <Eye className="h-5 w-5 text-orange-400" />
                   </div>
                   
-                  <div className="flex items-baseline gap-2 mb-4">
-                    <span className="text-5xl font-bold text-orange-400">{ecoScoreData?.aqi?.toFixed(0)}</span>
-                    <span className="text-xl text-gray-400">AQI</span>
+                  <div className="flex items-baseline justify-around gap-2 mb-4">
+                    <div className="text-center">
+                        <span className="text-5xl font-bold text-orange-400">{ecoScoreData?.aqi?.toFixed(0)}</span>
+                        <span className="text-xl text-gray-400 ml-1">AQI</span>
+                    </div>
+                     <div className="text-center">
+                        <span className="text-5xl font-bold text-emerald-400">{ecoScoreData?.ecoScore?.toFixed(0)}</span>
+                         <span className="text-xl text-gray-400 ml-1">EcoScore</span>
+                    </div>
                   </div>
 
                   <div className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-center">
@@ -600,5 +606,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
 
     
