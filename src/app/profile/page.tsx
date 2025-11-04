@@ -99,6 +99,8 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [menuOpen, setMenuOpen] = useState(false);
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
+  const [ecoScoreData, setEcoScoreData] = useState<PredictEcoScoreOutput | null>(null);
+  const [isLoadingEcoScore, setIsLoadingEcoScore] = useState(true);
 
   const userDocRef = useMemoFirebase(
     () => (user ? doc(firestore, 'users', user.uid) : null),
@@ -116,6 +118,34 @@ export default function ProfilePage() {
     const index = leaderboardData.findIndex(p => p.id === user.uid);
     return index !== -1 ? index + 1 : 'N/A';
   }, [leaderboardData, user]);
+
+  const fetchEcoScore = useCallback(async (location: string) => {
+    if (!location) {
+      setIsLoadingEcoScore(false);
+      return;
+    }
+    setIsLoadingEcoScore(true);
+    try {
+      const result = await predictEcoScore({ location });
+      setEcoScoreData(result);
+    } catch (error) {
+      console.error("Failed to fetch eco score", error);
+      setEcoScoreData(null);
+    } finally {
+      setIsLoadingEcoScore(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (userProfile?.location) {
+      const city = userProfile.location.split(',')[0].trim();
+      if(city) {
+        fetchEcoScore(city);
+      }
+    } else {
+      setIsLoadingEcoScore(false);
+    }
+  }, [userProfile?.location, fetchEcoScore]);
 
 
   const handleLogout = async () => {
@@ -361,7 +391,7 @@ export default function ProfilePage() {
 
         {/* Tabs */}
         <div className="flex items-center gap-2 p-2 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-x-auto">
-          {['overview', 'badges', 'achievements', 'activity'].map(tab => (
+          {['overview', 'community', 'leaderboard', 'badges', 'achievements', 'activity'].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -408,13 +438,13 @@ export default function ProfilePage() {
                             strokeWidth="12"
                             fill="transparent"
                             strokeDasharray={`${2 * Math.PI * 88}`}
-                            strokeDashoffset={`${2 * Math.PI * 88 * (1 - (userProfile?.ecoPoints || 0) / 100)}`}
+                            strokeDashoffset={`${2 * Math.PI * 88 * (1 - (ecoScoreData?.ecoScore || 0) / 100)}`}
                             className="text-emerald-400"
                             strokeLinecap="round"
                           />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="text-5xl font-bold text-emerald-400">{userProfile?.ecoPoints || 0}</div>
+                          <div className="text-5xl font-bold text-emerald-400">{ecoScoreData?.ecoScore.toFixed(0) || 'N/A'}</div>
                           <div className="text-sm text-gray-400">EcoScore</div>
                         </div>
                       </div>
@@ -641,6 +671,18 @@ export default function ProfilePage() {
                   </div>
                 </div>
               </>
+            )}
+
+            {activeTab === 'community' && (
+              <CommunityImpact 
+                userEcoPoints={userProfile?.ecoPoints || 0}
+                cityEcoScore={ecoScoreData?.ecoScore || 0}
+                isLoading={isLeaderboardLoading || isLoadingEcoScore}
+              />
+            )}
+
+            {activeTab === 'leaderboard' && (
+              <Leaderboard />
             )}
 
             {activeTab === 'badges' && (
