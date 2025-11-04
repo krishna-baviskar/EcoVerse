@@ -56,7 +56,7 @@ import {
 } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { collection, doc, limit, orderBy, query } from 'firebase/firestore';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -753,7 +753,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-300">Community Rank</span>
-                  <span className="font-bold text-yellow-400">#{userRank}</span>
+                  <span className="font-bold text-yellow-400">#2</span>
                 </div>
               </div>
             </div>
@@ -764,7 +764,7 @@ export default function ProfilePage() {
                 <h3 className="text-xl font-bold">Activity Streak</h3>
                 <div className="flex items-center gap-1">
                   <Flame className="h-5 w-5 text-orange-400" />
-                  <span className="font-bold text-orange-400">{stats.find(s=>s.label==='Streak')?.value || '0d'}</span>
+                  <span className="font-bold text-orange-400">{userData.streakDays}</span>
                 </div>
               </div>
               
@@ -809,13 +809,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
-
-      <UpdateLocationDialog
-          open={isLocationDialogOpen}
-          onOpenChange={setIsLocationDialogOpen}
-          onLocationSubmit={handleLocationUpdate}
-          isLoading={isProfileLoading}
-      />
     </div>
   );
 }
+"code for profile"
