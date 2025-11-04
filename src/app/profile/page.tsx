@@ -406,13 +406,13 @@ export default function ProfilePage() {
                             strokeWidth="12"
                             fill="transparent"
                             strokeDasharray={`${2 * Math.PI * 88}`}
-                            strokeDashoffset={`${2 * Math.PI * 88 * (1 - (userProfile?.ecoScore || 0) / 100)}`}
+                            strokeDashoffset={`${2 * Math.PI * 88 * (1 - (userProfile?.ecoPoints || 0) / 100)}`}
                             className="text-emerald-400"
                             strokeLinecap="round"
                           />
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <div className="text-5xl font-bold text-emerald-400">{userProfile?.ecoScore || 72}</div>
+                          <div className="text-5xl font-bold text-emerald-400">{userProfile?.ecoPoints || 0}</div>
                           <div className="text-sm text-gray-400">EcoScore</div>
                         </div>
                       </div>
@@ -811,5 +811,4 @@ export default function ProfilePage() {
       </main>
     </div>
   );
-}
-"code for profile"
+} "code for profile page"
