@@ -516,6 +516,10 @@ export default function DashboardPage() {
             </Card>
 
             <SuggestedChallenges challenges={challenges} isLoading={isLoadingChallenges} />
+            
+            <div className="lg:col-span-2">
+              <EcoScoreRatingScale />
+            </div>
           </div>
 
           <div className="space-y-6">
