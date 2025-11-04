@@ -289,7 +289,7 @@ export default function DashboardPage() {
 
             <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl cursor-pointer" onClick={() => setIsLocationDialogOpen(true)}>
               <MapPin className="h-5 w-5 text-emerald-400" />
-              <span className="text-white outline-none">{location ? location.split(',')[0].trim() : 'Set Location'}</span>
+              <span className="text-white outline-none">{location ? location : 'Set Location'}</span>
             </div>
 
             <div className="flex items-center gap-3">
@@ -600,3 +600,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
