@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -811,4 +812,5 @@ export default function ProfilePage() {
       </main>
     </div>
   );
-} "code for profile page"
+}
+"code for profile"
