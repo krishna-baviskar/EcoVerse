@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -765,7 +764,7 @@ export default function ProfilePage() {
                 <h3 className="text-xl font-bold">Activity Streak</h3>
                 <div className="flex items-center gap-1">
                   <Flame className="h-5 w-5 text-orange-400" />
-                  <span className="font-bold text-orange-400">{userData.streakDays}</span>
+                  <span className="font-bold text-orange-400">{15}d</span>
                 </div>
               </div>
               
@@ -813,4 +812,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-"code for profile"
