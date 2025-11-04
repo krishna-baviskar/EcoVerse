@@ -15,6 +15,23 @@ import {
   LogIn,
   LogOut,
   User as UserIcon,
+  Leaf,
+  ChevronDown,
+  Menu,
+  X,
+  Bell,
+  Settings,
+  Cloud,
+  Sun,
+  CloudRain,
+  CloudSnow,
+  Eye,
+  Activity,
+  BarChart3,
+  Award,
+  Clock,
+  ArrowRight,
+  RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -38,23 +55,27 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
 
 import { LogActionDialog } from '@/components/dashboard/log-action-dialog';
-import { OverviewCard } from '@/components/dashboard/overview-card';
 import { Logo } from '@/components/logo';
 import { EcoScoreRatingScale } from '@/components/dashboard/ecoscore-rating-scale';
-import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase, updateDocumentNonBlocking } from '@/firebase';
+import { useAuth, useUser, useDoc, useFirestore, useMemoFirebase, updateDocumentNonBlocking, useCollection } from '@/firebase';
 import { signOut } from 'firebase/auth';
-import { doc } from 'firebase/firestore';
+import { collection, doc, limit, orderBy, query } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { UserProfile } from '@/lib/types';
 import { SuggestedChallenges } from '@/components/dashboard/suggested-challenges';
 import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
-import { cn } from '@/lib/utils';
-import { Separator } from '@/components/ui/separator';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import { Progress } from '@/components/ui/progress';
+
+interface LeaderboardUser {
+    id: string;
+    displayName: string;
+    photoURL: string;
+    ecoPoints: number;
+}
 
 export default function DashboardPage() {
   const [location, setLocation] = useState('');
@@ -63,7 +84,9 @@ export default function DashboardPage() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [isLoadingChallenges, setIsLoadingChallenges] = useState(true);
   const [isLocationDialogOpen, setIsLocationDialogOpen] = useState(false);
-
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [time, setTime] = useState(new Date());
 
   const router = useRouter();
   const { user, isUserLoading } = useUser();
@@ -75,6 +98,22 @@ export default function DashboardPage() {
     [firestore, user]
   );
   const { data: userProfile, isLoading: isProfileLoading } = useDoc<UserProfile>(userDocRef);
+  
+  const usersCollectionRef = useMemoFirebase(
+    () => collection(firestore, 'users'),
+    [firestore]
+  );
+  const leaderboardQuery = useMemoFirebase(
+    () =>
+      usersCollectionRef
+        ? query(usersCollectionRef, orderBy('ecoPoints', 'desc'), limit(5))
+        : null,
+    [usersCollectionRef]
+  );
+
+  const { data: leaderboardData, isLoading: isLeaderboardLoading } =
+    useCollection<LeaderboardUser>(leaderboardQuery);
+
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -84,7 +123,6 @@ export default function DashboardPage() {
 
   const fetchDashboardData = useCallback(async (loc: string, forceRefresh = false) => {
     const locationParts = loc.split(',').map(p => p.trim());
-    // Find the city. It's usually the second part if an address is present, or the first otherwise.
     const fetchCity = locationParts.length > 1 ? locationParts[1] : locationParts[0];
     
     if (!fetchCity) {
@@ -93,7 +131,7 @@ export default function DashboardPage() {
       return;
     }
     
-    setLocation(loc); // Set the full location string for display
+    setLocation(loc);
 
     const ecoScoreCacheKey = `ecoScoreData-${fetchCity}`;
     const challengesCacheKey = `challenges-${fetchCity}`;
@@ -116,8 +154,7 @@ export default function DashboardPage() {
 
     try {
       const ecoScorePromise = predictEcoScore({ location: fetchCity });
-      // Use a default ecoScore for challenge generation to avoid dependency on the predictEcoScore result
-      const challengesPromise = generateChallenges({ location: fetchCity, ecoScore: 75 }); 
+      const challengesPromise = generateChallenges({ location: fetchCity, ecoScore: userProfile?.ecoPoints || 75 }); 
       
       const [ecoScoreResult, challengesResult] = await Promise.all([ecoScorePromise, challengesPromise]);
 
@@ -138,7 +175,7 @@ export default function DashboardPage() {
       setIsLoadingEcoScore(false);
       setIsLoadingChallenges(false);
     }
-  }, []);
+  }, [userProfile?.ecoPoints]);
 
   useEffect(() => {
     if (isProfileLoading || isUserLoading) {
@@ -146,7 +183,6 @@ export default function DashboardPage() {
     }
 
     if (!user) {
-        // Redirect handled by another effect
         return;
     }
     
@@ -160,6 +196,22 @@ export default function DashboardPage() {
     }
   }, [user, userProfile, isProfileLoading, isUserLoading, fetchDashboardData]);
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({
+        x: (e.clientX / window.innerWidth - 0.5) * 10,
+        y: (e.clientY / window.innerHeight - 0.5) * 10
+      });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    
+    const timer = setInterval(() => setTime(new Date()), 60000);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      clearInterval(timer);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -180,201 +232,371 @@ export default function DashboardPage() {
 
     await fetchDashboardData(newLocation, true);
   };
+  
+  const getWeatherIcon = (condition?: string) => {
+    if (!condition) return Cloud;
+    const lowerCaseCondition = condition.toLowerCase();
+    if (lowerCaseCondition.includes('mist') || lowerCaseCondition.includes('fog')) return Cloud;
+    if (lowerCaseCondition.includes('rain') || lowerCaseCondition.includes('drizzle')) return CloudRain;
+    if (lowerCaseCondition.includes('snow')) return CloudSnow;
+    if (lowerCaseCondition.includes('clear')) return Sun;
+    return Cloud;
+  };
+
+  const WeatherIcon = getWeatherIcon(ecoScoreData?.condition);
+  const aqiCategory = ecoScoreData?.aqi ? (ecoScoreData.aqi < 51 ? 'GOOD' : ecoScoreData.aqi < 101 ? 'MODERATE' : 'POOR') : 'N/A';
+
 
   if (isUserLoading || isProfileLoading) {
     return <LoadingSpinner />;
   }
-  
-  if (!user) {
-    return null; // or a login redirect, which is handled by the effect
-  }
-
-  const getAqiGaugeValue = (aqi: number) => (aqi ? Math.min(100, (aqi / 300) * 100) : 0);
-  const getTempGaugeValue = (temp: number) => {
-    if (temp < 10) return 10;
-    if (temp > 35) return 100;
-    return ((temp - 10) / 25) * 100;
-  };
-   const getTempGaugeColor = (temp: number) => {
-    if (temp > 18 && temp < 27) return 'bg-green-500';
-    if (temp > 10 && temp < 35) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <nav className="hidden w-full flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <Link href="/dashboard" className="flex items-center gap-2 text-lg font-semibold md:text-base flex-shrink-0">
-            <Logo />
-            <span className="sr-only">EcoVerse</span>
-          </Link>
-          <div className="flex-grow min-w-0">
-            {location ? (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4 flex-shrink-0" />
-                <span className="truncate">{location}</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <MapPin className="h-4 w-4" />
-                <span>No location set</span>
-              </div>
-            )}
-          </div>
-        </nav>
-        <div className="flex w-full items-center gap-4 md:ml-auto md:w-auto md:gap-2 lg:gap-4">
-            <div className="ml-auto flex-1 sm:flex-initial">
-                 <LogActionDialog>
-                    <Button className="hidden sm:flex" variant="outline">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Log Action
-                    </Button>
-                </LogActionDialog>
-            </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="secondary" size="icon" className="rounded-full">
-                <Avatar>
-                   {user?.photoURL ? (
-                    <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
-                  ) : (
-                    <AvatarImage src="https://picsum.photos/seed/100/40/40" />
-                  )}
-                  <AvatarFallback>
-                    {user?.displayName ? user.displayName.charAt(0).toUpperCase() : <UserIcon />}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="sr-only">Toggle user menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{user ? user.displayName : 'My Account'}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {user ? (
-                <>
-                  <DropdownMenuItem onClick={() => router.push('/profile')}>
-                    <UserIcon className="mr-2 h-4 w-4" />
-                    <span>Profile</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setIsLocationDialogOpen(true)}>
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    <span>Settings</span>
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleLogout}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Logout</span>
-                  </DropdownMenuItem>
-                </>
-              ) : (
-                <DropdownMenuItem onClick={() => router.push('/login')}>
-                  <LogIn className="mr-2 h-4 w-4" />
-                  <span>Login</span>
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-      <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <UpdateLocationDialog
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-emerald-950 to-slate-950 text-white overflow-hidden">
+      <UpdateLocationDialog
           open={isLocationDialogOpen}
           onOpenChange={setIsLocationDialogOpen}
           onLocationSubmit={handleLocationUpdate}
           isLoading={isLoadingEcoScore || isLoadingChallenges}
-        />
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-8">
-            <Card>
-              <CardHeader>
-                <CardTitle className="font-headline">Location Settings</CardTitle>
-                <CardDescription>
-                  Your location is used to calculate your EcoScore and find local challenges.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button onClick={() => setIsLocationDialogOpen(true)}>
-                  <MapPin className="mr-2 h-4 w-4" />
-                  Update Location
+      />
+      {/* Animated Background */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div 
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ transform: `translate(${mousePosition.x * 2}px, ${mousePosition.y * 2}px)` }}
+        ></div>
+        <div 
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ transform: `translate(${-mousePosition.x * 2}px, ${-mousePosition.y * 2}px)` }}
+        ></div>
+      </div>
+
+       {/* Header */}
+       <header className="relative z-50 bg-slate-900/50 backdrop-blur-xl border-b border-white/10">
+        <div className="container mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            <Link href="/dashboard" className="flex items-center gap-3 group cursor-pointer">
+              <div className="relative">
+                <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <Leaf className="h-8 w-8 text-emerald-400 relative" />
+              </div>
+              <div>
+                <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                  EcoVerse
+                </h1>
+              </div>
+            </Link>
+
+            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl cursor-pointer" onClick={() => setIsLocationDialogOpen(true)}>
+              <MapPin className="h-5 w-5 text-emerald-400" />
+              <span className="text-white outline-none">{location ? location.split(',')[0].trim() : 'Set Location'}</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+               <LogActionDialog>
+                <Button variant="outline" className="hidden sm:flex bg-white/5 border-white/10 hover:bg-white/10">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Log Action
                 </Button>
-              </CardContent>
-            </Card>
-            {ecoScoreData && !isLoadingEcoScore ? (
-               <Card>
-                <CardHeader>
-                  <CardTitle className="font-headline flex items-center gap-2">
-                    <Info /> EcoScore Insights for {location.split(',')[0].trim()}
-                  </CardTitle>
-                  <CardDescription>{ecoScoreData.condition}: {ecoScoreData.suggestion}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm mb-4">{ecoScoreData.explanation}</p>
-                  <Separator className="my-4" />
-                  <h4 className="font-semibold mb-2 text-sm">Score Breakdown:</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
-                    {ecoScoreData.breakdown.map((item) => (
-                        <li key={item.factor} className="flex justify-between items-center">
-                            <span>{item.factor} ({item.rawValue}):</span>
-                            <span className="font-medium text-foreground">{item.contribution.toFixed(1)} pts</span>
-                        </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="flex items-center justify-center">
-                <CardContent className="p-6">
-                  {isLoadingEcoScore ? <Skeleton className="h-4 w-[300px]" /> : <p>Enter a location to see your EcoScore insights.</p>}
-                </CardContent>
-              </Card>
+               </LogActionDialog>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 bg-white/5">
+                    <Avatar className="h-8 w-8">
+                       {user?.photoURL ? (
+                        <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
+                      ) : (
+                        <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/40/40`} />
+                      )}
+                      <AvatarFallback>
+                        {user?.displayName ? user.displayName.charAt(0).toUpperCase() : <UserIcon />}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-slate-900/80 backdrop-blur-xl border-white/10 text-white">
+                  <DropdownMenuLabel>{user ? user.displayName : 'My Account'}</DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-white/10" />
+                  {user ? (
+                    <>
+                      <DropdownMenuItem onClick={() => router.push('/profile')} className="cursor-pointer hover:bg-white/10">
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        <span>Profile</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setIsLocationDialogOpen(true)} className="cursor-pointer hover:bg-white/10">
+                        <Settings className="mr-2 h-4 w-4" />
+                        <span>Settings</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator className="bg-white/10" />
+                      <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-white/10">
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Logout</span>
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem onClick={() => router.push('/login')} className="cursor-pointer hover:bg-white/10">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      <span>Login</span>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="relative z-10 container mx-auto px-6 py-8 space-y-8">
+        <div 
+          className="relative rounded-3xl overflow-hidden"
+          style={{
+            transform: `perspective(1000px) rotateX(${-mousePosition.y * 0.3}deg) rotateY(${mousePosition.x * 0.3}deg)`,
+            transition: 'transform 0.1s ease-out'
+          }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-800/90 via-emerald-900/60 to-slate-800/90 backdrop-blur-sm"></div>
+          
+          <div 
+            className="absolute inset-0 opacity-30"
+            style={{
+              backgroundImage: "url('https://picsum.photos/seed/dashboard/1200/400')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center'
+            }}
+          ></div>
+
+          <div className="relative z-10 p-8 md:p-12">
+            {isLoadingEcoScore ? <LoadingSpinner /> : (
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div className="space-y-6">
+                <div>
+                  <h2 className="text-3xl md:text-4xl font-bold mb-2">{location.split(',')[0].trim() || '...'} Weather Conditions</h2>
+                  <p className="text-emerald-400">{ecoScoreData?.suggestion}</p>
+                </div>
+
+                <div className="flex items-start gap-8">
+                  <div>
+                    <div className="flex items-baseline gap-2 mb-4">
+                      <span className="text-7xl md:text-8xl font-bold">{ecoScoreData?.temperature?.toFixed(0)}</span>
+                      <span className="text-4xl text-gray-400">°C</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <WeatherIcon className="h-12 w-12 text-blue-400" />
+                      <div>
+                        <div className="text-xl font-semibold">{ecoScoreData?.condition}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Droplets className="h-4 w-4" />
+                      <span>Humidity: {ecoScoreData?.humidity?.toFixed(0)}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <Clock className="h-4 w-4" />
+                  <span>Last Updated: {time.toLocaleTimeString()}</span>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-10">
+                  <div className="w-32 h-32 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-full flex items-center justify-center animate-bounce">
+                    <Leaf className="h-16 w-16 text-white" />
+                  </div>
+                </div>
+
+                <div className="mt-20 p-6 bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-sm border border-orange-500/30 rounded-2xl">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Air Quality Index</h3>
+                    <Eye className="h-5 w-5 text-orange-400" />
+                  </div>
+                  
+                  <div className="flex items-baseline gap-2 mb-4">
+                    <span className="text-5xl font-bold text-orange-400">{ecoScoreData?.aqi?.toFixed(0)}</span>
+                    <span className="text-xl text-gray-400">AQI</span>
+                  </div>
+
+                  <div className="px-4 py-2 bg-red-500/20 border border-red-500/30 rounded-lg text-center">
+                    <span className="text-red-400 font-bold">Air quality index is: {aqiCategory}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
             )}
           </div>
-          <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
-            <OverviewCard
-              title="EcoScore"
-              value={isLoadingEcoScore ? "..." : ecoScoreData?.ecoScore.toFixed(1) || 'N/A'}
-              icon={TrendingUp}
-              description={isLoadingEcoScore ? "Calculating..." : `Based on location data`}
-              gaugeValue={ecoScoreData?.ecoScore}
-            />
-             <OverviewCard
-              title="AQI"
-              value={isLoadingEcoScore ? "..." : ecoScoreData?.aqi.toFixed(0) || 'N/A'}
-              icon={Wind}
-              description="Air Quality Index"
-              gaugeValue={getAqiGaugeValue(ecoScoreData?.aqi || 0)}
-              gaugeColor={ecoScoreData?.aqi ? (ecoScoreData.aqi < 51 ? 'bg-green-500' : ecoScoreData.aqi < 101 ? 'bg-yellow-500' : 'bg-red-500') : 'bg-muted'}
-            />
-            <OverviewCard
-              title="Humidity"
-              value={isLoadingEcoScore ? "..." : `${ecoScoreData?.humidity.toFixed(0) || 'N/A'}%`}
-              icon={Droplets}
-              description="Relative Humidity"
-              gaugeValue={ecoScoreData?.humidity}
-              gaugeColor={ecoScoreData?.humidity ? (ecoScoreData.humidity > 40 && ecoScoreData.humidity < 60 ? 'bg-green-500' : 'bg-yellow-500') : 'bg-muted'}
-            />
-            <OverviewCard
-              title="Temperature"
-              value={isLoadingEcoScore ? "..." : `${ecoScoreData?.temperature.toFixed(0) || 'N/A'}°C`}
-              icon={Thermometer}
-              description="Current temperature"
-              gaugeValue={getTempGaugeValue(ecoScoreData?.temperature || 20)}
-              gaugeColor={getTempGaugeColor(ecoScoreData?.temperature || 20)}
-            />
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="group p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-400">EcoScore</span>
+              <TrendingUp className="h-5 w-5 text-emerald-400" />
+            </div>
+            <div className="text-3xl font-bold mb-2">{ecoScoreData?.ecoScore.toFixed(0) || '...'}</div>
+            <Progress value={ecoScoreData?.ecoScore} indicatorClassName="bg-emerald-500" />
+          </div>
+          <div className="group p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-400">AQI</span>
+              <Wind className="h-5 w-5 text-orange-400" />
+            </div>
+            <div className="text-3xl font-bold mb-2">{ecoScoreData?.aqi.toFixed(0) || '...'}</div>
+            <Progress value={ecoScoreData ? (ecoScoreData.aqi/500)*100 : 0} indicatorClassName="bg-orange-500" />
+          </div>
+          <div className="group p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-400">Humidity</span>
+              <Droplets className="h-5 w-5 text-blue-400" />
+            </div>
+            <div className="text-3xl font-bold mb-2">{ecoScoreData?.humidity.toFixed(0) || '...'}%</div>
+            <Progress value={ecoScoreData?.humidity} indicatorClassName="bg-blue-500" />
+          </div>
+          <div className="group p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm text-gray-400">Temp</span>
+              <Thermometer className="h-5 w-5 text-red-400" />
+            </div>
+            <div className="text-3xl font-bold mb-2">{ecoScoreData?.temperature.toFixed(0) || '...'}°C</div>
+            <Progress value={ecoScoreData ? (ecoScoreData.temperature/50)*100 : 0} indicatorClassName="bg-red-500" />
+          </div>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+              <CardHeader className="p-0">
+                <CardTitle className="text-2xl font-bold">EcoScore Breakdown</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0 mt-6">
+                <div className="space-y-4">
+                  {ecoScoreData?.breakdown.map((item) => {
+                    const percentage = (item.contribution / (item.weight * 100)) * 100;
+                    const getColor = (val: number) => {
+                      if (val >= 80) return 'emerald';
+                      if (val >= 60) return 'yellow';
+                      return 'red';
+                    };
+                    const color = getColor(item.derivedScore);
+
+                    return (
+                      <div key={item.factor}>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-semibold capitalize">{item.factor}</span>
+                          <span className="text-lg font-bold text-white">{item.contribution.toFixed(0)}/{item.weight * 100}</span>
+                        </div>
+                        <Progress value={percentage} indicatorClassName={`bg-${color}-500`} />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-6 p-6 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-emerald-500/30 rounded-xl">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-gray-400 mb-1">Overall Grade</div>
+                      <div className="text-4xl font-bold text-emerald-400">{ecoScoreData?.ecoScore ? (ecoScoreData.ecoScore > 85 ? 'A' : ecoScoreData.ecoScore > 70 ? 'B' : 'C') : 'N/A'}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-400 mb-1">Total Score</div>
+                      <div className="text-3xl font-bold">{ecoScoreData?.ecoScore.toFixed(0) || '...'}</div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <SuggestedChallenges challenges={challenges} isLoading={isLoadingChallenges} />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-1">
-             <SuggestedChallenges 
-                challenges={challenges} 
-                isLoading={isLoadingChallenges}
-             />
+          <div className="space-y-6">
+             <div className="p-6 bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 rounded-2xl backdrop-blur-sm">
+                <div className="flex items-center gap-3 mb-4">
+                    <Avatar className="w-16 h-16">
+                        <AvatarImage src={user?.photoURL || `https://picsum.photos/seed/${user?.uid}/64/64`} />
+                        <AvatarFallback>{userProfile?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                    <h4 className="font-bold">{userProfile?.displayName || 'Eco Warrior'}</h4>
+                    <p className="text-sm text-gray-400">Level 12</p>
+                    </div>
+                </div>
+                
+                <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">EcoPoints</span>
+                    <span className="font-bold text-yellow-400">{userProfile?.ecoPoints || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Rank</span>
+                    <span className="font-bold text-emerald-400">#{leaderboardData?.findIndex(p => p.id === user?.uid) + 1 || 'N/A'}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Badges</span>
+                    <span className="font-bold">12</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-bold">Leaderboard</h3>
+                <Trophy className="h-5 w-5 text-yellow-400" />
+              </div>
+              
+              <div className="space-y-3">
+                {isLeaderboardLoading ? <LoadingSpinner /> : leaderboardData?.map((entry, index) => (
+                  <div 
+                    key={entry.id}
+                    className={`p-3 rounded-lg ${entry.id === user?.uid ? 'bg-emerald-500/20 border border-emerald-500/30' : 'bg-white/5'}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-8 h-8 flex items-center justify-center rounded-full font-bold ${
+                        index === 0 ? 'bg-yellow-500 text-black' :
+                        index === 1 ? 'bg-gray-300 text-black' :
+                        index === 2 ? 'bg-orange-500 text-white' : 'bg-slate-700'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div className="flex-1">
+                        <div className="font-semibold">{entry.displayName}</div>
+                        <div className="text-xs text-gray-400">{entry.ecoPoints} points</div>
+                      </div>
+                      <div className="text-lg font-bold">{entry.ecoPoints}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+             <div className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+              <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
+              <div className="space-y-2">
+                 <LogActionDialog>
+                    <Button variant="ghost" className="w-full flex items-center justify-start gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all group">
+                        <Activity className="h-5 w-5 text-emerald-400" />
+                        <span className="text-sm">Log Action</span>
+                        <ArrowRight className="h-4 w-4 ml-auto text-gray-400 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                </LogActionDialog>
+                <Button onClick={() => router.push('/profile')} variant="ghost" className="w-full flex items-center justify-start gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all group">
+                    <UserIcon className="h-5 w-5 text-purple-400" />
+                    <span className="text-sm">My Profile & Badges</span>
+                    <ArrowRight className="h-4 w-4 ml-auto text-gray-400 group-hover:translate-x-1 transition-transform" />
+                </Button>
+                <Button onClick={() => setIsLocationDialogOpen(true)} variant="ghost" className="w-full flex items-center justify-start gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all group">
+                    <Settings className="h-5 w-5 text-gray-400" />
+                    <span className="text-sm">Settings</span>
+                    <ArrowRight className="h-4 w-4 ml-auto text-gray-400 group-hover:translate-x-1 transition-transform" />
+                </Button>
+              </div>
+            </div>
           </div>
-          
-          <div className="grid gap-4 lg:grid-cols-1">
-              <EcoScoreRatingScale />
-          </div>
-        </main>
+        </div>
         {location && <FloatingEcoTutor location={location.split(',')[0].trim()} />}
-      </div>
+      </main>
+    </div>
   );
 }
