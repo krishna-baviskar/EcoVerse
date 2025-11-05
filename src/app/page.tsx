@@ -479,7 +479,7 @@ export default function EcoVerseLanding() {
             </div>
             
             <div>
-              <h3 className="text-3xl font-bold text-center mb-12">Meet the Founders</h3>
+              <h3 className="text-3xl font-bold text-center mb-12">Meet the Team IRONHACK</h3>
               <div className="grid md:grid-cols-2 gap-10">
                 
                 {founder1 && <div className="flex flex-col items-center md:flex-row gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
@@ -490,9 +490,9 @@ export default function EcoVerseLanding() {
                     </div>
                   </div>
                   <div className="text-center md:text-left">
-                    <h4 className="text-2xl font-bold">Jane Doe</h4>
-                    <p className="text-sm text-emerald-400 mb-3">Co-Founder & CEO</p>
-                    <p className="text-gray-400 italic">"We built EcoVerse to empower individuals. Every small action, when multiplied by millions, can change our world."</p>
+                    <h4 className="text-2xl font-bold">Krishna Somnath Baviskar</h4>
+                    <p className="text-sm text-emerald-400 mb-3">Lead Developer</p>
+                    <p className="text-gray-400 italic">"Technology should be a force for good. With AI, we can finally make sustainability data understandable and actionable for everyone."</p>
                   </div>
                 </div>}
 
@@ -504,9 +504,9 @@ export default function EcoVerseLanding() {
                     </div>
                   </div>
                   <div className="text-center md:text-left">
-                    <h4 className="text-2xl font-bold">John Smith</h4>
-                    <p className="text-sm text-purple-400 mb-3">Co-Founder & CTO</p>
-                    <p className="text-gray-400 italic">"Technology should be a force for good. With AI, we can finally make sustainability data understandable and actionable for everyone."</p>
+                    <h4 className="text-2xl font-bold">Sanket Mohan Kotkar</h4>
+                    <p className="text-sm text-purple-400 mb-3">Core Developer</p>
+                    <p className="text-gray-400 italic">"We built EcoVerse to empower individuals. Every small action, when multiplied by millions, can change our world."</p>
                   </div>
                 </div>}
 
@@ -623,7 +623,7 @@ export default function EcoVerseLanding() {
               </div>
               <p className="text-sm text-gray-400">
                 <Mail className="h-4 w-4 inline mr-2" />
-                contact@ecoverse.app
+                ideans.team@gmail.com
               </p>
             </div>
           </div>

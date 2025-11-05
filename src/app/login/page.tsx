@@ -102,7 +102,7 @@ export default function LoginPage() {
       <FloatingParticles />
 
       {/* Logo */}
-      <div className="absolute top-8 left-8 z-20">
+      <div className="absolute top-4 left-8 z-20">
         <Link href="/">
             <div className="flex items-center gap-3 group cursor-pointer">
             <div className="relative">
