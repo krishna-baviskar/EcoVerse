@@ -58,7 +58,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
 
   const challenge = passedChallenge || {
     title: 'Car-Free Day Challenge',
-    points: 50,
+    ecoPoints: 50,
     description: 'Use public transport or bike for all trips today'
   };
 
@@ -132,10 +132,10 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
         });
         
         if (result.isValid) {
-            const pointsToAward = actionType === 'challenge' ? challenge.points : (result.ecoPoints || 0);
+            const pointsToAward = actionType === 'challenge' ? challenge.ecoPoints : (result.ecoPoints || 0);
             if (pointsToAward > 0) {
               const userRef = doc(firestore, 'users', user.uid);
-              await updateDocumentNonBlocking(userRef, {
+              updateDocumentNonBlocking(userRef, {
                   ecoPoints: increment(pointsToAward)
               });
             }
@@ -150,6 +150,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
 
     setStep(3);
   };
+
 
   const handleClose = () => {
     setOpen(false);
@@ -249,7 +250,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
                       <p className="text-sm text-gray-400 mb-2">{challenge.description}</p>
                       <div className="flex items-center gap-2">
                         <Coins className="h-4 w-4 text-yellow-400" />
-                        <span className="text-yellow-400 font-bold">{challenge.points} EcoPoints</span>
+                        <span className="text-yellow-400 font-bold">{challenge.ecoPoints} EcoPoints</span>
                       </div>
                     </div>
                   </div>
