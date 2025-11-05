@@ -11,10 +11,24 @@ import {
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
+import { useUser } from '@/firebase';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function EcoVerseLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
+  const { user } = useUser();
+
+  const handleLaunchApp = () => {
+    if (user) {
+      router.push('/dashboard');
+    } else {
+      router.push('/login');
+    }
+  };
+
 
   const founder1 = PlaceHolderImages.find(img => img.id === 'founder1');
   const founder2 = PlaceHolderImages.find(img => img.id === 'founder2');
@@ -51,11 +65,9 @@ export default function EcoVerseLanding() {
               <a href="#how-it-works" className="text-gray-300 hover:text-emerald-400 transition-colors">How It Works</a>
               <a href="#get-started" className="text-gray-300 hover:text-emerald-400 transition-colors">Get Started</a>
               <a href="#about" className="text-gray-300 hover:text-emerald-400 transition-colors">About</a>
-              <Link href="/dashboard">
-                <button className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg font-semibold hover:shadow-lg hover:shadow-emerald-500/50 transition-all transform hover:scale-105">
+              <button onClick={handleLaunchApp} className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg font-semibold hover:shadow-lg hover:shadow-emerald-500/50 transition-all transform hover:scale-105">
                   Launch App
-                </button>
-              </Link>
+              </button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -74,11 +86,9 @@ export default function EcoVerseLanding() {
               <a href="#how-it-works" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-gray-300 hover:text-emerald-400">How It Works</a>
               <a href="#get-started" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-gray-300 hover:text-emerald-400">Get Started</a>
               <a href="#about" onClick={() => setMobileMenuOpen(false)} className="block py-2 text-gray-300 hover:text-emerald-400">About</a>
-               <Link href="/dashboard">
-                <button className="w-full mt-4 px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg font-semibold">
+               <button onClick={() => { handleLaunchApp(); setMobileMenuOpen(false); }} className="w-full mt-4 px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg font-semibold">
                   Launch App
                 </button>
-              </Link>
             </div>
           )}
         </nav>
@@ -105,12 +115,10 @@ export default function EcoVerseLanding() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-            <Link href="/dashboard">
-              <button className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+            <button onClick={handleLaunchApp} className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
                 Start Your Eco-Journey
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </Link>
+            </button>
             <button className="group w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2">
               <Play className="h-5 w-5" />
               Watch Demo
@@ -555,12 +563,10 @@ export default function EcoVerseLanding() {
               Join thousands of eco-warriors making real environmental impact through AI-powered insights and community action.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/dashboard">
-                <button className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
-                  Launch EcoVerse Now
-                  <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <button onClick={handleLaunchApp} className="group w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-105 flex items-center justify-center gap-2">
+                    Launch EcoVerse Now
+                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </button>
-              </Link>
             </div>
             
             <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-gray-400">
@@ -640,5 +646,7 @@ export default function EcoVerseLanding() {
     </div>
   );
 }
+
+    
 
     
