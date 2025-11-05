@@ -25,18 +25,20 @@ service cloud.firestore {
 
     // This function securely checks if a user is ONLY incrementing their ecoPoints.
     function isSecurelyIncrementingEcoPoints() {
-        // Use diff() to see exactly what fields are changing between the old and new document.
         let changes = request.resource.data.diff(resource.data);
+        let affectedKeys = changes.affectedKeys();
+
+        // Check if 'ecoPoints' is the only field being changed.
+        let onlyEcoPointsAffected = affectedKeys.size() == 1 && affectedKeys.hasAny(['ecoPoints']);
         
-        // Check that the *only* field affected is 'ecoPoints'.
-        let onlyEcoPointsAffected = changes.affectedKeys().size() == 1 &&
-                                    changes.affectedKeys().hasAny(['ecoPoints']);
-                                    
-        // This is the CRITICAL part: it verifies that the new ecoPoints value is
-        // greater than the old one. This works for `increment()` operations.
+        // Check if 'ecoPoints' and 'completedActions' are being changed together.
+        let ecoPointsAndActionsAffected = affectedKeys.size() == 2 && affectedKeys.hasAll(['ecoPoints', 'completedActions']);
+        
+        // Verify that ecoPoints are only ever increased.
         let pointsAreIncreased = request.resource.data.ecoPoints > resource.data.ecoPoints;
 
-        return onlyEcoPointsAffected && pointsAreIncreased;
+        // The update is valid if it's ONLY ecoPoints OR it's ecoPoints AND completedActions.
+        return pointsAreIncreased && (onlyEcoPointsAffected || ecoPointsAndActionsAffected);
     }
 
 
@@ -50,7 +52,7 @@ service cloud.firestore {
                     && request.resource.data.uid == userId
                     && request.resource.data.ecoPoints == 0;
 
-      // A user can EITHER update their profile OR increment their ecoPoints.
+      // A user can EITHER update their profile OR increment their ecoPoints (with or without completedActions).
       allow update: if isOwner(userId) && 
                        (isUpdatingAllowedProfileFields() || isSecurelyIncrementingEcoPoints());
 
