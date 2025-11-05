@@ -196,7 +196,7 @@ export default function EcoVerseLanding() {
                   <CheckCircle2 className="h-6 w-6 text-emerald-400 flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-semibold text-lg mb-1">AI-Powered Recommendations</h4>
-                    <p className="text-gray-400">Gemini AI explains your score and suggests personalized, actionable eco-challenges</p>
+                    <p className="text-gray-400"> AI explains your score and suggests personalized, actionable eco-challenges</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
@@ -237,7 +237,7 @@ export default function EcoVerseLanding() {
               {
                 icon: Brain,
                 title: 'EcoGPT AI Tutor',
-                description: 'Conversational AI powered by Gemini that explains your score, answers eco-questions, and generates personalized challenges.',
+                description: 'Conversational AI powered that explains your score, answers eco-questions, and generates personalized challenges.',
                 gradient: 'from-blue-500 to-purple-500'
               },
               {
@@ -249,7 +249,7 @@ export default function EcoVerseLanding() {
               {
                 icon: Activity,
                 title: 'Predictive Analytics',
-                description: 'Gemini AI predicts future EcoScore trends and shows the impact of collective actions before they happen.',
+                description: ' AI predicts future EcoScore trends and shows the impact of collective actions before they happen.',
                 gradient: 'from-pink-500 to-red-500'
               },
               {
@@ -308,14 +308,14 @@ export default function EcoVerseLanding() {
                 {
                   step: '02',
                   title: 'AI Processing',
-                  description: 'Gemini AI and Genkit process the raw environmental data. The AI normalizes metrics, applies weighted algorithms, and generates a comprehensive EcoScore from 0-100.',
+                  description: ' AI and ML flows process the raw environmental data. The AI normalizes metrics, applies weighted algorithms, and generates a comprehensive EcoScore from 0-100.',
                   icon: Brain,
                   color: 'blue'
                 },
                 {
                   step: '03',
                   title: 'Intelligent Insights',
-                  description: 'The AI Tutor (powered by Gemini) explains your score in conversational language, identifies problem areas, and suggests specific actions and challenges.',
+                  description: 'The AI Tutor (powered by AI) explains your score in conversational language, identifies problem areas, and suggests specific actions and challenges.',
                   icon: Sparkles,
                   color: 'purple'
                 },
@@ -490,7 +490,7 @@ export default function EcoVerseLanding() {
                       alt="Jane Doe, Founder"
                       width={128}
                       height={128}
-                      className="relative rounded-full border-2 border-white/20"
+                      className="relative rounded-full border-2 border-white/20 object-cover"
                       data-ai-hint={founder1.imageHint}
                     />
                   </div>
@@ -509,7 +509,7 @@ export default function EcoVerseLanding() {
                       alt="John Smith, Founder"
                       width={128}
                       height={128}
-                      className="relative rounded-full border-2 border-white/20"
+                      className="relative rounded-full border-2 border-white/20 object-cover"
                       data-ai-hint={founder2.imageHint}
                     />
                   </div>
