@@ -403,13 +403,36 @@ export default function EcoVerseLanding() {
           </div>
 
           <div className="p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
-            <div className="space-y-6">
+            <div className="space-y-8">
               <div>
-                <h3 className="text-2xl font-bold mb-4">Weighted Formula</h3>
+                  <h3 className="text-2xl font-bold mb-4">1. Data Normalization</h3>
+                  <p className="text-gray-400 mb-4">
+                      First, we take raw data from our connected APIs and convert each metric into a normalized score from 0 to 100, where higher is better. This allows us to compare different types of data on the same scale.
+                  </p>
+                  <div className="space-y-4">
+                      <div className="p-4 bg-slate-900 rounded-xl">
+                          <h4 className="font-semibold text-emerald-300">Air Quality Score (AQI):</h4>
+                          <p className="text-sm text-gray-300">Calculated as `100 - (AQI / 500 * 100)`. A lower AQI value results in a higher score.</p>
+                      </div>
+                      <div className="p-4 bg-slate-900 rounded-xl">
+                          <h4 className="font-semibold text-blue-300">Temperature Score:</h4>
+                          <p className="text-sm text-gray-300">Scores are based on proximity to an ideal temperature of 24°C. The closer the temperature, the higher the score.</p>
+                      </div>
+                      <div className="p-4 bg-slate-900 rounded-xl">
+                          <h4 className="font-semibold text-purple-300">Humidity Score:</h4>
+                          <p className="text-sm text-gray-300">Scores are based on proximity to an ideal humidity level of 55%. Deviations from this value lower the score.</p>
+                      </div>
+                  </div>
+              </div>
+              
+              <div>
+                <h3 className="text-2xl font-bold mb-4">2. Weighted Formula</h3>
+                <p className="text-gray-400 mb-4">
+                    Once normalized, we combine the scores using a weighted formula that prioritizes factors with the greatest impact on environmental health and human well-being. Air quality is given the highest weight.
+                </p>
                 <div className="p-6 bg-slate-900 rounded-xl">
-                  <pre className="text-emerald-400 text-lg font-mono">
-{`EcoScore = (AQIScore × 0.5) + (TempScore × 0.3) + 
-           (HumidityScore × 0.2)`}
+                  <pre className="text-emerald-400 text-lg font-mono whitespace-pre-wrap">
+{`EcoScore = (AirQualityScore × 0.5) + (TempScore × 0.3) + (HumidityScore × 0.2)`}
                   </pre>
                 </div>
               </div>
@@ -577,4 +600,5 @@ export default function EcoVerseLanding() {
     
 
     
+
 
