@@ -277,77 +277,79 @@ export default function DashboardPage() {
       </div>
 
        {/* Header */}
-       <header className="relative z-50 bg-slate-900/50 backdrop-blur-xl border-b border-white/10">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/dashboard" className="flex items-center gap-3 group cursor-pointer">
-              <div className="relative">
-                <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-50 group-hover:opacity-100 transition-opacity"></div>
-                <Leaf className="h-8 w-8 text-emerald-400 relative" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
-                  EcoVerse
-                </h1>
-              </div>
-            </Link>
+       {!isLocationDialogOpen && !isLogActionOpen && (
+        <header className="relative z-50 bg-slate-900/50 backdrop-blur-xl border-b border-white/10">
+          <div className="container mx-auto px-6 py-4">
+            <div className="flex items-center justify-between">
+              <Link href="/dashboard" className="flex items-center gap-3 group cursor-pointer">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                  <Leaf className="h-8 w-8 text-emerald-400 relative" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
+                    EcoVerse
+                  </h1>
+                </div>
+              </Link>
 
-            <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl cursor-pointer" onClick={() => setIsLocationDialogOpen(true)}>
-              <MapPin className="h-5 w-5 text-emerald-400" />
-              <span className="text-white outline-none">{location ? location : 'Set Location'}</span>
-            </div>
+              <div className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl cursor-pointer" onClick={() => setIsLocationDialogOpen(true)}>
+                <MapPin className="h-5 w-5 text-emerald-400" />
+                <span className="text-white outline-none">{location ? location : 'Set Location'}</span>
+              </div>
 
-            <div className="flex items-center gap-3">
-               <Button variant="outline" className="hidden sm:flex bg-white/5 border-white/10 hover:bg-white/10" onClick={() => setIsLogActionOpen(true)}>
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    Log Action
-                </Button>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 bg-white/5">
-                    <Avatar className="h-8 w-8">
-                       {user?.photoURL ? (
-                        <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
-                      ) : (
-                        <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/40/40`} />
-                      )}
-                      <AvatarFallback>
-                        {user?.displayName ? user.displayName.charAt(0).toUpperCase() : <UserIcon />}
-                      </AvatarFallback>
-                    </Avatar>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" className="hidden sm:flex bg-white/5 border-white/10 hover:bg-white/10" onClick={() => setIsLogActionOpen(true)}>
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Log Action
                   </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-slate-900/80 backdrop-blur-xl border-white/10 text-white">
-                  <DropdownMenuLabel>{user ? user.displayName : 'My Account'}</DropdownMenuLabel>
-                  <DropdownMenuSeparator className="bg-white/10" />
-                  {user ? (
-                    <>
-                      <DropdownMenuItem onClick={() => router.push('/profile')} className="cursor-pointer hover:bg-white/10">
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 bg-white/5">
+                      <Avatar className="h-8 w-8">
+                        {user?.photoURL ? (
+                          <AvatarImage src={user.photoURL} alt={user.displayName || 'User'} />
+                        ) : (
+                          <AvatarImage src={`https://picsum.photos/seed/${user?.uid}/40/40`} />
+                        )}
+                        <AvatarFallback>
+                          {user?.displayName ? user.displayName.charAt(0).toUpperCase() : <UserIcon />}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-slate-900/80 backdrop-blur-xl border-white/10 text-white">
+                    <DropdownMenuLabel>{user ? user.displayName : 'My Account'}</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-white/10" />
+                    {user ? (
+                      <>
+                        <DropdownMenuItem onClick={() => router.push('/profile')} className="cursor-pointer hover:bg-white/10">
+                          <UserIcon className="mr-2 h-4 w-4" />
+                          <span>Profile</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setIsLocationDialogOpen(true)} className="cursor-pointer hover:bg-white/10">
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Settings</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator className="bg-white/10" />
+                        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-white/10">
+                          <LogOut className="mr-2 h-4 w-4" />
+                          <span>Logout</span>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <DropdownMenuItem onClick={() => router.push('/login')} className="cursor-pointer hover:bg-white/10">
+                        <LogIn className="mr-2 h-4 w-4" />
+                        <span>Login</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setIsLocationDialogOpen(true)} className="cursor-pointer hover:bg-white/10">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-white/10" />
-                      <DropdownMenuItem onClick={handleLogout} className="cursor-pointer hover:bg-white/10">
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Logout</span>
-                      </DropdownMenuItem>
-                    </>
-                  ) : (
-                    <DropdownMenuItem onClick={() => router.push('/login')} className="cursor-pointer hover:bg-white/10">
-                      <LogIn className="mr-2 h-4 w-4" />
-                      <span>Login</span>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
+       )}
 
       {/* Main Content */}
       <main className="relative z-10 container mx-auto px-6 py-8 space-y-8">
@@ -571,5 +573,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
