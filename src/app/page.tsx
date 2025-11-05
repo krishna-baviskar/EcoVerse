@@ -119,10 +119,10 @@ export default function EcoVerseLanding() {
                 Start Your Eco-Journey
                 <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </button>
-            <button className="group w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2">
+            <a href="https://www.youtube.com/shorts/J3cRmJuM5GM" target="_blank" rel="noopener noreferrer" className="group w-full sm:w-auto px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2">
               <Play className="h-5 w-5" />
               Watch Demo
-            </button>
+            </a>
           </div>
 
           {/* Stats */}
