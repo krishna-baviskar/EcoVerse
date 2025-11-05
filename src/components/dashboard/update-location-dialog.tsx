@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -27,7 +26,6 @@ export function UpdateLocationDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // If the parent component is already loading, reflect that in our state.
     if (isLoading) {
         setIsSubmitting(true);
     }
@@ -43,7 +41,7 @@ export function UpdateLocationDialog({
     await onLocationSubmit(fullLocation);
     
     setIsSubmitting(false);
-    onOpenChange(false); // Close dialog on success
+    onOpenChange(false);
   };
 
   const isSubmitDisabled = isSubmitting || !city.trim();
