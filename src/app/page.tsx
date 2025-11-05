@@ -5,7 +5,7 @@ import {
   ChevronRight, Play, CheckCircle2, Globe, Zap, Shield, Code, 
   Brain, Sparkles, ArrowRight, Menu, X, Github, Twitter, Linkedin,
   MessageSquare, BookOpen, Download, Star, Award, Atom, Rocket,
-  Lock, Database, Cloud, Cpu, Activity, Map, Sun, Wind, Droplets
+  Lock, Database, Cloud, Cpu, Activity, Map, Sun, Wind, Droplets, UserCheck, Edit, BarChart2
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -42,7 +42,7 @@ export default function EcoVerseLanding() {
             <div className="hidden md:flex items-center gap-8">
               <a href="#features" className="text-gray-300 hover:text-emerald-400 transition-colors">Features</a>
               <a href="#how-it-works" className="text-gray-300 hover:text-emerald-400 transition-colors">How It Works</a>
-              <a href="#tech-stack" className="text-gray-300 hover:text-emerald-400 transition-colors">Tech Stack</a>
+              <a href="#get-started" className="text-gray-300 hover:text-emerald-400 transition-colors">Get Started</a>
               <a href="#about" className="text-gray-300 hover:text-emerald-400 transition-colors">About</a>
               <Link href="/dashboard">
                 <button className="px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg font-semibold hover:shadow-lg hover:shadow-emerald-500/50 transition-all transform hover:scale-105">
@@ -65,7 +65,7 @@ export default function EcoVerseLanding() {
             <div className="md:hidden mt-4 pb-4 space-y-4">
               <a href="#features" className="block text-gray-300 hover:text-emerald-400">Features</a>
               <a href="#how-it-works" className="block text-gray-300 hover:text-emerald-400">How It Works</a>
-              <a href="#tech-stack" className="block text-gray-300 hover:text-emerald-400">Tech Stack</a>
+              <a href="#get-started" className="block text-gray-300 hover:text-emerald-400">Get Started</a>
               <a href="#about" className="block text-gray-300 hover:text-emerald-400">About</a>
                <Link href="/dashboard">
                 <button className="w-full px-6 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-lg font-semibold">
@@ -344,63 +344,44 @@ export default function EcoVerseLanding() {
         </div>
       </section>
 
-      {/* Tech Stack Section */}
-      <section id="tech-stack" className="py-24 px-6 relative">
+      {/* Get Started Section */}
+      <section id="get-started" className="py-24 px-6 relative">
         <div className="container mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-6xl font-bold mb-4">
               <span className="bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">
-                Cutting-Edge Tech Stack
+                Get Started in 3 Easy Steps
               </span>
             </h2>
             <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-              Built with modern, scalable technologies for maximum performance and developer experience
+              Joining the EcoVerse community and making an impact is simple and rewarding.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
+          <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                category: 'Frontend',
-                icon: Code,
-                color: 'blue',
-                technologies: [
-                  { name: 'Next.js 14', desc: 'React framework with App Router & Server Components' },
-                  { name: 'TypeScript', desc: 'Type-safe development with full IntelliSense' },
-                  { name: 'Tailwind CSS', desc: 'Utility-first CSS for rapid UI development' },
-                  { name: 'Recharts', desc: 'Advanced data visualization library' },
-                ]
+                icon: UserCheck,
+                title: 'Create Your Account',
+                description: 'Sign up for free in seconds. All you need is an email to join the green revolution.',
               },
               {
-                category: 'Backend & AI',
-                icon: Brain,
-                color: 'emerald',
-                technologies: [
-                  { name: 'Next.js API Routes', desc: 'Serverless functions for backend logic' },
-                  { name: 'Google Gemini', desc: 'LLM for conversational AI and reasoning' },
-                  { name: 'Genkit', desc: 'AI framework for structured ML tasks' },
-                  { name: 'Firebase', desc: 'Authentication and Firestore database' },
-                ]
+                icon: Edit,
+                title: 'Set Your Location',
+                description: 'Enter your city to get personalized, real-time EcoScore data and relevant local challenges.',
               },
-            ].map((stack, i) => (
-              <div key={i} className="p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className={`w-12 h-12 bg-gradient-to-br from-${stack.color}-500 to-${stack.color}-600 rounded-xl flex items-center justify-center`}>
-                    <stack.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold">{stack.category}</h3>
+              {
+                icon: BarChart2,
+                title: 'Track & Improve',
+                description: 'Log your sustainable actions, complete challenges, and watch your EcoScore and community rank climb!',
+              },
+            ].map((step, i) => (
+              <div key={i} className="p-8 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl text-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                   <span className="text-3xl font-bold">{i + 1}</span>
                 </div>
-                <div className="space-y-3">
-                  {stack.technologies.map((tech, j) => (
-                    <div key={j} className="flex items-start gap-3">
-                      <CheckCircle2 className={`h-5 w-5 text-${stack.color}-400 flex-shrink-0 mt-0.5`} />
-                      <div>
-                        <div className="font-semibold">{tech.name}</div>
-                        <div className="text-sm text-gray-400">{tech.desc}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <h3 className="text-2xl font-bold mb-3">{step.title}</h3>
+                <p className="text-gray-400 leading-relaxed">{step.description}</p>
               </div>
             ))}
           </div>
@@ -548,7 +529,7 @@ export default function EcoVerseLanding() {
               <ul className="space-y-2 text-sm text-gray-400">
                 <li><a href="#features" className="hover:text-emerald-400 transition-colors">Features</a></li>
                 <li><a href="#how-it-works" className="hover:text-emerald-400 transition-colors">How It Works</a></li>
-                <li><a href="#tech-stack" className="hover:text-emerald-400 transition-colors">Technology</a></li>
+                <li><a href="#get-started" className="hover:text-emerald-400 transition-colors">Get Started</a></li>
               </ul>
             </div>
             
@@ -596,3 +577,4 @@ export default function EcoVerseLanding() {
     
 
     
+
