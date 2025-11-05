@@ -103,7 +103,6 @@ import type { UserProfile } from '@/lib/types';
 import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 import { Leaderboard } from '@/components/dashboard/leaderboard';
 import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
-import { CommunityImpact } from '@/components/dashboard/community-impact';
 import { predictEcoScore, type PredictEcoScoreOutput } from '@/ai/flows';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { format } from 'date-fns';
@@ -176,9 +175,18 @@ export default function ProfilePage() {
     setIsLoadingEcoScore(true);
     try {
       const city = location.split(',')[0].trim();
+      const cacheKey = `ecoScoreData-${city}`;
+      const cachedData = sessionStorage.getItem(cacheKey);
+      if (cachedData) {
+        setEcoScoreData(JSON.parse(cachedData));
+        setIsLoadingEcoScore(false);
+        return;
+      }
+
       if (city) {
         const result = await predictEcoScore({ location: city });
         setEcoScoreData(result);
+        sessionStorage.setItem(cacheKey, JSON.stringify(result));
       }
     } catch (error) {
       console.error('Failed to fetch eco score', error);
@@ -189,16 +197,23 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (userProfile?.location) {
-      fetchEcoScore(userProfile.location);
+    if (isUserLoading || isProfileLoading) return;
+    
+    const location = userProfile?.location || sessionStorage.getItem('userLocation');
+
+    if (location) {
+      fetchEcoScore(location);
     } else {
+      // If no location is found anywhere, prompt the user.
+      setIsLocationDialogOpen(true);
       setIsLoadingEcoScore(false);
     }
-  }, [userProfile?.location, fetchEcoScore]);
+  }, [userProfile, isUserLoading, isProfileLoading, fetchEcoScore]);
 
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      sessionStorage.clear();
       router.push('/login');
     } catch (error) {
       console.error('Logout failed:', error);
@@ -211,7 +226,8 @@ export default function ProfilePage() {
     if (userDocRef) {
       updateDocumentNonBlocking(userDocRef, { location: newLocation });
     }
-    fetchEcoScore(newLocation);
+    sessionStorage.setItem('userLocation', newLocation);
+    await fetchEcoScore(newLocation);
     setIsLocationDialogOpen(false);
   };
 
@@ -652,14 +668,13 @@ export default function ProfilePage() {
           <div className="lg:col-span-2 space-y-6">
             {activeTab === 'overview' && (
               <>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Weekly Goal Progress */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   <Card className="bg-white/5 backdrop-blur-sm border-white/10">
                     <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2 text-white">
-                        <Target className="w-5 h-5" />
-                        Weekly Goal Progress
-                      </CardTitle>
+                        <CardTitle className="text-lg flex items-center gap-2 text-white">
+                            <Target className="w-5 h-5" />
+                            Weekly Goal Progress
+                        </CardTitle>
                     </CardHeader>
                     <CardContent className="h-64 flex flex-col items-center justify-center">
                       <ChartContainer config={{}} className="h-full w-full">
@@ -710,7 +725,7 @@ export default function ProfilePage() {
                       </ChartContainer>
                     </CardContent>
                   </Card>
-                   {/* Your Score vs City Average */}
+                  
                   <Card className="bg-white/5 backdrop-blur-sm border-white/10">
                     <CardHeader>
                         <CardTitle className="text-lg flex items-center gap-2 text-white">
@@ -730,7 +745,7 @@ export default function ProfilePage() {
                                         <svg className="w-full h-full" viewBox="0 0 36 36">
                                             <path
                                                 className="stroke-muted"
-                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15._9155 0 0 1 0 -31.831"
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                                                 strokeWidth="4"
                                                 fill="none"
                                             />
@@ -781,8 +796,7 @@ export default function ProfilePage() {
                     </CardContent>
                 </Card>
                 </div>
-                 {/* EcoScore Trend */}
-                <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+                 <Card className="bg-white/5 backdrop-blur-sm border-white/10">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center gap-2 text-white">
                       <TrendingUp className="w-5 h-5" />
@@ -1478,5 +1492,3 @@ export default function ProfilePage() {
     </div>
   );
 }
-
-    
