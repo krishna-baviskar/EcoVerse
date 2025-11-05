@@ -24,7 +24,7 @@ const SuggestEcoActionsInputSchema = z.object({
 export type SuggestEcoActionsInput = z.infer<typeof SuggestEcoActionsInputSchema>;
 
 const SuggestEcoActionsOutputSchema = z.object({
-  suggestions: z.array(z.string()).describe('A list of personalized actions the user can take to improve their EcoScore.'),
+  answer: z.string().describe('The answer to the user\'s question, formatted nicely for chat display. Use markdown for lists, bolding, etc.'),
 });
 export type SuggestEcoActionsOutput = z.infer<typeof SuggestEcoActionsOutputSchema>;
 
@@ -42,17 +42,20 @@ const suggestEcoActionsPrompt = ai.definePrompt({
   name: 'suggestEcoActionsPrompt',
   input: {schema: SuggestEcoActionsInputSchema},
   output: {schema: SuggestEcoActionsOutputSchema},
-  prompt: `You are an Eco-Tutor who provides personalized and actionable suggestions to users on how to improve their EcoScore.
+  prompt: `You are EcoGPT, a friendly and knowledgeable AI assistant for the EcoVerse app. Your goal is to help users learn about sustainability and improve their environmental impact.
 
-  Based on the user's profile, current EcoScore, and location, suggest specific actions they can take to reduce their environmental impact and increase their EcoScore.
-  Consider local opportunities, resources, and environmental challenges in your suggestions.
+You are having a conversation with a user. Here is the context about them:
+- Location: {{{location}}}
+- EcoScore: {{{ecoScore}}}
 
-  User Profile: {{{userProfile}}}
-  EcoScore: {{{ecoScore}}}
-  Location: {{{location}}}
+The user's message is:
+"{{{userProfile}}}"
 
-  Suggestions should be clear, concise, and directly related to improving the user's EcoScore.
-  The suggestions should also be diverse, covering different aspects of sustainability (e.g., energy consumption, waste reduction, transportation). Return at least three suggestions.
+Please provide a helpful and encouraging answer to the user's message.
+- If they ask for suggestions, give them personalized, actionable ideas based on their context.
+- If they ask a question, answer it clearly and concisely.
+- If they ask for a fun fact, provide one that is interesting and relevant to sustainability.
+- Always format your response in a clear, readable way. Use markdown (like lists or bold text) to improve formatting.
 `,
 });
 

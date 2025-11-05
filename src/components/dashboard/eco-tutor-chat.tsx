@@ -60,9 +60,8 @@ export function EcoTutorChat({ location }: { location: string }) {
         ecoScore: 75, // A neutral ecoScore
         location: location,
       });
-      // The prompt for suggestEcoActions is general enough to provide a relevant answer.
-      // We will use the first suggestion as the main response.
-      const responseText = res.suggestions.join('\n- ');
+      
+      const responseText = res.answer;
       setMessages(prev => [
         ...prev,
         { id: Date.now() + 1, text: responseText, sender: 'tutor' },
@@ -143,7 +142,7 @@ export function EcoTutorChat({ location }: { location: string }) {
       });
       const suggestionsText =
         'Here are some challenges for you:\n- ' +
-        res.suggestions.join('\n- ');
+        res.answer;
       setMessages(prev => [
         ...prev,
         { id: Date.now() + 1, text: suggestionsText, sender: 'tutor' },
@@ -302,4 +301,3 @@ export function EcoTutorChat({ location }: { location: string }) {
     </Card>
   );
 }
-    
