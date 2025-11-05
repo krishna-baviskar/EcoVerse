@@ -54,14 +54,14 @@ export function EcoScoreAnalytics({ ecoScoreData }: EcoScoreAnalyticsProps) {
       <div className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
         <h3 className="text-2xl font-bold mb-6">EcoScore Analytics</h3>
 
-        <div className="grid md:grid-cols-2 gap-8 mb-8">
+        <div className="grid md:grid-cols-2 gap-8 mb-8 items-center">
           {/* Circular Progress */}
-          <div className="relative">
-            <div className="relative w-48 h-48 mx-auto">
-              <svg className="transform -rotate-90 w-48 h-48">
+          <div className="relative flex justify-center">
+            <div className="relative w-48 h-48">
+              <svg className="transform -rotate-90 w-full h-full">
                 <circle
-                  cx="96"
-                  cy="96"
+                  cx="50%"
+                  cy="50%"
                   r="88"
                   stroke="currentColor"
                   strokeWidth="12"
@@ -69,8 +69,8 @@ export function EcoScoreAnalytics({ ecoScoreData }: EcoScoreAnalyticsProps) {
                   className="text-white/10"
                 />
                 <circle
-                  cx="96"
-                  cy="96"
+                  cx="50%"
+                  cy="50%"
                   r="88"
                   stroke="currentColor"
                   strokeWidth="12"
@@ -96,7 +96,7 @@ export function EcoScoreAnalytics({ ecoScoreData }: EcoScoreAnalyticsProps) {
           </div>
 
           {/* Pie Chart - Activity Distribution */}
-          <div className="relative">
+          <div>
             <h4 className="text-center font-semibold mb-4">
               Activity Distribution
             </h4>
@@ -173,4 +173,3 @@ export function EcoScoreAnalytics({ ecoScoreData }: EcoScoreAnalyticsProps) {
     </div>
   );
 }
-

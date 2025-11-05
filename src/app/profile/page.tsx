@@ -262,10 +262,10 @@ export default function ProfilePage() {
         });
       }
     } else {
+        navigator.clipboard.writeText(window.location.href);
         toast({
-            variant: "destructive",
-            title: "Sharing Not Supported",
-            description: "Your browser does not support the Web Share API.",
+            title: "Link Copied!",
+            description: "Profile URL copied to clipboard.",
         });
     }
   };
@@ -463,7 +463,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Header */}
-      {!isLocationDialogOpen && !isLogActionOpen && (
+      {!(isLocationDialogOpen || isLogActionOpen) && (
         <header className="relative z-50 bg-slate-900/50 backdrop-blur-xl border-b border-white/10">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
@@ -569,6 +569,12 @@ export default function ProfilePage() {
                 </button>
               </div>
             </div>
+            {menuOpen && (
+                <div className="md:hidden mt-4 pb-4 space-y-2">
+                    <Link href="/dashboard" className="block text-gray-300 hover:text-emerald-400 p-2 rounded-md">Dashboard</Link>
+                    <Link href="/profile" className="block text-white font-semibold p-2 rounded-md bg-white/5">Profile</Link>
+                </div>
+            )}
           </div>
         </header>
       )}
@@ -598,9 +604,9 @@ export default function ProfilePage() {
           ></div>
 
           <div className="relative z-10 p-8 md:p-12">
-            <div className="flex flex-col md:flex-row items-center md:items-end gap-8">
+            <div className="flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
               {/* Avatar */}
-              <div className="relative group">
+              <div className="relative group flex-shrink-0">
                 <div className="absolute -inset-2 bg-gradient-to-r from-emerald-500 via-blue-500 to-purple-500 rounded-full blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
                 <Avatar className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-white/20 overflow-hidden bg-slate-800">
                   <AvatarImage
@@ -622,7 +628,7 @@ export default function ProfilePage() {
               {/* User Info */}
               <div className="flex-1 text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-3 mb-2">
-                  <h2 className="text-4xl font-bold">
+                  <h2 className="text-3xl md:text-4xl font-bold">
                     {userProfile?.displayName}
                   </h2>
                   <div className="px-3 py-1 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full text-xs font-bold flex items-center gap-1">
@@ -632,7 +638,7 @@ export default function ProfilePage() {
                 </div>
                 <p className="text-gray-400 mb-4">{userProfile?.email}</p>
 
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-sm">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 md:gap-4 text-sm">
                   <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full">
                     <MapPin className="h-4 w-4 text-emerald-400" />
                     <span>{userProfile?.location || 'Set Location'}</span>
@@ -654,7 +660,7 @@ export default function ProfilePage() {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex gap-3">
+              <div className="flex gap-3 mt-4 md:mt-0">
                 <Button
                   variant="outline"
                   className="bg-white/5 border-white/10 hover:bg-white/10"
@@ -692,7 +698,7 @@ export default function ProfilePage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center gap-2 p-2 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-x-auto">
+        <div className="flex items-center gap-1 p-1 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 overflow-x-auto">
           {[
             'overview',
             'leaderboard',
@@ -703,7 +709,7 @@ export default function ProfilePage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-3 rounded-lg font-semibold whitespace-nowrap transition-all ${
+              className={`flex-1 md:flex-none px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-all text-sm ${
                 activeTab === tab
                   ? 'bg-gradient-to-r from-emerald-500 to-blue-500 text-white'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -923,7 +929,7 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                   {badges.map(badge => (
                     <div
                       key={badge.id}

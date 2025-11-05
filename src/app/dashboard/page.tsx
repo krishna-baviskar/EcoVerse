@@ -233,6 +233,7 @@ export default function DashboardPage() {
     }
 
     await fetchDashboardData(newLocation, true);
+    setIsLocationDialogOpen(false);
   };
   
   const getWeatherIcon = (condition?: string) => {
@@ -277,7 +278,7 @@ export default function DashboardPage() {
       </div>
 
        {/* Header */}
-       {!isLocationDialogOpen && !isLogActionOpen && (
+       {!(isLocationDialogOpen || isLogActionOpen) && (
         <header className="relative z-50 bg-slate-900/50 backdrop-blur-xl border-b border-white/10">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
@@ -408,7 +409,7 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className="relative">
+              <div className="relative mt-8 md:mt-0">
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-10">
                   <div className="w-32 h-32 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-full flex items-center justify-center animate-bounce">
                     <Leaf className="h-16 w-16 text-white" />
@@ -477,7 +478,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <EcoScoreAnalytics ecoScoreData={ecoScoreData} />
             <SuggestedChallenges challenges={challenges} isLoading={isLoadingChallenges} />
