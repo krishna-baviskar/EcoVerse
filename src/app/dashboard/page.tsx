@@ -411,7 +411,10 @@ export default function DashboardPage() {
 
               <div className="relative mt-8 md:mt-0">
                 <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-10">
-                  <div className="w-32 h-32 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-full flex items-center justify-center animate-bounce">
+                  <div 
+                    className="w-32 h-32 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-full flex items-center justify-center animate-bounce cursor-pointer"
+                    onClick={() => setIsLogActionOpen(true)}
+                  >
                     <Leaf className="h-16 w-16 text-white" />
                   </div>
                 </div>
