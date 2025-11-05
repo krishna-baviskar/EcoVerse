@@ -106,6 +106,7 @@ import { UpdateLocationDialog } from '@/components/dashboard/update-location-dia
 import { predictEcoScore, type PredictEcoScoreOutput } from '@/ai/flows';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { format } from 'date-fns';
+import { useToast } from '@/hooks/use-toast';
 
 const ecoScoreTrendData = [
   { month: 'Jan', ecoScore: 65 },
@@ -125,6 +126,7 @@ export default function ProfilePage() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [activeTab, setActiveTab] = useState('overview');
@@ -237,6 +239,35 @@ export default function ProfilePage() {
     sessionStorage.setItem('userLocation', newLocation);
     await fetchEcoScore(newLocation);
     setIsLocationDialogOpen(false);
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `Check out ${userProfile?.displayName || 'my'} EcoVerse Profile!`,
+          text: `I've earned ${userProfile?.ecoPoints || 0} EcoPoints on EcoVerse. Come join me!`,
+          url: window.location.href,
+        });
+        toast({
+            title: "Profile Shared!",
+            description: "Thanks for spreading the word about EcoVerse.",
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+        toast({
+            variant: "destructive",
+            title: "Sharing Failed",
+            description: "Could not share your profile at this time.",
+        });
+      }
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Sharing Not Supported",
+            description: "Your browser does not support the Web Share API.",
+        });
+    }
   };
 
   useEffect(() => {
@@ -635,6 +666,7 @@ export default function ProfilePage() {
                   variant="ghost"
                   size="icon"
                   className="bg-white/5 hover:bg-white/10"
+                  onClick={handleShare}
                 >
                   <Share2 className="h-5 w-5" />
                 </Button>
