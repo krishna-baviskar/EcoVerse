@@ -168,10 +168,14 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
 
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      onClick={handleClose}
+    >
       {/* Modal Container */}
       <div 
         className="relative w-full max-w-lg bg-gradient-to-br from-slate-900 via-emerald-900/30 to-slate-900 rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-scaleIn"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -438,7 +442,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
                     {[
                       { label: 'New Total', value: '1,885', icon: Award },
                       { label: 'Rank', value: '#2', icon: Target },
-                      { label: 'Level', value: '12', icon: Sparkles }
+                      { label: 'Level', value: 'Sparkles', icon: Sparkles }
                     ].map((stat, i) => (
                       <div key={i} className="p-4 bg-white/5 rounded-xl border border-white/10">
                         <stat.icon className="h-5 w-5 text-emerald-400 mx-auto mb-2" />

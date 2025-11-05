@@ -34,6 +34,10 @@ export function UpdateLocationDialog({
     }
   }, [isLoading]);
 
+  const handleClose = () => {
+    onOpenChange(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!city.trim()) return;
@@ -43,13 +47,10 @@ export function UpdateLocationDialog({
     
     await onLocationSubmit(fullLocation);
     
-    // The parent component will control closing the dialog.
-    // We don't automatically close it here, but we do stop the loading state
-    // if the parent component doesn't handle it.
     if (!isLoading) {
         setIsSubmitting(false);
     }
-    onOpenChange(false);
+    handleClose();
   };
 
   const isSubmitDisabled = isSubmitting || !city.trim();
@@ -59,9 +60,13 @@ export function UpdateLocationDialog({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn"
+      onClick={handleClose}
+    >
       <div 
         className="relative w-full max-w-md bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900 rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-scaleIn"
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute -top-40 -left-40 w-96 h-96 bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-full blur-3xl opacity-20 animate-pulse"></div>
@@ -69,7 +74,7 @@ export function UpdateLocationDialog({
         </div>
 
         <button
-          onClick={() => onOpenChange(false)}
+          onClick={handleClose}
           className="absolute top-6 right-6 w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 backdrop-blur-sm border border-white/10 flex items-center justify-center transition-all duration-300 hover:scale-110 z-10"
         >
           <X className="w-5 h-5 text-white/70" />
