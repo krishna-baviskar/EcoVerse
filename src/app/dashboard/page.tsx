@@ -69,6 +69,7 @@ import { FloatingEcoTutor } from '@/components/dashboard/floating-eco-tutor';
 import { UpdateLocationDialog } from '@/components/dashboard/update-location-dialog';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { Progress } from '@/components/ui/progress';
+import { EcoScoreAnalytics } from '@/components/dashboard/ecoscore-analytics';
 
 interface LeaderboardUser {
     id: string;
@@ -474,47 +475,7 @@ export default function DashboardPage() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <Card className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
-              <CardHeader className="p-0">
-                <CardTitle className="text-2xl font-bold">EcoScore Breakdown</CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 mt-6">
-                <div className="space-y-4">
-                  {ecoScoreData?.breakdown.map((item) => {
-                    const percentage = (item.contribution / (item.weight * 100)) * 100;
-                    const getColor = (val: number) => {
-                      if (val >= 80) return 'emerald';
-                      if (val >= 60) return 'yellow';
-                      return 'red';
-                    };
-                    const color = getColor(item.derivedScore);
-
-                    return (
-                      <div key={item.factor}>
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-semibold capitalize">{item.factor}</span>
-                          <span className="text-lg font-bold text-white">{item.contribution.toFixed(0)}/{item.weight * 100}</span>
-                        </div>
-                        <Progress value={percentage} indicatorClassName={`bg-${color}-500`} />
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="mt-6 p-6 bg-gradient-to-br from-emerald-500/20 to-blue-500/20 border border-emerald-500/30 rounded-xl">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm text-gray-400 mb-1">Overall Grade</div>
-                      <div className="text-4xl font-bold text-emerald-400">{ecoScoreData?.ecoScore ? (ecoScoreData.ecoScore > 85 ? 'A' : ecoScoreData.ecoScore > 70 ? 'B' : 'C') : 'N/A'}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-400 mb-1">Total Score</div>
-                      <div className="text-3xl font-bold">{ecoScoreData?.ecoScore.toFixed(0) || '...'}</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
+            <EcoScoreAnalytics ecoScoreData={ecoScoreData} />
             <SuggestedChallenges challenges={challenges} isLoading={isLoadingChallenges} />
             
             <div className="lg:col-span-2">
@@ -610,7 +571,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
-
-    
