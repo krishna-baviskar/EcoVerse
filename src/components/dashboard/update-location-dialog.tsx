@@ -29,6 +29,8 @@ export function UpdateLocationDialog({
   useEffect(() => {
     if (isLoading) {
         setIsSubmitting(true);
+    } else {
+        setIsSubmitting(false);
     }
   }, [isLoading]);
 
@@ -41,7 +43,12 @@ export function UpdateLocationDialog({
     
     await onLocationSubmit(fullLocation);
     
-    setIsSubmitting(false);
+    // The parent component will control closing the dialog.
+    // We don't automatically close it here, but we do stop the loading state
+    // if the parent component doesn't handle it.
+    if (!isLoading) {
+        setIsSubmitting(false);
+    }
     onOpenChange(false);
   };
 
