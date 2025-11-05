@@ -8,12 +8,13 @@ import {
 } from 'lucide-react';
 import { useForm, zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { doc, increment } from 'firebase/firestore';
+import { doc, increment, arrayUnion } from 'firebase/firestore';
 import Image from 'next/image';
 
 import { useToast } from '@/hooks/use-toast';
 import { validateSustainableAction } from '@/ai/flows';
-import { useUser, useFirestore, updateDocumentNonBlocking } from '@/firebase';
+import { useUser, useFirestore, updateDocumentNonBlocking, useDoc, useMemoFirebase } from '@/firebase';
+import type { UserProfile } from '@/lib/types';
 
 interface LogActionDialogProps {
   children: ReactNode;
@@ -55,6 +56,12 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
+
+  const userDocRef = useMemoFirebase(
+    () => (user ? doc(firestore, 'users', user.uid) : null),
+    [firestore, user]
+  );
+  const { data: userProfile } = useDoc<UserProfile>(userDocRef);
 
   const challenge = passedChallenge || {
     title: 'Car-Free Day Challenge',
@@ -113,7 +120,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
   const handleSubmit = async () => {
     setStep(2);
     
-    if (!user) {
+    if (!user || !userDocRef) {
         toast({ variant: "destructive", title: "Authentication Error", description: "You must be logged in." });
         setStep(1);
         return;
@@ -128,17 +135,20 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
 
         const result = await validateSustainableAction({
             action: actionToValidate,
-            supportingEvidence: descriptionOrEvidence
+            supportingEvidence: descriptionOrEvidence,
+            completedActions: userProfile?.completedActions || [],
         });
         
+        const pointsToAward = actionType === 'challenge' ? challenge.ecoPoints : (result.ecoPoints || 0);
+
         if (result.isValid) {
-            const pointsToAward = actionType === 'challenge' ? challenge.ecoPoints : (result.ecoPoints || 0);
-            if (pointsToAward > 0) {
-              const userRef = doc(firestore, 'users', user.uid);
-              updateDocumentNonBlocking(userRef, {
-                  ecoPoints: increment(pointsToAward)
-              });
-            }
+            const updates: any = {
+                ecoPoints: increment(pointsToAward)
+            };
+            // Add the successfully completed action to the user's history
+            updates.completedActions = arrayUnion(actionToValidate);
+
+            updateDocumentNonBlocking(userDocRef, updates);
             setValidationResult({ ...result, ecoPoints: pointsToAward, reason: result.reason || 'Great eco-friendly action!' });
         } else {
             setValidationResult({ isValid: false, ecoPoints: 0, reason: result.reason || 'Validation failed.' });
@@ -445,7 +455,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
                   {/* Stats */}
                   <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
                     {[
-                      { label: 'New Total', value: '1,885', icon: Award },
+                      { label: 'New Total', value: (userProfile?.ecoPoints || 0) + validationResult.ecoPoints, icon: Award },
                       { label: 'Rank', value: '#2', icon: Target },
                       { label: 'Level', value: 'Sparkles', icon: Sparkles }
                     ].map((stat, i) => (
