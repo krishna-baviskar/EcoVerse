@@ -170,7 +170,7 @@ export function SuggestedChallenges({ challenges, isLoading }: SuggestedChalleng
                               className={`px-3 py-1 rounded-full text-xs font-semibold bg-gradient-to-r ${difficulty.bg} text-white shadow-lg`}
                               style={{ boxShadow: `0 4px 20px ${difficulty.glow}` }}
                             >
-                              {(challenge.difficulty || 'medium').toUpperCase()}
+                              {(challenge.difficulty || '').toUpperCase()}
                             </span>
                           </div>
 
