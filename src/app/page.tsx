@@ -500,7 +500,7 @@ export default function EcoVerseLanding() {
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <div className="absolute -inset-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full blur-xl opacity-60"></div>
                      <div className="relative w-32 h-32 flex items-center justify-center bg-slate-800 rounded-full border-2 border-white/20 overflow-hidden">
-                      <Image src="/krishna.png" alt="Founder" layout="fill" className="object-cover" />
+                      <Image src="/sanket.png" alt="Founder" layout="fill" className="object-cover" />
                     </div>
                   </div>
                   <div className="text-center md:text-left">
