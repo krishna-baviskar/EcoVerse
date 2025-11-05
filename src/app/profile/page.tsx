@@ -224,7 +224,7 @@ export default function ProfilePage() {
     try {
       await signOut(auth);
       sessionStorage.clear();
-      router.push('/');
+      router.replace('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -1153,3 +1153,5 @@ export default function ProfilePage() {
     </div>
   );
 }
+
+    

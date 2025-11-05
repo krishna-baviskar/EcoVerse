@@ -219,7 +219,7 @@ export default function DashboardPage() {
     try {
       await signOut(auth);
       sessionStorage.clear();
-      router.push('/');
+      router.replace('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -574,3 +574,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
