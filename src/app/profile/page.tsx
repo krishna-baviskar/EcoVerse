@@ -197,7 +197,14 @@ export default function ProfilePage() {
   }, []);
 
   useEffect(() => {
-    if (isUserLoading || isProfileLoading) return;
+    if (isUserLoading || isProfileLoading) {
+      return;
+    }
+
+    if (!user) {
+      router.push('/login'); // Redirect if not logged in
+      return;
+    }
     
     const location = userProfile?.location || sessionStorage.getItem('userLocation');
 
@@ -208,7 +215,7 @@ export default function ProfilePage() {
       setIsLocationDialogOpen(true);
       setIsLoadingEcoScore(false);
     }
-  }, [userProfile, isUserLoading, isProfileLoading, fetchEcoScore]);
+  }, [user, userProfile, isUserLoading, isProfileLoading, fetchEcoScore, router]);
 
   const handleLogout = async () => {
     try {
@@ -388,7 +395,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    router.push('/login');
+    // This check is redundant due to useEffect but good for clarity
     return <LoadingSpinner />;
   }
 
@@ -444,6 +451,12 @@ export default function ProfilePage() {
             </div>
 
             <div className="flex items-center gap-3">
+              <LogActionDialog>
+                <Button variant="outline" className="hidden sm:flex bg-white/5 border-white/10 hover:bg-white/10">
+                    <PlusCircle className="mr-2 h-4 w-4" />
+                    Log Action
+                </Button>
+               </LogActionDialog>
               <button className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
                 <Bell className="h-5 w-5" />
               </button>
