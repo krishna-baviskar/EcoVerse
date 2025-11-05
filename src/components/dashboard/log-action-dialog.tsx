@@ -159,14 +159,19 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
     }, 300);
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    if (React.Children.count(children) > 0) {
+        return <div onClick={() => setOpen(true)}>{children}</div>
+    }
+    return null;
+  }
+
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-      {children}
       {/* Modal Container */}
       <div 
-        className="relative w-full max-w-2xl bg-gradient-to-br from-slate-900 via-emerald-900/30 to-slate-900 rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-scaleIn"
+        className="relative w-full max-w-lg bg-gradient-to-br from-slate-900 via-emerald-900/30 to-slate-900 rounded-3xl border border-white/10 shadow-2xl overflow-hidden animate-scaleIn"
       >
         {/* Animated Background Elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -177,13 +182,13 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
         {/* Close Button */}
         <button
           onClick={handleClose}
-          className="absolute top-4 right-4 z-10 p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all group"
+          className="absolute top-4 right-4 z-20 p-2 bg-white/5 hover:bg-white/10 rounded-xl transition-all group"
         >
           <X className="h-5 w-5 group-hover:rotate-90 transition-transform" />
         </button>
 
         {/* Content */}
-        <div className="relative z-10 p-8">
+        <div className="relative z-10 max-h-[90vh] overflow-y-auto p-8">
           {/* Step 1: Form */}
           {step === 1 && (
             <div className="space-y-6">
