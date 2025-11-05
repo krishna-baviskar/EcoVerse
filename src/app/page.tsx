@@ -31,7 +31,7 @@ export default function EcoVerseLanding() {
 
       {/* Header */}
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-slate-950/80 backdrop-blur-xl border-b border-white/10`}>
-        <nav className="container mx-auto px-6 py-4">
+        <nav className="px-6 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 group cursor-pointer">
               <div className="relative">
@@ -640,3 +640,5 @@ export default function EcoVerseLanding() {
     </div>
   );
 }
+
+    
