@@ -9,9 +9,15 @@ import {
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export default function EcoVerseLanding() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const founder1 = PlaceHolderImages.find(img => img.id === 'founder1');
+  const founder2 = PlaceHolderImages.find(img => img.id === 'founder2');
+
 
   return (
     <div className="min-h-screen bg-slate-950 text-white overflow-x-hidden">
@@ -468,6 +474,51 @@ export default function EcoVerseLanding() {
                 movement where communities compete to build the greenest, most sustainable cities on Earth.
               </p>
             </div>
+            
+            <div>
+              <h3 className="text-3xl font-bold text-center mb-12">Meet the Founders</h3>
+              <div className="grid md:grid-cols-2 gap-10">
+                
+                {founder1 && <div className="flex flex-col md:flex-row items-center gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+                  <div className="relative w-32 h-32 flex-shrink-0">
+                    <div className="absolute -inset-2 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full blur-xl opacity-60"></div>
+                    <Image
+                      src={founder1.imageUrl}
+                      alt="Jane Doe, Founder"
+                      width={128}
+                      height={128}
+                      className="relative rounded-full border-2 border-white/20"
+                      data-ai-hint={founder1.imageHint}
+                    />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <h4 className="text-2xl font-bold">Jane Doe</h4>
+                    <p className="text-sm text-emerald-400 mb-3">Co-Founder & CEO</p>
+                    <p className="text-gray-400 italic">"We built EcoVerse to empower individuals. Every small action, when multiplied by millions, can change our world."</p>
+                  </div>
+                </div>}
+
+                {founder2 && <div className="flex flex-col md:flex-row items-center gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+                  <div className="relative w-32 h-32 flex-shrink-0">
+                    <div className="absolute -inset-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full blur-xl opacity-60"></div>
+                     <Image
+                      src={founder2.imageUrl}
+                      alt="John Smith, Founder"
+                      width={128}
+                      height={128}
+                      className="relative rounded-full border-2 border-white/20"
+                      data-ai-hint={founder2.imageHint}
+                    />
+                  </div>
+                  <div className="text-center md:text-left">
+                    <h4 className="text-2xl font-bold">John Smith</h4>
+                    <p className="text-sm text-purple-400 mb-3">Co-Founder & CTO</p>
+                    <p className="text-gray-400 italic">"Technology should be a force for good. With AI, we can finally make sustainability data understandable and actionable for everyone."</p>
+                  </div>
+                </div>}
+
+              </div>
+            </div>
 
             <div className="grid md:grid-cols-3 gap-6">
               {[
@@ -600,5 +651,6 @@ export default function EcoVerseLanding() {
     
 
     
+
 
 
