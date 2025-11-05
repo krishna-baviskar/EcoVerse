@@ -282,7 +282,7 @@ export default function DashboardPage() {
         <header className="relative z-50 bg-slate-900/50 backdrop-blur-xl border-b border-white/10">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <Link href="/dashboard" className="flex items-center gap-3 group cursor-pointer">
+              <Link href="/" className="flex items-center gap-3 group cursor-pointer">
                 <div className="relative">
                   <div className="absolute inset-0 bg-emerald-500 blur-lg opacity-50 group-hover:opacity-100 transition-opacity"></div>
                   <Leaf className="h-8 w-8 text-emerald-400 relative" />
