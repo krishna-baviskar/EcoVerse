@@ -120,28 +120,31 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
     }
 
     try {
-        let result;
-        if (actionType === 'challenge') {
-            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate validation time
-            result = { isValid: true, ecoPoints: challenge.points, reason: 'Challenge completed successfully!' };
-        } else {
-            const mediaDataUri = formData.file ? await fileToDataUri(formData.file) : undefined;
-            result = await validateSustainableAction({
-                action: formData.action,
-                supportingEvidence: mediaDataUri || formData.description
-            });
-        }
+        const actionToValidate = actionType === 'challenge' ? challenge.title : formData.action;
+        const mediaDataUri = formData.file ? await fileToDataUri(formData.file) : undefined;
+        const descriptionOrEvidence = actionType === 'challenge' 
+            ? (mediaDataUri || challenge.description)
+            : (mediaDataUri || formData.description);
+
+        const result = await validateSustainableAction({
+            action: actionToValidate,
+            supportingEvidence: descriptionOrEvidence
+        });
         
-        if (result.isValid && result.ecoPoints) {
-            const userRef = doc(firestore, 'users', user.uid);
-            await updateDocumentNonBlocking(userRef, {
-                ecoPoints: increment(result.ecoPoints)
-            });
-            setValidationResult({ ...result, reason: result.reason || 'Great eco-friendly action!' });
+        if (result.isValid) {
+            const pointsToAward = actionType === 'challenge' ? challenge.points : (result.ecoPoints || 0);
+            if (pointsToAward > 0) {
+              const userRef = doc(firestore, 'users', user.uid);
+              await updateDocumentNonBlocking(userRef, {
+                  ecoPoints: increment(pointsToAward)
+              });
+            }
+            setValidationResult({ ...result, ecoPoints: pointsToAward, reason: result.reason || 'Great eco-friendly action!' });
         } else {
             setValidationResult({ isValid: false, ecoPoints: 0, reason: result.reason || 'Validation failed.' });
         }
     } catch (e) {
+        console.error("Validation error:", e);
         setValidationResult({ isValid: false, ecoPoints: 0, reason: 'An error occurred during validation.' });
     }
 
