@@ -88,6 +88,7 @@ export default function DashboardPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [menuOpen, setMenuOpen] = useState(false);
   const [time, setTime] = useState(new Date());
+  const [isLogActionOpen, setIsLogActionOpen] = useState(false);
 
   const router = useRouter();
   const { user, isUserLoading } = useUser();
@@ -260,6 +261,9 @@ export default function DashboardPage() {
           onLocationSubmit={handleLocationUpdate}
           isLoading={isLoadingEcoScore || isLoadingChallenges}
       />
+      <LogActionDialog open={isLogActionOpen} onOpenChange={setIsLogActionOpen}>
+        <></>
+      </LogActionDialog>
       {/* Animated Background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div 
@@ -294,12 +298,10 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex items-center gap-3">
-               <LogActionDialog>
-                <Button variant="outline" className="hidden sm:flex bg-white/5 border-white/10 hover:bg-white/10">
+               <Button variant="outline" className="hidden sm:flex bg-white/5 border-white/10 hover:bg-white/10" onClick={() => setIsLogActionOpen(true)}>
                     <PlusCircle className="mr-2 h-4 w-4" />
                     Log Action
                 </Button>
-               </LogActionDialog>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="icon" className="rounded-full w-10 h-10 bg-white/5">
@@ -545,13 +547,11 @@ export default function DashboardPage() {
              <div className="p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
               <h3 className="text-xl font-bold mb-4">Quick Actions</h3>
               <div className="space-y-2">
-                 <LogActionDialog>
-                    <Button variant="ghost" className="w-full flex items-center justify-start gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all group">
-                        <Activity className="h-5 w-5 text-emerald-400" />
-                        <span className="text-sm">Log Action</span>
-                        <ArrowRight className="h-4 w-4 ml-auto text-gray-400 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                </LogActionDialog>
+                 <Button onClick={() => setIsLogActionOpen(true)} variant="ghost" className="w-full flex items-center justify-start gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all group">
+                    <Activity className="h-5 w-5 text-emerald-400" />
+                    <span className="text-sm">Log Action</span>
+                    <ArrowRight className="h-4 w-4 ml-auto text-gray-400 group-hover:translate-x-1 transition-transform" />
+                </Button>
                 <Button onClick={() => router.push('/profile')} variant="ghost" className="w-full flex items-center justify-start gap-3 p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all group">
                     <UserIcon className="h-5 w-5 text-purple-400" />
                     <span className="text-sm">My Profile & Badges</span>
@@ -571,3 +571,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
