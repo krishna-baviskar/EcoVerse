@@ -175,8 +175,11 @@ export default function ProfilePage() {
     }
     setIsLoadingEcoScore(true);
     try {
-      const result = await predictEcoScore({ location });
-      setEcoScoreData(result);
+      const city = location.split(',')[0].trim();
+      if (city) {
+        const result = await predictEcoScore({ location: city });
+        setEcoScoreData(result);
+      }
     } catch (error) {
       console.error('Failed to fetch eco score', error);
       setEcoScoreData(null);
@@ -187,10 +190,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (userProfile?.location) {
-      const city = userProfile.location.split(',')[0].trim();
-      if (city) {
-        fetchEcoScore(city);
-      }
+      fetchEcoScore(userProfile.location);
     } else {
       setIsLoadingEcoScore(false);
     }
@@ -211,7 +211,7 @@ export default function ProfilePage() {
     if (userDocRef) {
       updateDocumentNonBlocking(userDocRef, { location: newLocation });
     }
-
+    fetchEcoScore(newLocation);
     setIsLocationDialogOpen(false);
   };
 
@@ -652,11 +652,11 @@ export default function ProfilePage() {
           <div className="lg:col-span-2 space-y-6">
             {activeTab === 'overview' && (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                   {/* Weekly Goal Progress */}
                   <Card className="bg-white/5 backdrop-blur-sm border-white/10">
                     <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
+                      <CardTitle className="text-lg flex items-center gap-2 text-white">
                         <Target className="w-5 h-5" />
                         Weekly Goal Progress
                       </CardTitle>
@@ -689,7 +689,7 @@ export default function ProfilePage() {
                             y="50%"
                             textAnchor="middle"
                             dominantBaseline="middle"
-                            className="fill-foreground text-3xl font-bold"
+                            className="fill-white text-3xl font-bold"
                           >
                             {`${(
                               (weeklyGoalData[0].value /
@@ -713,53 +713,78 @@ export default function ProfilePage() {
                    {/* Your Score vs City Average */}
                   <Card className="bg-white/5 backdrop-blur-sm border-white/10">
                     <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <BarChartIcon className="w-5 h-5" />
-                        Your Score vs. City Average
-                      </CardTitle>
+                        <CardTitle className="text-lg flex items-center gap-2 text-white">
+                            <BarChartIcon className="w-5 h-5" />
+                            Your Score vs. City Average
+                        </CardTitle>
                     </CardHeader>
                     <CardContent className="h-64">
-                      <ChartContainer config={{}} className="h-full w-full">
-                        <RechartsBarChart
-                          data={barChartData}
-                          accessibilityLayer
-                          layout="vertical"
-                          margin={{ left: 20 }}
-                        >
-                          <XAxis type="number" hide />
-                          <YAxis
-                            dataKey="name"
-                            type="category"
-                            tickLine={false}
-                            axisLine={false}
-                            hide
-                          />
-                          <RechartsTooltip
-                            cursor={{ fill: 'hsl(var(--muted))' }}
-                            content={<ChartTooltipContent />}
-                          />
-                          <Legend />
-                          <Bar
-                            dataKey="Your EcoPoints"
-                            fill="hsl(var(--primary))"
-                            radius={[0, 4, 4, 0]}
-                            barSize={30}
-                          />
-                          <Bar
-                            dataKey="City EcoScore"
-                            fill="hsl(var(--accent))"
-                            radius={[0, 4, 4, 0]}
-                            barSize={30}
-                          />
-                        </RechartsBarChart>
-                      </ChartContainer>
+                    <ChartContainer config={{
+                        ecoPoints: { label: "Your EcoPoints", color: "hsl(var(--primary))" },
+                        ecoScore: { label: "City EcoScore", color: "hsl(var(--accent))" },
+                    }} className="h-full w-full">
+                        <ResponsiveContainer width="100%" height="100%">
+                            <div className="flex items-center justify-around h-full">
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="relative h-32 w-32">
+                                        <svg className="w-full h-full" viewBox="0 0 36 36">
+                                            <path
+                                                className="stroke-muted"
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15._9155 0 0 1 0 -31.831"
+                                                strokeWidth="4"
+                                                fill="none"
+                                            />
+                                            <path
+                                                className="stroke-primary"
+                                                strokeDasharray={`${((userProfile?.ecoPoints || 0) / 1000) * 100}, 100`}
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                strokeWidth="4"
+                                                fill="none"
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                            <span className="text-2xl font-bold">{userProfile?.ecoPoints || 0}</span>
+                                            <span className="text-xs text-muted-foreground">EcoPoints</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-sm font-medium">Your EcoPoints</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-2">
+                                     <div className="relative h-32 w-32">
+                                        <svg className="w-full h-full" viewBox="0 0 36 36">
+                                            <path
+                                                className="stroke-muted"
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                strokeWidth="4"
+                                                fill="none"
+                                            />
+                                            <path
+                                                className="stroke-accent"
+                                                strokeDasharray={`${ecoScoreData?.ecoScore || 0}, 100`}
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                strokeWidth="4"
+                                                fill="none"
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                            <span className="text-2xl font-bold">{ecoScoreData?.ecoScore?.toFixed(0) || 'N/A'}</span>
+                                            <span className="text-xs text-muted-foreground">EcoScore</span>
+                                        </div>
+                                    </div>
+                                    <span className="text-sm font-medium">City EcoScore</span>
+                                </div>
+                            </div>
+                        </ResponsiveContainer>
+                    </ChartContainer>
                     </CardContent>
-                  </Card>
+                </Card>
                 </div>
                  {/* EcoScore Trend */}
                 <Card className="bg-white/5 backdrop-blur-sm border-white/10">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center gap-2">
+                    <CardTitle className="text-lg flex items-center gap-2 text-white">
                       <TrendingUp className="w-5 h-5" />
                       EcoScore Trend
                     </CardTitle>
@@ -854,7 +879,7 @@ export default function ProfilePage() {
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                           <div className="text-5xl font-bold text-emerald-400">
-                            {ecoScoreData?.ecoScore.toFixed(0) || 'N/A'}
+                            {ecoScoreData?.ecoScore?.toFixed(0) || 'N/A'}
                           </div>
                           <div className="text-sm text-gray-400">
                             EcoScore
@@ -1444,6 +1469,14 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+      <UpdateLocationDialog
+        open={isLocationDialogOpen}
+        onOpenChange={setIsLocationDialogOpen}
+        onLocationSubmit={handleLocationUpdate}
+        isLoading={isLoadingEcoScore}
+      />
     </div>
   );
 }
+
+    
