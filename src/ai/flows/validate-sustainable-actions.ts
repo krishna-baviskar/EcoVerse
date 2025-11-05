@@ -41,24 +41,30 @@ const validateSustainableActionPrompt = ai.definePrompt({
   name: 'validateSustainableActionPrompt',
   input: {schema: ValidateSustainableActionInputSchema},
   output: {schema: ValidateSustainableActionOutputSchema},
-  prompt: `You are an AI assistant that validates user-reported sustainable actions and assigns eco-points.
-Analyze the user's action and any supporting evidence provided.
+  prompt: `You are a strict but fair AI judge for the EcoVerse app. Your role is to validate user-reported sustainable actions and award EcoPoints. These points are precious, so you must be discerning.
 
-User's reported action:
-Action: {{{action}}}
+Analyze the user's action and any supporting evidence. The evidence can be a text description or an image/video.
+
+**Your Task:**
+
+1.  **Critically Evaluate:** Scrutinize the action and the evidence. Does the evidence truly support the action claimed? Is the action genuinely sustainable?
+2.  **Determine Validity:**
+    *   If the evidence is strong and the action is legitimate, set \`isValid\` to \`true\`.
+    *   If the evidence is weak, irrelevant, or the action is not sustainable, set \`isValid\` to \`false\`.
+3.  **Award Points (if valid):** If the action is valid, assign a fair number of 'ecoPoints' between 1 and 100 based on the action's environmental impact. Be consistent and fair. A small action like using a reusable cup gets fewer points than a big action like planting a tree.
+4.  **Provide a Reason (if invalid):** If the action is invalid, you MUST provide a clear, helpful 'reason' explaining why it was not approved.
+
+**User's Submission:**
+
+*   **Action:** \`{{{action}}}\`
 
 {{#if supportingEvidence}}
-Supporting Evidence:
-{{{supportingEvidence}}}
-{{media url=supportingEvidence}}
+*   **Supporting Evidence:**
+    *   \`{{{supportingEvidence}}}\`
+    *   {{media url=supportingEvidence}}
 {{/if}}
 
-The supporting evidence may be text, or it could be a data URI for an image or video. Use all available information to make your determination.
-Determine if the action is a valid sustainable action based on the evidence. If it is valid, award eco-points between 1 and 100 based on the environmental impact.
-If the action is not valid, explain why in the 'reason' field.
-
-Return a JSON response in the specified format.
-`,
+Use all available information to make your final determination. Return a JSON response in the specified format.`,
 });
 
 const validateSustainableActionFlow = ai.defineFlow(
