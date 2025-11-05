@@ -457,9 +457,6 @@ export default function ProfilePage() {
                     Log Action
                 </Button>
                </LogActionDialog>
-              <button className="p-2 bg-white/5 rounded-lg hover:bg-white/10 transition-all">
-                <Bell className="h-5 w-5" />
-              </button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
