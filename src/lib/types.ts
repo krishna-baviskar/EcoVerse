@@ -1,4 +1,3 @@
-
 export interface User {
     rank: number;
     name: string;
@@ -15,4 +14,5 @@ export interface UserProfile {
     photoURL: string;
     ecoPoints: number;
     location?: string;
+    completedActions?: string[];
 }
