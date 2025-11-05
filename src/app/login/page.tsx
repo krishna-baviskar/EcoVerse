@@ -207,7 +207,7 @@ export default function LoginPage() {
                             <Input
                             id="email"
                             type="email"
-                            placeholder="name@example.com"
+                            placeholder="Enter your Email"
                             {...register('email')}
                             className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition-all"
                             />
@@ -234,7 +234,7 @@ export default function LoginPage() {
                             <Input
                                 id="password"
                                 type={showPassword ? 'text' : 'password'}
-                                placeholder="••••••••"
+                                placeholder="••••••••••••••"
                                 {...register('password')}
                                 className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition-all pr-12"
                             />

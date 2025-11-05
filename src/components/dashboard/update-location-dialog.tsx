@@ -96,11 +96,11 @@ export function UpdateLocationDialog({
             <div className="relative group/input">
                 <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
                     <Navigation className="w-4 h-4" />
-                    Address <span className="text-gray-500 text-xs">(Optional)</span>
+                    Address <span className="text-gray-500 text-xs"></span>
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g., 123 Main St"
+                  placeholder="Enter your Address"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   disabled={isSubmitting}
@@ -112,11 +112,11 @@ export function UpdateLocationDialog({
             <div className="relative group/input">
                 <label className="block text-sm font-medium text-gray-300 mb-2 flex items-center gap-2">
                   <Globe className="w-4 h-4" />
-                  City <span className="text-red-400">*</span>
+                  City <span className="text-red-400"></span>
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g., San Francisco"
+                  placeholder="Enter your City"
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   disabled={isSubmitting}
@@ -128,11 +128,11 @@ export function UpdateLocationDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="relative group/input">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  State <span className="text-gray-500 text-xs">(Opt.)</span>
+                  State <span className="text-gray-500 text-xs"></span>
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g., CA"
+                  placeholder="eg. MH"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
                   disabled={isSubmitting}
@@ -142,11 +142,11 @@ export function UpdateLocationDialog({
               </div>
               <div className="relative group/input">
                 <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Country <span className="text-gray-500 text-xs">(Opt.)</span>
+                  Country <span className="text-gray-500 text-xs"></span>
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g., USA"
+                  placeholder="eg. India"
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   disabled={isSubmitting}

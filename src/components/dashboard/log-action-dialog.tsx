@@ -122,6 +122,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
     try {
         let result;
         if (actionType === 'challenge') {
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate validation time
             result = { isValid: true, ecoPoints: challenge.points, reason: 'Challenge completed successfully!' };
         } else {
             const mediaDataUri = formData.file ? await fileToDataUri(formData.file) : undefined;
@@ -273,7 +274,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-gray-300 flex items-center gap-2">
                     <FileText className="h-4 w-4 text-blue-400" />
-                    Description (Optional)
+                    Description 
                   </label>
                   <textarea
                     value={formData.description}
@@ -289,7 +290,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-gray-300 flex items-center gap-2">
                   <Camera className="h-4 w-4 text-purple-400" />
-                  Evidence (Image/Video)
+                  Image/Video
                 </label>
                 
                 {!preview ? (
@@ -369,7 +370,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
                 disabled={!formData.action && actionType === 'custom'}
                 className="w-full py-4 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-xl font-bold text-lg hover:shadow-2xl hover:shadow-emerald-500/50 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 group"
               >
-                {actionType === 'challenge' ? 'Log Challenge' : 'Validate Action'}
+                {actionType === 'challenge' ? 'Log Action' : 'Validate Action'}
                 <Zap className="h-5 w-5 group-hover:rotate-12 transition-transform" />
               </button>
             </div>
@@ -390,9 +391,9 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
               
               <div className="space-y-3 max-w-md mx-auto">
                 {[
-                  { label: 'Analyzing content', delay: 0 },
-                  { label: 'Checking authenticity', delay: 0.5 },
-                  { label: 'Calculating EcoPoints', delay: 1 }
+                  { label: 'Analyzing content', delay: 1 },
+                  { label: 'Checking authenticity', delay: 1 },
+                  { label: 'Calculating EcoPoints', delay: 5 }
                 ].map((item, i) => (
                   <div 
                     key={i} 
