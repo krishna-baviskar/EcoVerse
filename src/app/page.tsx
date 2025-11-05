@@ -485,8 +485,8 @@ export default function EcoVerseLanding() {
                 {founder1 && <div className="flex flex-col items-center md:flex-row gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <div className="absolute -inset-2 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full blur-xl opacity-60"></div>
-                    <div className="relative w-32 h-32 flex items-center justify-center bg-slate-800 rounded-full border-2 border-white/20">
-                      <Leaf className="h-16 w-16 text-emerald-400" />
+                    <div className="relative w-32 h-32 flex items-center justify-center bg-slate-800 rounded-full border-2 border-white/20 overflow-hidden">
+                      <Image src="/krishna.png" alt="Founder" layout="fill" className="object-cover" />
                     </div>
                   </div>
                   <div className="text-center md:text-left">
@@ -499,8 +499,8 @@ export default function EcoVerseLanding() {
                 {founder2 && <div className="flex flex-col items-center md:flex-row gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <div className="absolute -inset-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full blur-xl opacity-60"></div>
-                     <div className="relative w-32 h-32 flex items-center justify-center bg-slate-800 rounded-full border-2 border-white/20">
-                      <Leaf className="h-16 w-16 text-purple-400" />
+                     <div className="relative w-32 h-32 flex items-center justify-center bg-slate-800 rounded-full border-2 border-white/20 overflow-hidden">
+                      <Image src="/krishna.png" alt="Founder" layout="fill" className="object-cover" />
                     </div>
                   </div>
                   <div className="text-center md:text-left">
