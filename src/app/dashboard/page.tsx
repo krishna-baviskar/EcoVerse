@@ -124,7 +124,8 @@ export default function DashboardPage() {
   }, [isUserLoading, user, router]);
 
   const fetchDashboardData = useCallback(async (loc: string, forceRefresh = false) => {
-    const city = loc.split(',')[0].trim();
+    const locationParts = loc.split(',').map(part => part.trim());
+    const city = locationParts.length > 1 ? locationParts[1] : locationParts[0] || '';
     
     if (!city) {
       setIsLoadingEcoScore(false);
@@ -379,7 +380,7 @@ export default function DashboardPage() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="space-y-6">
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold mb-2">{location.split(',')[0].trim() || '...'} Weather Conditions</h2>
+                  <h2 className="text-3xl md:text-4xl font-bold mb-2">{location.split(',')[1]?.trim() || location.split(',')[0]?.trim() || '...'} Weather Conditions</h2>
                   <p className="text-emerald-400">{ecoScoreData?.suggestion}</p>
                 </div>
 
