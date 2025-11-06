@@ -283,7 +283,7 @@ export default function DashboardPage() {
        {/* Header */}
        {!(isLocationDialogOpen || isLogActionOpen) && (
         <header className="relative z-50 bg-slate-900/50 backdrop-blur-xl border-b border-white/10">
-          <div className="container mx-auto px-6 py-4">
+          <div className="container mx-auto px-4 sm:px-6 py-4">
             <div className="flex items-center justify-between">
               <Link href="/" className="flex items-center gap-3 group cursor-pointer">
                 <div className="relative">
@@ -302,7 +302,7 @@ export default function DashboardPage() {
                 <span className="text-white outline-none">{location ? location : 'Set Location'}</span>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3">
                 <Button variant="outline" className="hidden sm:flex bg-white/5 border-white/10 hover:bg-white/10" onClick={() => setIsLogActionOpen(true)}>
                       <PlusCircle className="mr-2 h-4 w-4" />
                       Log Action
@@ -356,7 +356,7 @@ export default function DashboardPage() {
        )}
 
       {/* Main Content */}
-      <main className="relative z-10 container mx-auto px-6 py-8 space-y-8">
+      <main className="relative z-10 container mx-auto px-4 sm:px-6 py-8 space-y-8">
         <div 
           className="relative rounded-3xl overflow-hidden"
           style={{
@@ -375,7 +375,7 @@ export default function DashboardPage() {
             }}
           ></div>
 
-          <div className="relative z-10 p-8 md:p-12">
+          <div className="relative z-10 p-6 sm:p-8 md:p-12">
             {isLoadingEcoScore ? <LoadingSpinner /> : (
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <div className="space-y-6">
@@ -384,19 +384,19 @@ export default function DashboardPage() {
                   <p className="text-emerald-400">{ecoScoreData?.suggestion}</p>
                 </div>
 
-                <div className="flex items-start gap-8">
+                <div className="flex items-start gap-4 sm:gap-8">
                   <div>
                     <div className="flex items-baseline gap-2 mb-4">
-                      <span className="text-7xl md:text-8xl font-bold">{ecoScoreData?.temperature?.toFixed(0)}</span>
-                      <span className="text-4xl text-gray-400">°C</span>
+                      <span className="text-6xl sm:text-7xl md:text-8xl font-bold">{ecoScoreData?.temperature?.toFixed(0)}</span>
+                      <span className="text-3xl sm:text-4xl text-gray-400">°C</span>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <WeatherIcon className="h-12 w-12 text-blue-400" />
+                      <WeatherIcon className="h-10 w-10 sm:h-12 sm:w-12 text-blue-400" />
                       <div>
-                        <div className="text-xl font-semibold">{ecoScoreData?.condition}</div>
+                        <div className="text-lg sm:text-xl font-semibold">{ecoScoreData?.condition}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-400">
@@ -430,12 +430,12 @@ export default function DashboardPage() {
                   
                   <div className="flex items-baseline justify-around gap-2 mb-4">
                     <div className="text-center">
-                        <span className="text-5xl font-bold text-orange-400">{ecoScoreData?.aqi?.toFixed(0)}</span>
-                        <span className="text-xl text-gray-400 ml-1">AQI</span>
+                        <span className="text-4xl sm:text-5xl font-bold text-orange-400">{ecoScoreData?.aqi?.toFixed(0)}</span>
+                        <span className="text-lg sm:text-xl text-gray-400 ml-1">AQI</span>
                     </div>
                      <div className="text-center">
-                        <span className="text-5xl font-bold text-emerald-400">{ecoScoreData?.ecoScore?.toFixed(0)}</span>
-                         <span className="text-xl text-gray-400 ml-1">EcoScore</span>
+                        <span className="text-4xl sm:text-5xl font-bold text-emerald-400">{ecoScoreData?.ecoScore?.toFixed(0)}</span>
+                         <span className="text-lg sm:text-xl text-gray-400 ml-1">EcoScore</span>
                     </div>
                   </div>
 
@@ -450,36 +450,36 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="group p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-400">EcoScore</span>
+          <div className="group p-4 sm:p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <span className="text-xs sm:text-sm text-gray-400">EcoScore</span>
               <TrendingUp className="h-5 w-5 text-emerald-400" />
             </div>
-            <div className="text-3xl font-bold mb-2">{ecoScoreData?.ecoScore.toFixed(0) || '...'}</div>
+            <div className="text-2xl sm:text-3xl font-bold mb-2">{ecoScoreData?.ecoScore.toFixed(0) || '...'}</div>
             <Progress value={ecoScoreData?.ecoScore} indicatorClassName="bg-emerald-500" />
           </div>
-          <div className="group p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-400">AQI</span>
+          <div className="group p-4 sm:p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <span className="text-xs sm:text-sm text-gray-400">AQI</span>
               <Wind className="h-5 w-5 text-orange-400" />
             </div>
-            <div className="text-3xl font-bold mb-2">{ecoScoreData?.aqi.toFixed(0) || '...'}</div>
+            <div className="text-2xl sm:text-3xl font-bold mb-2">{ecoScoreData?.aqi.toFixed(0) || '...'}</div>
             <Progress value={ecoScoreData ? (ecoScoreData.aqi/500)*100 : 0} indicatorClassName="bg-orange-500" />
           </div>
-          <div className="group p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-400">Humidity</span>
+          <div className="group p-4 sm:p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <span className="text-xs sm:text-sm text-gray-400">Humidity</span>
               <Droplets className="h-5 w-5 text-blue-400" />
             </div>
-            <div className="text-3xl font-bold mb-2">{ecoScoreData?.humidity.toFixed(0) || '...'}%</div>
+            <div className="text-2xl sm:text-3xl font-bold mb-2">{ecoScoreData?.humidity.toFixed(0) || '...'}%</div>
             <Progress value={ecoScoreData?.humidity} indicatorClassName="bg-blue-500" />
           </div>
-          <div className="group p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-400">Temp</span>
+          <div className="group p-4 sm:p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl hover:bg-white/10 transition-all transform hover:scale-105">
+            <div className="flex items-center justify-between mb-2 sm:mb-4">
+              <span className="text-xs sm:text-sm text-gray-400">Temp</span>
               <Thermometer className="h-5 w-5 text-red-400" />
             </div>
-            <div className="text-3xl font-bold mb-2">{ecoScoreData?.temperature.toFixed(0) || '...'}°C</div>
+            <div className="text-2xl sm:text-3xl font-bold mb-2">{ecoScoreData?.temperature.toFixed(0) || '...'}°C</div>
             <Progress value={ecoScoreData ? (ecoScoreData.temperature/50)*100 : 0} indicatorClassName="bg-red-500" />
           </div>
         </div>
@@ -580,5 +580,7 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
 
     
