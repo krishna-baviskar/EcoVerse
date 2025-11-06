@@ -124,10 +124,9 @@ export default function DashboardPage() {
   }, [isUserLoading, user, router]);
 
   const fetchDashboardData = useCallback(async (loc: string, forceRefresh = false) => {
-    const locationParts = loc.split(',').map(p => p.trim());
-    const fetchCity = locationParts.length > 1 ? locationParts[1] : locationParts[0];
+    const city = loc.split(',')[0].trim();
     
-    if (!fetchCity) {
+    if (!city) {
       setIsLoadingEcoScore(false);
       setIsLoadingChallenges(false);
       return;
@@ -135,8 +134,8 @@ export default function DashboardPage() {
     
     setLocation(loc);
 
-    const ecoScoreCacheKey = `ecoScoreData-${fetchCity}`;
-    const challengesCacheKey = `challenges-${fetchCity}`;
+    const ecoScoreCacheKey = `ecoScoreData-${city}`;
+    const challengesCacheKey = `challenges-${city}`;
 
     if (!forceRefresh) {
         const cachedEcoScore = sessionStorage.getItem(ecoScoreCacheKey);
@@ -155,8 +154,8 @@ export default function DashboardPage() {
     setIsLoadingChallenges(true);
 
     try {
-      const ecoScorePromise = predictEcoScore({ location: fetchCity });
-      const challengesPromise = generateChallenges({ location: fetchCity, ecoScore: userProfile?.ecoPoints || 75 }); 
+      const ecoScorePromise = predictEcoScore({ location: city });
+      const challengesPromise = generateChallenges({ location: city, ecoScore: userProfile?.ecoPoints || 75 }); 
       
       const [ecoScoreResult, challengesResult] = await Promise.all([ecoScorePromise, challengesPromise]);
 
@@ -194,9 +193,11 @@ export default function DashboardPage() {
         setIsLoadingEcoScore(false);
         setIsLoadingChallenges(false);
     } else {
-        fetchDashboardData(userLocation, false);
+        if(location !== userLocation) {
+          fetchDashboardData(userLocation, false);
+        }
     }
-  }, [user, userProfile, isProfileLoading, isUserLoading, fetchDashboardData]);
+  }, [user, userProfile, isProfileLoading, isUserLoading, fetchDashboardData, location]);
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -231,7 +232,8 @@ export default function DashboardPage() {
     if (userDocRef) {
       updateDocumentNonBlocking(userDocRef, { location: newLocation });
     }
-
+    
+    sessionStorage.setItem('userLocation', newLocation);
     await fetchDashboardData(newLocation, true);
     setIsLocationDialogOpen(false);
   };
@@ -410,16 +412,16 @@ export default function DashboardPage() {
               </div>
 
               <div className="relative mt-8 md:mt-0">
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 z-10">
+                <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 z-10">
                   <div 
-                    className="w-32 h-32 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-full flex items-center justify-center animate-bounce cursor-pointer"
+                    className="w-32 h-32 bg-gradient-to-br from-emerald-400 to-blue-400 rounded-full flex items-center justify-center cursor-pointer"
                     onClick={() => setIsLogActionOpen(true)}
                   >
                     <Leaf className="h-16 w-16 text-white" />
                   </div>
                 </div>
 
-                <div className="mt-20 p-6 bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-sm border border-orange-500/30 rounded-2xl">
+                <div className="mt-16 p-6 bg-gradient-to-br from-orange-500/20 to-red-500/20 backdrop-blur-sm border border-orange-500/30 rounded-2xl">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Air Quality & EcoScore</h3>
                     <Eye className="h-5 w-5 text-orange-400" />
