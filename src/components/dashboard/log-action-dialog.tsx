@@ -284,7 +284,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
                   value={actionType === 'challenge' ? challenge.title : formData.action}
                   onChange={(e) => setFormData({ ...formData, action: e.target.value })}
                   disabled={actionType === 'challenge'}
-                  placeholder="your Action Here..."
+                  placeholder="Your Action Here..."
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition-all disabled:opacity-50"
                 />
               </div>
