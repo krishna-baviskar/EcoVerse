@@ -126,8 +126,16 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
         return;
     }
 
+    const actionToValidate = actionType === 'challenge' ? challenge.title : formData.action;
+
+    // Client-side duplicate check
+    if (userProfile?.completedActions?.includes(actionToValidate)) {
+        setValidationResult({ isValid: false, ecoPoints: 0, reason: 'You have already earned points for this activity.' });
+        setStep(3);
+        return; // Stop here, no AI call needed
+    }
+
     try {
-        const actionToValidate = actionType === 'challenge' ? challenge.title : formData.action;
         const mediaDataUri = formData.file ? await fileToDataUri(formData.file) : undefined;
         const descriptionOrEvidence = actionType === 'challenge' 
             ? (mediaDataUri || challenge.description)
@@ -135,8 +143,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
 
         const result = await validateSustainableAction({
             action: actionToValidate,
-            supportingEvidence: descriptionOrEvidence,
-            completedActions: userProfile?.completedActions || [],
+            supportingEvidence: descriptionOrEvidence
         });
         
         const pointsToAward = actionType === 'challenge' ? challenge.ecoPoints : (result.ecoPoints || 0);
@@ -145,7 +152,6 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
             const updates: any = {
                 ecoPoints: increment(pointsToAward)
             };
-            // Add the successfully completed action to the user's history
             updates.completedActions = arrayUnion(actionToValidate);
 
             updateDocumentNonBlocking(userDocRef, updates);
@@ -278,7 +284,7 @@ export function LogActionDialog({ children, challenge: passedChallenge, open: co
                   value={actionType === 'challenge' ? challenge.title : formData.action}
                   onChange={(e) => setFormData({ ...formData, action: e.target.value })}
                   disabled={actionType === 'challenge'}
-                  placeholder="e.g., Carpooled to work today"
+                  placeholder="your Action Here..."
                   className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-emerald-500 focus:bg-white/10 transition-all disabled:opacity-50"
                 />
               </div>
