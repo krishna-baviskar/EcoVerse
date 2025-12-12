@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-config();
+config(); 
 
 import '@/ai/flows/validate-sustainable-actions.ts';
 import '@/ai/flows/eco-gpt-tutor-action-suggestions.ts';
