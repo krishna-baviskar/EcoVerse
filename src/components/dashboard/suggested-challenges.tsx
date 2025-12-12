@@ -1,5 +1,5 @@
 'use client';
-
+  
 import React, { useState } from 'react';
 import { Lightbulb, Zap, Award, TrendingUp, Sparkles, Lock } from 'lucide-react';
 import { type Challenge } from '@/ai/flows';
