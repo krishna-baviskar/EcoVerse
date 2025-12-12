@@ -1,6 +1,6 @@
 
 'use client';
-
+ 
 import React, { useState, useEffect } from 'react';
 import { MapPin, Navigation, Globe, X } from 'lucide-react';
 import { Loader } from '../ui/loader';
