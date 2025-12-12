@@ -1,7 +1,7 @@
 export interface User {
     rank: number;
     name: string;
-    ecoscore: number;
+    ecoscore: number; 
     city: string;
     avatar: string;
     isCurrentUser?: boolean;
