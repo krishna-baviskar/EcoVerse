@@ -92,23 +92,6 @@ This final formula results in a single, powerful score that makes the invisible 
 
 ---
 
-## 🛠️ Technology & Architecture
-
-EcoVerse is built on a modern, serverless technology stack.
-
--   **Frontend**:
-    -   **Framework**: [Next.js](https://nextjs.org/) (App Router)
-    -   **Language**: [TypeScript](https://www.typescriptlang.org/)
-    -   **UI Components**: [ShadCN UI](https://ui.shadcn.com/)
-    -   **Styling**: [Tailwind CSS](https://tailwindcss.com/)
--   **Backend & Database**:
-    -   **Platform**: [Firebase](https://firebase.google.com/)
-    -   **Authentication**: Firebase Authentication
-    -   **Database**: Cloud Firestore (with real-time listeners)
-    -   [OpenWeatherMap API](https://openweathermap.org/api): For temperature and humidity data.
-    -   [World Air Quality Index (WAQI) API](https://aqicn.org/api/): For real-time AQI data.
-
----
 
 ## 👨‍💻 Meet the Team
 
