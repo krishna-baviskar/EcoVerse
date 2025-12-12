@@ -1,6 +1,6 @@
 'use client';
 
-import {
+import { 
     Table,
     TableBody,
     TableCell,
