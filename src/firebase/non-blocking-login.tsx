@@ -1,5 +1,5 @@
 'use client';
-import {
+import { 
   Auth, // Import Auth type for type hinting
   signInAnonymously,
   createUserWithEmailAndPassword,
