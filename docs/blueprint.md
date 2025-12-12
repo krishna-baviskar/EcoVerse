@@ -3,9 +3,10 @@
 ## Core Features:
 
 - EcoScore Dashboard: Fetches and normalizes real-time environmental metrics using open APIs into an EcoScore, visualizing it over time with comparison leaderboards.
-- EcoGPT Tutor: A conversational tutor powered by the Gemini API, which explains EcoScore insights, suggests improvement actions, and generates interactive quizzes and eco-challenges. The tutor uses a tool to decide if, or when to incorporate various pieces of information from its data.
-- Gamified User Experience: Users earn eco-points for sustainable actions, with AI validation via Gemini API, updating a community leaderboard. Actions that generate eco-points may be things such as carpooling, recycling, or reducing energy consumption.
-- Predictive Insights: Uses AI to forecast EcoScore trends based on various factors, displaying predictions visually through charts and graphs. This utilizes Genkit to perform the predictive analysis.
+- EcoGPT Tutor: A conversational tutor powered by the API, which explains EcoScore insights, suggests improvement actions, and generates interactive quizzes and eco-challenges. The tutor uses a tool to decide if, or when to incorporate various pieces of information from its data.
+- Gamified User Experience: Users earn eco-points for sustainable actions, with AI validation via API, updating a community leaderboard. Actions that generate eco-points may be things such as carpooling, recycling, or reducing energy consumption.
+- Predictive Insights: Uses AI to forecast EcoScore trends based on various factors, displaying predictions visually through charts and graphs. This utilizes 
+perform the predictive analysis.
 - Leaderboard & Rewards: Compares EcoScores across cities or communities, rewarding badges and ranks on a leaderboard to incentivize participation and showcase progress.
 
 ## Style Guidelines:
