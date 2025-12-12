@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Bot, X } from 'lucide-react';
+import { Bot, X } from 'lucide-react'; 
 import { EcoTutorChat } from './eco-tutor-chat';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
