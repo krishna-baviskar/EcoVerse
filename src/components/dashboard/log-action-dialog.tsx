@@ -4,7 +4,7 @@
 import React, { useState, useEffect, type ReactNode } from 'react';
 import { 
   X, CheckCircle2, XCircle, Upload, Camera, Sparkles, Award, Zap, 
-  Leaf, Target, Info, AlertCircle, Loader2, FileText, Coins
+  Leaf, Target, Info, AlertCircle, Loader2, FileText, Coins 
 } from 'lucide-react';
 import { useForm, zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
