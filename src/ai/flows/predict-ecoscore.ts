@@ -1,6 +1,6 @@
 'use server';
 
-/**
+/** 
  * @fileOverview A flow to predict the EcoScore for a given location.
  *
  * - predictEcoScore - A function that takes a location and returns a predicted EcoScore and explanation.
