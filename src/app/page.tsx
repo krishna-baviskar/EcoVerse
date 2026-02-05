@@ -504,19 +504,7 @@ export default function EcoVerseLanding() {
                   </div>
                 </div>}
 
-                /* {founder2 && <div className="flex flex-col items-center md:flex-row gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
-                  <div className="relative w-32 h-32 flex-shrink-0">
-                    <div className="absolute -inset-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full blur-xl opacity-60"></div>
-                     <div className="relative w-32 h-32 flex items-center justify-center bg-slate-800 rounded-full border-2 border-white/20 overflow-hidden">
-                      <Image src="/sanket.png" alt="Founder" layout="fill" className="object-cover" />
-                    </div>
-                  </div>
-                  <div className="text-center md:text-left">
-                    <h4 className="text-2xl font-bold">Sanket Mohan Kotkar</h4>
-                    <p className="text-sm text-purple-400 mb-3">Core Developer</p>
-                    <p className="text-gray-400 italic">"We built EcoVerse to empower individuals. Every small action, when multiplied by millions, can change our world."</p>
-                  </div>
-                </div>} */
+              
 
               </div>
             </div>
