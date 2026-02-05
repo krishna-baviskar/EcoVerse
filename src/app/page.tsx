@@ -487,7 +487,7 @@ export default function EcoVerseLanding() {
             </div>
             
             <div>
-              <h3 className="text-3xl font-bold text-center mb-12">Meet the Team IRONHACK</h3>
+              <h3 className="text-3xl font-bold text-center mb-12">Meet the Developer</h3>
               <div className="grid md:grid-cols-2 gap-10">
                 
                 {founder1 && <div className="flex flex-col items-center md:flex-row gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
@@ -504,7 +504,7 @@ export default function EcoVerseLanding() {
                   </div>
                 </div>}
 
-                {founder2 && <div className="flex flex-col items-center md:flex-row gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+                /* {founder2 && <div className="flex flex-col items-center md:flex-row gap-6 p-6 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
                   <div className="relative w-32 h-32 flex-shrink-0">
                     <div className="absolute -inset-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full blur-xl opacity-60"></div>
                      <div className="relative w-32 h-32 flex items-center justify-center bg-slate-800 rounded-full border-2 border-white/20 overflow-hidden">
@@ -516,7 +516,7 @@ export default function EcoVerseLanding() {
                     <p className="text-sm text-purple-400 mb-3">Core Developer</p>
                     <p className="text-gray-400 italic">"We built EcoVerse to empower individuals. Every small action, when multiplied by millions, can change our world."</p>
                   </div>
-                </div>}
+                </div>} */
 
               </div>
             </div>
