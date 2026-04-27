@@ -93,11 +93,3 @@ This final formula results in a single, powerful score that makes the invisible 
 ---
 
 
-## 👨‍💻 Meet the Team
-
-This project was brought to life by a team of passionate developers from IRONHACK.
-
--   **Krishna Somnath Baviskar**: Lead Developer
--   **Sanket Mohan Kotkar**: Core Developer
-
----
