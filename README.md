@@ -1,4 +1,4 @@
-# 🌿 EcoVerse: AI-Powered Urban Sustainability Platform 
+ # 🌿 EcoVerse: AI-Powered Urban Sustainability Platform 
 
 EcoVerse is a next-generation, gamified web application designed to make urban sustainability visible, engaging, and rewarding. It leverages real-time environmental data, generative AI, and community-driven challenges to empower citizens to understand and improve their local environment.
 
