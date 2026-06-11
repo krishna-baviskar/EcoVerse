@@ -9,7 +9,7 @@ Our cities face invisible environmental challenges like poor air quality and urb
 2.  **Providing Actionable Guidance**: Using an **AI Eco-Tutor** to explain complex data and suggest personalized, impactful actions.
 3.  **Driving Motivation through Gamification**: Turning sustainable actions into a fun and rewarding experience with points, badges, and leaderboards.
 
-Our vision is to foster a global community of "Eco Warriors" who are empowered with the data and tools to collectively transform their cities into healthier, greener  eco-paradises.
+Our vision is to foster a global community of "Eco Warriors" who are empowered with the data and tools to collectively transform their cities into healthier, greener  eco-paradises. 
 
 ---
 
