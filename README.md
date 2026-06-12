@@ -10,7 +10,7 @@ Our cities face invisible environmental challenges like poor air quality and urb
 3.  **Driving Motivation through Gamification**: Turning sustainable actions into a fun and rewarding experience with points, badges, and leaderboards.
 
 Our vision is to foster a global community of "Eco Warriors" who are empowered with the data and tools to collectively transform their cities into healthier, greener  eco-paradises. 
-
+ 
 ---
 
 ## 🚀 Key Features
