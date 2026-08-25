@@ -1,5 +1,5 @@
 # **App Name**: EcoVerse
-
+  
 ## Core Features:
 
 - EcoScore Dashboard: Fetches and normalizes real-time environmental metrics using open APIs into an EcoScore, visualizing it over time with comparison leaderboards.
